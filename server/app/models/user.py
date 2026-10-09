@@ -18,6 +18,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.contract import Contract
+    from app.models.contract_version import ContractVersion
     from app.models.organization import Organization
 
 
@@ -27,10 +28,7 @@ class User(Base):
     __tablename__ = "users"
 
     __table_args__ = (
-        UniqueConstraint(
-            "email",
-            name="uq_users_email",
-        ),
+        UniqueConstraint("email", name="uq_users_email"),
         CheckConstraint(
             "role IN ("
             "'SUPER_ADMIN', "
@@ -64,10 +62,7 @@ class User(Base):
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "organizations.id",
-            ondelete="RESTRICT",
-        ),
+        ForeignKey("organizations.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
@@ -122,6 +117,11 @@ class User(Base):
     created_contracts: Mapped[list["Contract"]] = relationship(
         "Contract",
         back_populates="creator",
+    )
+
+    uploaded_contract_versions: Mapped[list["ContractVersion"]] = relationship(
+        "ContractVersion",
+        back_populates="uploader",
     )
 
     def __repr__(self) -> str:

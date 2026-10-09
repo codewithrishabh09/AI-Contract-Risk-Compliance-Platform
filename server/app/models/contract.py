@@ -18,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.contract_version import ContractVersion
     from app.models.organization import Organization
     from app.models.user import User
 
@@ -68,20 +69,14 @@ class Contract(Base):
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "organizations.id",
-            ondelete="RESTRICT",
-        ),
+        ForeignKey("organizations.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
 
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "users.id",
-            ondelete="RESTRICT",
-        ),
+        ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
@@ -131,6 +126,11 @@ class Contract(Base):
     creator: Mapped["User"] = relationship(
         "User",
         back_populates="created_contracts",
+    )
+
+    versions: Mapped[list["ContractVersion"]] = relationship(
+        "ContractVersion",
+        back_populates="contract",
     )
 
     def __repr__(self) -> str:

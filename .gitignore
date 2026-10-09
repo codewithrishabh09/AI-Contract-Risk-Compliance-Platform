@@ -1,3 +1,25 @@
+
+# Secrets and environment files
 .env
-.venv/
+.env.*
+!.env.example
+server/.env
+
+# Python
 __pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Generated coverage
+.coverage
+htmlcov/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store

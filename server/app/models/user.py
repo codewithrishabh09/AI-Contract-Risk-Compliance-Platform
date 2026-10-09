@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     CheckConstraint,
@@ -14,6 +15,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.contract import Contract
+    from app.models.organization import Organization
 
 
 class User(Base):
@@ -112,6 +117,11 @@ class User(Base):
     organization: Mapped["Organization"] = relationship(
         "Organization",
         back_populates="users",
+    )
+
+    created_contracts: Mapped[list["Contract"]] = relationship(
+        "Contract",
+        back_populates="creator",
     )
 
     def __repr__(self) -> str:

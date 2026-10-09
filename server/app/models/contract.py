@@ -6,8 +6,9 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     String,
-    UniqueConstraint,
+    Text,
     func,
     text,
 )
@@ -17,42 +18,45 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models.contract import Contract
     from app.models.organization import Organization
+    from app.models.user import User
 
 
-class User(Base):
-    """Represents a user account belonging to an organization."""
+class Contract(Base):
+    """Represents a contract managed by an organization."""
 
-    __tablename__ = "users"
+    __tablename__ = "contracts"
 
     __table_args__ = (
-        UniqueConstraint(
-            "email",
-            name="uq_users_email",
-        ),
         CheckConstraint(
-            "role IN ("
-            "'SUPER_ADMIN', "
-            "'ORG_ADMIN', "
-            "'LEGAL_REVIEWER', "
-            "'COMPLIANCE_OFFICER', "
-            "'EMPLOYEE'"
+            "contract_type IN ("
+            "'NDA', "
+            "'EMPLOYMENT', "
+            "'SERVICE_AGREEMENT', "
+            "'VENDOR_AGREEMENT', "
+            "'DATA_PROCESSING_AGREEMENT', "
+            "'PRIVACY_POLICY', "
+            "'OTHER'"
             ")",
-            name="ck_users_role",
+            name="ck_contracts_contract_type",
         ),
         CheckConstraint(
             "status IN ("
-            "'ACTIVE', "
-            "'INVITED', "
-            "'SUSPENDED', "
-            "'DEACTIVATED'"
+            "'DRAFT', "
+            "'UPLOADED', "
+            "'PROCESSING', "
+            "'ANALYZED', "
+            "'UNDER_REVIEW', "
+            "'APPROVED', "
+            "'REJECTED', "
+            "'ARCHIVED'"
             ")",
-            name="ck_users_status",
+            name="ck_contracts_status",
         ),
-        CheckConstraint(
-            "email = lower(btrim(email))",
-            name="ck_users_email_normalized",
+        Index(
+            "ix_contracts_organization_status",
+            "organization_id",
+            "status",
         ),
     )
 
@@ -72,33 +76,38 @@ class User(Base):
         index=True,
     )
 
-    email: Mapped[str] = mapped_column(
-        String(320),
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "users.id",
+            ondelete="RESTRICT",
+        ),
         nullable=False,
+        index=True,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    title: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
     )
 
-    full_name: Mapped[str] = mapped_column(
-        String(150),
+    contract_type: Mapped[str] = mapped_column(
+        String(50),
         nullable=False,
-    )
-
-    role: Mapped[str] = mapped_column(
-        String(40),
-        nullable=False,
-        default="EMPLOYEE",
-        server_default=text("'EMPLOYEE'"),
+        default="OTHER",
+        server_default=text("'OTHER'"),
     )
 
     status: Mapped[str] = mapped_column(
         String(30),
         nullable=False,
-        default="INVITED",
-        server_default=text("'INVITED'"),
+        default="DRAFT",
+        server_default=text("'DRAFT'"),
+    )
+
+    description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -116,19 +125,17 @@ class User(Base):
 
     organization: Mapped["Organization"] = relationship(
         "Organization",
-        back_populates="users",
+        back_populates="contracts",
     )
 
-    created_contracts: Mapped[list["Contract"]] = relationship(
-        "Contract",
-        back_populates="creator",
+    creator: Mapped["User"] = relationship(
+        "User",
+        back_populates="created_contracts",
     )
 
     def __repr__(self) -> str:
         return (
-            f"User(id={self.id!r}, "
-            f"email={self.email!r}, "
-            f"organization_id={self.organization_id!r}, "
-            f"role={self.role!r}, "
+            f"Contract(id={self.id!r}, "
+            f"title={self.title!r}, "
             f"status={self.status!r})"
         )

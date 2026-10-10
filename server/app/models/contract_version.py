@@ -7,7 +7,6 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
-    String,
     Text,
     UniqueConstraint,
     func,
@@ -18,8 +17,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.clause import Clause
     from app.models.contract import Contract
     from app.models.document import Document
+    from app.models.processing_job import ProcessingJob
     from app.models.user import User
 
 
@@ -48,10 +49,7 @@ class ContractVersion(Base):
 
     contract_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "contracts.id",
-            ondelete="RESTRICT",
-        ),
+        ForeignKey("contracts.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
@@ -63,10 +61,7 @@ class ContractVersion(Base):
 
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "users.id",
-            ondelete="RESTRICT",
-        ),
+        ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
@@ -94,6 +89,16 @@ class ContractVersion(Base):
 
     documents: Mapped[list["Document"]] = relationship(
         "Document",
+        back_populates="contract_version",
+    )
+
+    processing_jobs: Mapped[list["ProcessingJob"]] = relationship(
+        "ProcessingJob",
+        back_populates="contract_version",
+    )
+
+    clauses: Mapped[list["Clause"]] = relationship(
+        "Clause",
         back_populates="contract_version",
     )
 

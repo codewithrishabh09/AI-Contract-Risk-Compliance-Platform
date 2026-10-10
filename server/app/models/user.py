@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from app.models.contract import Contract
     from app.models.contract_version import ContractVersion
     from app.models.organization import Organization
+    from app.models.processing_job import ProcessingJob
 
 
 class User(Base):
@@ -122,6 +123,11 @@ class User(Base):
     uploaded_contract_versions: Mapped[list["ContractVersion"]] = relationship(
         "ContractVersion",
         back_populates="uploader",
+    )
+
+    requested_processing_jobs: Mapped[list["ProcessingJob"]] = relationship(
+        "ProcessingJob",
+        back_populates="requester",
     )
 
     def __repr__(self) -> str:

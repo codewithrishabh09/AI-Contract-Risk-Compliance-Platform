@@ -7,7 +7,7 @@ Create Date: ${create_date}
 """
 from typing import Sequence, Union
 
-from alembic import op
+import pgvector as sa
 import sqlalchemy as sa
 ${imports if imports else ""}
 

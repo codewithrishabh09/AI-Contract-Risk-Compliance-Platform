@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from app.models.clause import Clause
     from app.models.contract import Contract
     from app.models.document import Document
+    from app.models.document_chunk import DocumentChunk
     from app.models.processing_job import ProcessingJob
     from app.models.user import User
 
@@ -99,6 +100,11 @@ class ContractVersion(Base):
 
     clauses: Mapped[list["Clause"]] = relationship(
         "Clause",
+        back_populates="contract_version",
+    )
+
+    document_chunks: Mapped[list["DocumentChunk"]] = relationship(
+        "DocumentChunk",
         back_populates="contract_version",
     )
 

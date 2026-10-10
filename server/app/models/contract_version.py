@@ -17,6 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.analysis_result import AnalysisResult
     from app.models.clause import Clause
     from app.models.contract import Contract
     from app.models.document import Document
@@ -105,6 +106,11 @@ class ContractVersion(Base):
 
     document_chunks: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk",
+        back_populates="contract_version",
+    )
+
+    analysis_results: Mapped[list["AnalysisResult"]] = relationship(
+        "AnalysisResult",
         back_populates="contract_version",
     )
 

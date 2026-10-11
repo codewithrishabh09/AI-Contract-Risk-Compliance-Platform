@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.auth import router as auth_router
 from app.api.v1.contracts import router as contracts_router
 from app.core.config import settings
 
@@ -41,6 +42,11 @@ def health_check() -> dict[str, str]:
         "service": "ai-contract-intelligence",
     }
 
+
+app.include_router(
+    auth_router,
+    prefix="/api/v1",
+)
 
 app.include_router(
     contracts_router,

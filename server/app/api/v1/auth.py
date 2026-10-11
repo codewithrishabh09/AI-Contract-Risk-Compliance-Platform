@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import CurrentUser
 from app.db.session import SessionLocal
 from app.schemas.auth import (
     LoginRequest,
@@ -95,3 +96,12 @@ def login(
             detail=str(exc),
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+def get_me(
+    current_user: CurrentUser,
+) -> UserResponse:
+    return UserResponse.model_validate(current_user)

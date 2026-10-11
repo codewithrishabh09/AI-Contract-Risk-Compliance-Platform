@@ -1,9 +1,10 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import CurrentUser
 from app.db.session import SessionLocal
 from app.schemas.contract import (
     ContractCreate,
@@ -23,23 +24,17 @@ router = APIRouter(
 
 
 def get_db():
-    """Provide a database session for one API request."""
-
     session = SessionLocal()
+
     try:
         yield session
     finally:
         session.close()
 
 
-DatabaseSession = Annotated[Session, Depends(get_db)]
-OrganizationHeader = Annotated[
-    UUID,
-    Header(alias="X-Organization-ID"),
-]
-UserHeader = Annotated[
-    UUID,
-    Header(alias="X-User-ID"),
+DatabaseSession = Annotated[
+    Session,
+    Depends(get_db),
 ]
 
 
@@ -51,20 +46,18 @@ UserHeader = Annotated[
 def create_contract(
     payload: ContractCreate,
     session: DatabaseSession,
-    organization_id: OrganizationHeader,
-    user_id: UserHeader,
+    current_user: CurrentUser,
 ) -> ContractResponse:
-    """Create a contract for an organization."""
-
     try:
         contract = ContractService.create_contract(
             session,
-            organization_id=organization_id,
-            created_by=user_id,
+            organization_id=current_user.organization_id,
+            created_by=current_user.id,
             title=payload.title,
             contract_type=payload.contract_type,
             description=payload.description,
         )
+
         return ContractResponse.model_validate(contract)
 
     except InvalidContractDataError as exc:
@@ -80,7 +73,7 @@ def create_contract(
 )
 def list_contracts(
     session: DatabaseSession,
-    organization_id: OrganizationHeader,
+    current_user: CurrentUser,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     contract_status: Annotated[
@@ -88,12 +81,10 @@ def list_contracts(
         Query(alias="status"),
     ] = None,
 ) -> ContractListResponse:
-    """List contracts belonging to an organization."""
-
     try:
         contracts, total = ContractService.list_contracts(
             session,
-            organization_id=organization_id,
+            organization_id=current_user.organization_id,
             offset=offset,
             limit=limit,
             status=contract_status,
@@ -123,16 +114,15 @@ def list_contracts(
 def get_contract(
     contract_id: UUID,
     session: DatabaseSession,
-    organization_id: OrganizationHeader,
+    current_user: CurrentUser,
 ) -> ContractResponse:
-    """Retrieve a contract within the requested organization."""
-
     try:
         contract = ContractService.get_contract(
             session,
-            organization_id=organization_id,
+            organization_id=current_user.organization_id,
             contract_id=contract_id,
         )
+
         return ContractResponse.model_validate(contract)
 
     except ContractNotFoundError as exc:

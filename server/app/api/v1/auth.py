@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import CurrentUser
+from app.api.dependencies import CurrentUser, require_roles
 from app.db.session import SessionLocal
+from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
     TokenResponse,
@@ -14,6 +15,7 @@ from app.schemas.auth import (
 from app.services.auth_service import (
     AuthService,
     InvalidCredentialsError,
+    OrganizationNotFoundError,
     UserAlreadyExistsError,
 )
 
@@ -58,6 +60,12 @@ def register(
 
         return UserResponse.model_validate(user)
 
+    except OrganizationNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
     except UserAlreadyExistsError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -97,11 +105,24 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
 
+
 @router.get(
     "/me",
     response_model=UserResponse,
 )
 def get_me(
     current_user: CurrentUser,
+) -> UserResponse:
+    return UserResponse.model_validate(current_user)
+
+
+@router.get(
+    "/admin-test",
+    response_model=UserResponse,
+)
+def admin_test(
+    current_user: User = Depends(
+        require_roles("SUPER_ADMIN", "ORG_ADMIN")
+    ),
 ) -> UserResponse:
     return UserResponse.model_validate(current_user)

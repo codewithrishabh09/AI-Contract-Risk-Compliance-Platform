@@ -1,7 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import CurrentUser
@@ -11,11 +20,19 @@ from app.schemas.contract import (
     ContractListResponse,
     ContractResponse,
 )
+from app.schemas.contract_document import ContractUploadResponse
+from app.services.contract_document_service import (
+    ContractDocumentService,
+    ContractDocumentServiceError,
+    ContractNotFoundForUploadError,
+    InvalidDocumentError,
+)
 from app.services.contract_service import (
     ContractNotFoundError,
     ContractService,
     InvalidContractDataError,
 )
+from app.storage.local import LocalStorage
 
 router = APIRouter(
     prefix="/contracts",
@@ -129,4 +146,62 @@ def get_contract(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Contract not found.",
+        ) from exc
+
+
+@router.post(
+    "/{contract_id}/versions",
+    response_model=ContractUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def upload_contract_document(
+    contract_id: UUID,
+    current_user: CurrentUser,
+    session: DatabaseSession,
+    file: UploadFile = File(...),
+    change_summary: str | None = Form(
+        default=None,
+        max_length=2000,
+    ),
+) -> ContractUploadResponse:
+    """Upload a new document version for a contract."""
+
+    content = file.file.read()
+
+    storage = LocalStorage("storage")
+
+    try:
+        (
+            _contract,
+            contract_version,
+            document,
+            processing_job,
+        ) = ContractDocumentService.upload_document(
+            session,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id,
+            contract_id=contract_id,
+            original_filename=file.filename or "",
+            content_type=file.content_type,
+            content=content,
+            change_summary=change_summary,
+            storage=storage,
+        )
+
+        return ContractUploadResponse(
+            contract_version=contract_version,
+            document=document,
+            processing_job=processing_job,
+        )
+
+    except ContractNotFoundForUploadError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    except InvalidDocumentError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
         ) from exc

@@ -25,6 +25,25 @@ class ContractRepository:
         return session.scalar(statement)
 
     @staticmethod
+    def get_by_id_for_update(
+        session: Session,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+    ) -> Contract | None:
+        """Get a contract while locking its row for the current transaction."""
+
+        statement = (
+            select(Contract)
+            .where(
+                Contract.id == contract_id,
+                Contract.organization_id == organization_id,
+            )
+            .with_for_update()
+        )
+
+        return session.scalar(statement)
+
+    @staticmethod
     def list_by_organization(
         session: Session,
         organization_id: uuid.UUID,

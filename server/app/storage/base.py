@@ -19,6 +19,15 @@ class StorageBackend(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def read(
+        self,
+        *,
+        storage_key: str,
+    ) -> bytes:
+        """Read file content using the given storage key."""
+        raise NotImplementedError
+
+    @abstractmethod
     def delete(
         self,
         *,

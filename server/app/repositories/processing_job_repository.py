@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.processing_job import ProcessingJob
@@ -7,6 +8,20 @@ from app.models.processing_job import ProcessingJob
 
 class ProcessingJobRepository:
     """Database operations for processing jobs."""
+
+    @staticmethod
+    def get_by_id(
+        session: Session,
+        *,
+        job_id: uuid.UUID,
+    ) -> ProcessingJob | None:
+        """Get a processing job by ID."""
+
+        statement = select(ProcessingJob).where(
+            ProcessingJob.id == job_id,
+        )
+
+        return session.scalar(statement)
 
     @staticmethod
     def create(

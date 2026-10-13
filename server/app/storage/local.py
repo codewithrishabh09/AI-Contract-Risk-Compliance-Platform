@@ -52,6 +52,24 @@ class LocalStorage(StorageBackend):
                 "Failed to save document."
             ) from exc
 
+    def read(
+        self,
+        *,
+        storage_key: str,
+    ) -> bytes:
+        path = self._resolve_path(storage_key)
+
+        try:
+            return path.read_bytes()
+        except FileNotFoundError as exc:
+            raise StorageError(
+                "Stored document was not found."
+            ) from exc
+        except OSError as exc:
+            raise StorageError(
+                "Failed to read document."
+            ) from exc
+
     def delete(
         self,
         *,

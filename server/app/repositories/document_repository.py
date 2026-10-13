@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.document import Document
@@ -7,6 +8,38 @@ from app.models.document import Document
 
 class DocumentRepository:
     """Database operations for documents."""
+
+    @staticmethod
+    def get_by_id(
+        session: Session,
+        *,
+        document_id: uuid.UUID,
+    ) -> Document | None:
+        """Get a document by ID."""
+
+        statement = select(Document).where(
+            Document.id == document_id,
+        )
+
+        return session.scalar(statement)
+
+    @staticmethod
+    def get_by_contract_version_id(
+        session: Session,
+        *,
+        contract_version_id: uuid.UUID,
+    ) -> Document | None:
+        """Get the document associated with a contract version."""
+
+        statement = (
+            select(Document)
+            .where(
+                Document.contract_version_id == contract_version_id,
+            )
+            .order_by(Document.created_at.desc())
+        )
+
+        return session.scalar(statement)
 
     @staticmethod
     def create(

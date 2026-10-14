@@ -1,4 +1,5 @@
 import fitz
+import pymupdf
 
 from app.services.extraction.models import (
     ExtractedDocument,

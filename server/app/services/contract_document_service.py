@@ -17,6 +17,7 @@ from app.repositories.document_repository import DocumentRepository
 from app.repositories.processing_job_repository import (
     ProcessingJobRepository,
 )
+from app.worker.celery_app import celery_app
 from app.storage.base import StorageError
 from app.storage.local import LocalStorage
 
@@ -175,6 +176,17 @@ class ContractDocumentService:
             session.refresh(contract_version)
             session.refresh(document)
             session.refresh(processing_job)
+
+            try:
+                celery_app.send_task(
+                    "app.worker.tasks.process_contract_job",
+                    args=[str(processing_job.id)],
+                )
+
+            except Exception:
+                # the Upload is already saved. The job stays QUEUED
+                # and can be re-sent later.
+                pass
 
             return (
                 contract,

@@ -7,6 +7,7 @@ from app.services.extraction import (
     extract_document,
 )
 from app.services.processing_service import (
+    ProcessingJobNotFoundError,
     ProcessingService,
     ProcessingServiceError,
 )
@@ -18,8 +19,13 @@ from app.worker.celery_app import celery_app
     bind=True,
     name="app.worker.tasks.process_contract_job",
     autoretry_for=(Exception,),
+    dont_autoretry_for=(
+        DocumentExtractionError,
+        UnsupportedDocumentTypeError,
+        ProcessingJobNotFoundError,
+    ),
     retry_backoff=True,
-    retry_kwargs={"max_retries": 3},
+    retry_kwargs={"max_retries": 2},
 )
 def process_contract_job(
     self,
@@ -90,12 +96,8 @@ def process_contract_job(
             "status": completed_job.status,
             "job_id": job_id,
             "document_id": str(document.id),
-            "pages": str(
-                len(extracted_document.pages)
-            ),
-            "characters": str(
-                extracted_document.character_count
-            ),
+            "pages": str(len(extracted_document.pages)),
+            "characters": str(extracted_document.character_count),
             "chunks": str(len(chunks)),
         }
 
@@ -118,7 +120,7 @@ def process_contract_job(
 
         raise
 
-    except Exception as exc:
+    except Exception:
         session.rollback()
 
         try:
@@ -131,7 +133,7 @@ def process_contract_job(
         except Exception:
             session.rollback()
 
-        raise exc
+        raise
 
     finally:
         session.close()

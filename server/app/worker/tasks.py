@@ -40,7 +40,8 @@ def process_contract_job(
     3. Extract text.
     4. Generate chunks.
     5. Persist chunks.
-    6. Mark job as SUCCEEDED.
+    6. Generate and persist embeddings.
+    7. Mark job as SUCCEEDED.
     """
 
     parsed_job_id = uuid.UUID(job_id)
@@ -85,6 +86,13 @@ def process_contract_job(
             extracted_document=extracted_document,
         )
 
+        embedded_chunks = (
+            ProcessingService.generate_and_persist_embeddings(
+                session,
+                contract_version_id=job.contract_version_id,
+            )
+        )
+
         session.commit()
 
         completed_job = ProcessingService.mark_succeeded(
@@ -99,6 +107,7 @@ def process_contract_job(
             "pages": str(len(extracted_document.pages)),
             "characters": str(extracted_document.character_count),
             "chunks": str(len(chunks)),
+            "embedded_chunks": str(len(embedded_chunks)),
         }
 
     except (

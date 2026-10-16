@@ -7,19 +7,14 @@ from app.models.document_chunk import DocumentChunk
 
 
 class DocumentChunkRepository:
-    """Database operations for document chunks."""
-
     @staticmethod
     def delete_by_contract_version_id(
         session: Session,
         *,
         contract_version_id: uuid.UUID,
     ) -> None:
-        """Delete all chunks belonging to a contract version."""
-
         statement = delete(DocumentChunk).where(
-            DocumentChunk.contract_version_id
-            == contract_version_id,
+            DocumentChunk.contract_version_id == contract_version_id
         )
 
         session.execute(statement)
@@ -31,8 +26,6 @@ class DocumentChunkRepository:
         contract_version_id: uuid.UUID,
         chunks: list[dict],
     ) -> list[DocumentChunk]:
-        """Create multiple document chunks."""
-
         document_chunks = [
             DocumentChunk(
                 contract_version_id=contract_version_id,
@@ -58,19 +51,37 @@ class DocumentChunkRepository:
         *,
         contract_version_id: uuid.UUID,
     ) -> list[DocumentChunk]:
-        """Return chunks ordered by chunk index."""
-
         statement = (
             select(DocumentChunk)
             .where(
-                DocumentChunk.contract_version_id
-                == contract_version_id,
+                DocumentChunk.contract_version_id == contract_version_id
             )
-            .order_by(
-                DocumentChunk.chunk_index.asc(),
-            )
+            .order_by(DocumentChunk.chunk_index.asc())
         )
 
-        return list(
-            session.scalars(statement).all()
-        )
+        return list(session.scalars(statement).all())
+
+    @staticmethod
+    def set_embeddings(
+        session: Session,
+        *,
+        document_chunks: list[DocumentChunk],
+        embeddings: list[list[float]],
+        embedding_model: str,
+    ) -> list[DocumentChunk]:
+        if len(document_chunks) != len(embeddings):
+            raise ValueError(
+                "Number of chunks and embeddings must be the same."
+            )
+
+        for document_chunk, embedding in zip(
+            document_chunks,
+            embeddings,
+            strict=True,
+        ):
+            document_chunk.embedding = embedding
+            document_chunk.embedding_model = embedding_model
+
+        session.flush()
+
+        return document_chunks

@@ -11,6 +11,10 @@ from app.repositories.processing_job_repository import (
     ProcessingJobRepository,
 )
 from app.services.chunking import chunk_pages
+from app.services.embedding import (
+    EMBEDDING_MODEL_NAME,
+    generate_embeddings,
+)
 from app.services.extraction import ExtractedDocument
 from app.storage.base import StorageError
 from app.storage.local import LocalStorage
@@ -173,6 +177,43 @@ class ProcessingService:
             contract_version_id=contract_version_id,
             chunks=chunk_records,
         )
+
+    @staticmethod
+    def generate_and_persist_embeddings(
+        session: Session,
+        *,
+        contract_version_id: uuid.UUID,
+    ):
+        """Generate embeddings for a version's chunks and store them."""
+
+        document_chunks = (
+            DocumentChunkRepository.list_by_contract_version_id(
+                session,
+                contract_version_id=contract_version_id,
+            )
+        )
+
+        if not document_chunks:
+            raise ProcessingServiceError(
+                "Cannot generate embeddings because "
+                "no document chunks exist."
+            )
+
+        texts = [
+            document_chunk.content
+            for document_chunk in document_chunks
+        ]
+
+        embeddings = generate_embeddings(texts)
+
+        DocumentChunkRepository.set_embeddings(
+            session,
+            document_chunks=document_chunks,
+            embeddings=embeddings,
+            embedding_model=EMBEDDING_MODEL_NAME,
+        )
+
+        return document_chunks
 
     @staticmethod
     def mark_succeeded(

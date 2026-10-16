@@ -85,3 +85,38 @@ class DocumentChunkRepository:
         session.flush()
 
         return document_chunks
+
+    @staticmethod
+    def similarity_search(
+        session: Session,
+        *,
+        contract_version_id: uuid.UUID,
+        query_embedding: list[float],
+        limit: int = 5,
+    ) -> list[tuple[DocumentChunk, float]]:
+        if limit <= 0:
+            raise ValueError("limit must be greater than zero.")
+
+        distance = DocumentChunk.embedding.cosine_distance(
+            query_embedding
+        )
+
+        statement = (
+            select(
+                DocumentChunk,
+                distance.label("distance"),
+            )
+            .where(
+                DocumentChunk.contract_version_id == contract_version_id,
+                DocumentChunk.embedding.is_not(None),
+            )
+            .order_by(distance.asc())
+            .limit(limit)
+        )
+
+        rows = session.execute(statement).all()
+
+        return [
+            (document_chunk, float(dist))
+            for document_chunk, dist in rows
+        ]

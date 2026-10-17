@@ -9,13 +9,14 @@ from app.repositories.document_chunk_repository import (
     DocumentChunkRepository,
 )
 from app.services.embedding import generate_embeddings
+from app.services.reranking import rerank
 
 
 DEFAULT_TOP_K = 5
 
 
 class RetrievalServiceError(Exception):
-        @staticmethod
+    @staticmethod
     def hybrid_retrieve(
         session: Session,
         *,
@@ -196,4 +197,65 @@ class RetrievalService:
                 similarity_score=max(0.0, 1.0 - distance),
             )
             for document_chunk, distance in rows
+        ]
+    
+        @staticmethod
+    def hybrid_retrieve_with_reranking(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+        contract_version_id: uuid.UUID,
+        query: str,
+        candidate_k: int = 15,
+        top_k: int = 5,
+    ) -> list[RetrievedChunk]:
+        if not query or not query.strip():
+            raise ValueError("Query must not be empty.")
+
+        if candidate_k <= 0:
+            raise ValueError("candidate_k must be greater than zero.")
+
+        if top_k <= 0:
+            raise ValueError("top_k must be greater than zero.")
+
+        contract = ContractRepository.get_by_id(
+            session,
+            organization_id=organization_id,
+            contract_id=contract_id,
+        )
+
+        if contract is None:
+            raise RetrievalContractNotFoundError(
+                "Contract not found."
+            )
+
+        candidates = RetrievalService.hybrid_retrieve(
+            session,
+            organization_id=organization_id,
+            contract_id=contract_id,
+            contract_version_id=contract_version_id,
+            query=query,
+            top_k=candidate_k,
+            vector_k=candidate_k,
+            keyword_k=candidate_k,
+        )
+
+        reranked_results = rerank(
+            query,
+            candidates,
+            text_getter=lambda item: item.content,
+            top_k=top_k,
+        )
+
+        return [
+            RetrievedChunk(
+                chunk_id=result.item.chunk_id,
+                chunk_index=result.item.chunk_index,
+                content=result.item.content,
+                page_start=result.item.page_start,
+                page_end=result.item.page_end,
+                similarity_score=result.score,
+            )
+            for result in reranked_results
         ]

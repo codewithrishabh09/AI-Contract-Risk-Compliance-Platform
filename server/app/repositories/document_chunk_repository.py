@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.models.document_chunk import DocumentChunk
@@ -119,4 +119,51 @@ class DocumentChunkRepository:
         return [
             (document_chunk, float(dist))
             for document_chunk, dist in rows
+        ]
+    
+    @staticmethod
+    def keyword_search(
+        session: Session,
+        *,
+        contract_version_id: uuid.UUID,
+        query: str,
+        limit: int = 5,
+    ) -> list[tuple[DocumentChunk, float]]:
+        if not query or not query.strip():
+            raise ValueError("Query must not be empty.")
+
+        if limit <= 0:
+            raise ValueError("limit must be greater than zero.")
+
+        search_query = func.websearch_to_tsquery(
+            "english",
+            query.strip(),
+        )
+
+        rank = func.ts_rank_cd(
+            func.to_tsvector(
+                "english",
+                DocumentChunk.content,
+            ),
+            search_query,
+        )
+
+        statement = (
+            select(
+                DocumentChunk,
+                rank.label("rank"),
+            )
+            .where(
+                DocumentChunk.contract_version_id == contract_version_id,
+                DocumentChunk.content.op("@@")(search_query),
+            )
+            .order_by(rank.desc())
+            .limit(limit)
+        )
+
+        rows = session.execute(statement).all()
+
+        return [
+            (document_chunk, float(rank_score))
+            for document_chunk, rank_score in rows
         ]

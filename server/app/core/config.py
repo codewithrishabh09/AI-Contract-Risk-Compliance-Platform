@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     db_user: str = "contract_admin"
     db_password: str
 
+    llm_provider: str = "openai"
+    llm_model: str = "gpt-4.1-mini"
+    openai_api_key: str | None = None
+
     cors_origins: list[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.services.retrieval import RetrievedChunk
+from app.services.retrieval.service import RetrievedChunk
 
 
 @dataclass(slots=True)

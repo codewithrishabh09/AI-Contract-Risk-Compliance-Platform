@@ -14,8 +14,10 @@ class Settings(BaseSettings):
     db_user: str = "contract_admin"
     db_password: str
 
-    llm_provider: str = "openai"
-    llm_model: str = "gpt-4.1-mini"
+    llm_provider: str = "groq"
+    llm_model: str = "llama-3.3-70b-versatile"
+    llm_base_url: str | None = None
+    llm_api_key: str | None = None
     openai_api_key: str | None = None
 
     cors_origins: list[str] = [

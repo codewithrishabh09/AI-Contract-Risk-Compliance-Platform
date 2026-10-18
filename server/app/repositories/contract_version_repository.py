@@ -1,13 +1,37 @@
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.contract import Contract
 from app.models.contract_version import ContractVersion
 
 
 class ContractVersionRepository:
-    """Database operations for contract versions."""
+    """Repository for contract version database operations."""
+
+    @staticmethod
+    def get_by_id_for_contract(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+        contract_version_id: uuid.UUID,
+    ) -> ContractVersion | None:
+        statement = (
+            select(ContractVersion)
+            .join(
+                Contract,
+                Contract.id == ContractVersion.contract_id,
+            )
+            .where(
+                ContractVersion.id == contract_version_id,
+                ContractVersion.contract_id == contract_id,
+                Contract.organization_id == organization_id,
+            )
+        )
+
+        return session.scalar(statement)
 
     @staticmethod
     def get_next_version_number(
@@ -15,39 +39,25 @@ class ContractVersionRepository:
         *,
         contract_id: uuid.UUID,
     ) -> int:
-        """Return the next version number for a contract."""
-
-        statement = select(
-            func.coalesce(
-                func.max(ContractVersion.version_number),
-                0,
-            )
-            + 1
-        ).where(
-            ContractVersion.contract_id == contract_id,
+        statement = select(ContractVersion.version_number).where(
+            ContractVersion.contract_id == contract_id
+        ).order_by(
+            ContractVersion.version_number.desc()
         )
 
-        return int(session.scalar(statement) or 1)
+        latest_version = session.scalar(statement)
+
+        if latest_version is None:
+            return 1
+
+        return latest_version + 1
 
     @staticmethod
     def create(
         session: Session,
         *,
-        contract_id: uuid.UUID,
-        version_number: int,
-        uploaded_by: uuid.UUID,
-        change_summary: str | None = None,
+        contract_version: ContractVersion,
     ) -> ContractVersion:
-        """Create a new contract version."""
-
-        contract_version = ContractVersion(
-            contract_id=contract_id,
-            version_number=version_number,
-            uploaded_by=uploaded_by,
-            change_summary=change_summary,
-        )
-
         session.add(contract_version)
         session.flush()
-
         return contract_version

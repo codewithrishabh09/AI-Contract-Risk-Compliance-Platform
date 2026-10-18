@@ -1,9 +1,8 @@
-import uuid
-
 from sqlalchemy.orm import Session
 
-from app.schemas.rag import Citation, RAGAnswer
+from app.schemas.rag import RAGAnswer
 from app.services.llm import get_llm_provider
+from app.services.rag.citation_validator import validate_citations
 from app.services.retrieval import (
     RetrievalService,
     build_context,
@@ -14,32 +13,34 @@ from app.services.retrieval import (
 SYSTEM_PROMPT = """
 You are an AI contract analysis assistant.
 
-Your job is to answer questions using ONLY the contract
-evidence supplied in the context.
+Your job is to answer questions using ONLY the supplied contract evidence.
 
 Rules:
 
-1. Do not invent contract terms.
-2. Do not use outside legal knowledge as contract evidence.
-3. If the supplied evidence does not contain the answer,
-   clearly say that the available contract evidence is insufficient.
-4. Be precise and concise.
-5. When making a factual statement about the contract,
-   reference the relevant citation ID such as [chunk-1].
-6. Do not create citation IDs that are not present in the context.
-7. Never claim that a contract contains something when the
-   supplied evidence does not support it.
-""".strip()
+1. Use only the supplied contract evidence.
+2. Do not invent contract terms.
+3. Do not use outside legal knowledge as contract evidence.
+4. If the evidence is insufficient, clearly say that the available contract
+   evidence is insufficient.
+5. Be precise and concise.
+6. Every factual statement based on contract evidence must include a citation.
+7. Citations must use ONLY the citation IDs provided in the evidence.
+8. Never create a new citation ID.
+9. Never cite evidence that was not provided.
+10. Do not guess missing contract information.
+"""
 
 
 class RAGService:
+    """Application service for contract question answering."""
+
     @staticmethod
     def answer_question(
         session: Session,
         *,
-        organization_id: uuid.UUID,
-        contract_id: uuid.UUID,
-        contract_version_id: uuid.UUID,
+        organization_id,
+        contract_id,
+        contract_version_id,
         question: str,
         candidate_k: int = 15,
         top_k: int = 5,
@@ -53,7 +54,9 @@ class RAGService:
                 organization_id=organization_id,
                 contract_id=contract_id,
                 contract_version_id=contract_version_id,
-                query=question,
+                query=question.strip(),
+                vector_k=candidate_k,
+                keyword_k=candidate_k,
                 candidate_k=candidate_k,
                 top_k=top_k,
             )
@@ -61,31 +64,36 @@ class RAGService:
 
         context_blocks = build_context(retrieved_chunks)
 
-        context = render_context(context_blocks)
-
-        if not context:
+        if not context_blocks:
             return RAGAnswer(
                 answer=(
-                    "I could not find sufficient contract evidence "
-                    "to answer this question."
+                    "I could not find sufficient evidence in the "
+                    "available contract content to answer this question."
                 ),
                 citations=[],
                 model_provider="none",
                 model_name="none",
             )
 
+        rendered_context = render_context(context_blocks)
+
         user_prompt = f"""
 Contract evidence:
 
-{context}
+{rendered_context}
 
-User question:
+Question:
 
 {question.strip()}
 
 Answer the question using only the contract evidence above.
-Include citation IDs in square brackets.
-""".strip()
+
+Important:
+- Cite factual statements using the exact citation IDs provided.
+- Example: [chunk-1]
+- Do not create citation IDs that are not present in the evidence.
+- If the evidence is insufficient, explicitly say so.
+"""
 
         provider = get_llm_provider()
 
@@ -94,15 +102,10 @@ Include citation IDs in square brackets.
             user_prompt=user_prompt,
         )
 
-        citations = [
-            Citation(
-                citation_id=block.citation_id,
-                chunk_index=block.chunk_index,
-                page_start=block.page_start,
-                page_end=block.page_end,
-            )
-            for block in context_blocks
-        ]
+        citations = validate_citations(
+            answer=response.content,
+            context_blocks=context_blocks,
+        )
 
         return RAGAnswer(
             answer=response.content,

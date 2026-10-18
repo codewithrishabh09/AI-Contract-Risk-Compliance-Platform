@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
@@ -10,9 +11,10 @@ from app.schemas.rag import RAGAnswer, RAGQuestionRequest
 from app.services.rag.citation_validator import CitationValidationError
 from app.services.rag_service import RAGService
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/api/v1/contracts",
+    prefix="/contracts",
     tags=["RAG"],
 )
 
@@ -54,6 +56,7 @@ def ask_contract_question(
         )
 
     except CitationValidationError as exc:
+        logger.warning("RAG citation validation failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),
@@ -66,6 +69,7 @@ def ask_contract_question(
         ) from exc
 
     except Exception as exc:
+        logger.exception("RAG answer generation failed")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="RAG answer generation failed.",

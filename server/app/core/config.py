@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     db_password: str
 
     llm_provider: str = "groq"
-    llm_model: str = "llama-3.3-70b-versatile"
+    llm_model: str = "openai/gpt-oss-20b"
     llm_base_url: str | None = None
     llm_api_key: str | None = None
     openai_api_key: str | None = None

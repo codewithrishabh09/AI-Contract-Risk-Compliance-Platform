@@ -55,8 +55,6 @@ class RAGService:
                 contract_id=contract_id,
                 contract_version_id=contract_version_id,
                 query=question.strip(),
-                vector_k=candidate_k,
-                keyword_k=candidate_k,
                 candidate_k=candidate_k,
                 top_k=top_k,
             )

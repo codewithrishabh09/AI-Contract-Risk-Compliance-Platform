@@ -19,6 +19,7 @@ QUERIES = [
     "What is the termination notice period?",
     "What is the liability cap?",
     "What are the payment obligations?",
+    "Analyze the contract for payment, termination, liability, indemnification, confidentiality, intellectual property, data protection, renewal, governing law, dispute resolution and other material contractual risks.",
 ]
 
 

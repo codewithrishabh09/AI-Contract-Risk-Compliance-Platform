@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
@@ -18,9 +19,10 @@ from app.services.analysis.service import (
     ContractAnalysisService,
 )
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/api/v1/contracts",
+    prefix="/contracts",
     tags=["Contract Analysis"],
 )
 
@@ -62,6 +64,7 @@ def analyze_contract(
 
     except ContractAnalysisError as exc:
         session.rollback()
+        logger.warning("Contract analysis failed: %s", exc)
 
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -70,6 +73,7 @@ def analyze_contract(
 
     except Exception as exc:
         session.rollback()
+        logger.exception("Contract analysis failed unexpectedly")
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

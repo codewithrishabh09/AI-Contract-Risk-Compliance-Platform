@@ -57,13 +57,13 @@ CONTRACT EVIDENCE:
 
 Return JSON with exactly this logical structure:
 
-{
+{{
   "overall_risk_score": 0,
   "risk_level": "LOW",
   "status": "NEEDS_REVIEW",
   "summary": "Short contract risk summary",
   "findings": [
-    {
+    {{
       "category": "LIABILITY",
       "title": "Short title",
       "description": "Detailed explanation",
@@ -73,9 +73,9 @@ Return JSON with exactly this logical structure:
       "page_start": 1,
       "page_end": 1,
       "confidence_score": 0.95
-    }
+    }}
   ]
-}
+}}
 
 Rules:
 

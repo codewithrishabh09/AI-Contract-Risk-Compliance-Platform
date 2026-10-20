@@ -31,10 +31,15 @@ class OpenAIProvider(LLMProvider):
                 "LLM_API_KEY is not configured."
             )
 
+        if not resolved_model:
+            raise LLMProviderError(
+                "LLM_MODEL is not configured."
+            )
+
         self.client = OpenAI(
             api_key=resolved_api_key,
             base_url=resolved_base_url or None,
-            timeout=60.0,
+            timeout=120.0,
             max_retries=2,
         )
         self.model = resolved_model
@@ -47,22 +52,46 @@ class OpenAIProvider(LLMProvider):
         user_prompt: str,
     ) -> LLMResponse:
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # Groq gpt-oss models prefer max_completion_tokens.
+            # JSON object mode reduces empty / non-JSON replies.
+            create_kwargs: dict = {
+                "model": self.model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                temperature=0.1,
-            )
+                "temperature": 0.1,
+                "max_completion_tokens": 8192,
+            }
 
-            content = (
-                response.choices[0].message.content or ""
-            ).strip()
+            # Force JSON when the prompt asks for structured output
+            if "json" in user_prompt.lower() or "json" in system_prompt.lower():
+                create_kwargs["response_format"] = {"type": "json_object"}
+
+            response = self.client.chat.completions.create(**create_kwargs)
+
+            if not response.choices:
+                raise LLMProviderError(
+                    "LLM returned no choices in the response."
+                )
+
+            choice = response.choices[0]
+            message = choice.message
+            content = (message.content or "").strip()
+            refusal = getattr(message, "refusal", None)
+            finish_reason = getattr(choice, "finish_reason", None)
 
             if not content:
+                details = [
+                    f"finish_reason={finish_reason!r}",
+                    f"model={self.model!r}",
+                    f"provider={self.provider_name!r}",
+                ]
+                if refusal:
+                    details.append(f"refusal={refusal!r}")
                 raise LLMProviderError(
-                    "LLM returned an empty response."
+                    "LLM returned an empty response. "
+                    + ", ".join(details)
                 )
 
             return LLMResponse(
@@ -76,5 +105,5 @@ class OpenAIProvider(LLMProvider):
 
         except Exception as exc:
             raise LLMProviderError(
-                f"LLM provider request failed: {type(exc).__name__}"
+                f"LLM provider request failed: {type(exc).__name__}: {exc}"
             ) from exc

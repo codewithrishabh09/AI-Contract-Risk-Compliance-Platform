@@ -1,11 +1,31 @@
 from decimal import Decimal
+from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import (
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+ALLOWED_LEVELS = {"LOW", "MEDIUM", "HIGH", "CRITICAL"}
+ALLOWED_ANALYSIS_STATUSES = {"COMPLETED", "NEEDS_REVIEW", "FAILED"}
+
+
+def _normalize_choice(value: Any, allowed: set[str], name: str) -> str:
+    normalized = str(value).strip().upper().replace(" ", "_")
+
+    if normalized not in allowed:
+        raise ValueError(
+            f"{name} must be one of {sorted(allowed)}, got {value!r}"
+        )
+
+    return normalized
 
 
 class RiskFindingInput(BaseModel):
-    category: str = Field(min_length=1, max_length=100)
-    title: str = Field(min_length=1, max_length=255)
+    category: str = Field(min_length=1, max_length=80)
+    title: str = Field(min_length=1, max_length=200)
     description: str = Field(min_length=1)
     severity: str
     recommendation: str | None = None
@@ -17,6 +37,31 @@ class RiskFindingInput(BaseModel):
         ge=0,
         le=1,
     )
+
+    @field_validator("category", "title", mode="before")
+    @classmethod
+    def _strip_and_truncate(cls, value: Any, info) -> Any:
+        if not isinstance(value, str):
+            return value
+
+        limit = 80 if info.field_name == "category" else 200
+        return value.strip()[:limit]
+
+    @field_validator("severity", mode="before")
+    @classmethod
+    def _normalize_severity(cls, value: Any) -> str:
+        return _normalize_choice(value, ALLOWED_LEVELS, "severity")
+
+    @model_validator(mode="after")
+    def _fix_page_range(self) -> "RiskFindingInput":
+        if (
+            self.page_start is not None
+            and self.page_end is not None
+            and self.page_end < self.page_start
+        ):
+            self.page_end = self.page_start
+
+        return self
 
 
 class ContractAnalysisOutput(BaseModel):
@@ -34,6 +79,20 @@ class ContractAnalysisOutput(BaseModel):
     findings: list[RiskFindingInput] = Field(
         default_factory=list
     )
+
+    @field_validator("risk_level", mode="before")
+    @classmethod
+    def _normalize_risk_level(cls, value: Any) -> str:
+        return _normalize_choice(value, ALLOWED_LEVELS, "risk_level")
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def _normalize_status(cls, value: Any) -> str:
+        return _normalize_choice(
+            value,
+            ALLOWED_ANALYSIS_STATUSES,
+            "status",
+        )
 
 
 class RiskFindingResponse(BaseModel):

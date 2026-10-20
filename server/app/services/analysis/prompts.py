@@ -7,7 +7,7 @@ Your job is to identify commercially relevant contract risks.
 
 Do not invent terms that are not present in the supplied evidence.
 
-Return structured JSON matching the requested schema.
+Return valid JSON matching the requested structure.
 
 Risk severity must be one of:
 
@@ -25,24 +25,17 @@ CRITICAL
 
 Risk score must be between 0 and 100.
 
-Consider factors such as:
+For every finding:
 
-- payment obligations
-- termination
-- liability
-- indemnification
-- confidentiality
-- intellectual property
-- data protection
-- governing law
-- dispute resolution
-- renewal
-- unusual or one-sided obligations
+- Use only supplied evidence.
+- Identify the relevant contract domain.
+- Explain the actual contractual risk.
+- Provide actionable recommendation.
+- Include evidence text when available.
+- Include page numbers when available.
+- Never invent page numbers.
 
-Every finding must contain evidence from the supplied contract.
-
-If there is insufficient evidence for a potential risk,
-do not invent the risk.
+If a domain has no evidence, do not invent a finding.
 
 Be conservative and evidence-based.
 """
@@ -51,38 +44,46 @@ Be conservative and evidence-based.
 ANALYSIS_USER_PROMPT = """
 Analyze the following contract evidence.
 
+The evidence was retrieved separately for multiple contract-risk domains.
+
 CONTRACT EVIDENCE:
 
 {context}
 
+DOMAIN COVERAGE:
+
+{coverage}
+
 Return JSON with exactly this logical structure:
 
-{{
+{
   "overall_risk_score": 0,
   "risk_level": "LOW",
   "status": "NEEDS_REVIEW",
   "summary": "Short contract risk summary",
   "findings": [
-    {{
+    {
       "category": "LIABILITY",
       "title": "Short title",
       "description": "Detailed explanation",
       "severity": "HIGH",
       "recommendation": "Recommended action",
-      "evidence_text": "Exact relevant contract evidence",
+      "evidence_text": "Relevant contract evidence",
       "page_start": 1,
       "page_end": 1,
       "confidence_score": 0.95
-    }}
+    }
   ]
-}}
+}
 
 Rules:
 
 - Do not invent evidence.
+- Do not invent clauses.
+- Do not invent page numbers.
 - Use only supplied contract evidence.
-- Risk score must be 0-100.
+- Risk score must be between 0 and 100.
 - Use only allowed severity values.
-- Evidence must correspond to the supplied contract chunks.
-- Keep findings actionable.
+- Findings must be actionable.
+- If evidence is insufficient, do not create a finding.
 """

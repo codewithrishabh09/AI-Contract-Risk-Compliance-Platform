@@ -76,3 +76,32 @@ class AnalysisResultRepository:
         session.add(analysis_result)
         session.flush()
         return analysis_result
+    
+    @staticmethod
+    def get_latest_for_dashboard(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+        contract_version_id: uuid.UUID,
+    ) -> AnalysisResult | None:
+        statement = (
+            select(AnalysisResult)
+            .join(
+                ContractVersion,
+                ContractVersion.id == AnalysisResult.contract_version_id,
+            )
+            .join(
+                Contract,
+                Contract.id == ContractVersion.contract_id,
+            )
+            .where(
+                AnalysisResult.contract_version_id == contract_version_id,
+                ContractVersion.contract_id == contract_id,
+                Contract.organization_id == organization_id,
+            )
+            .order_by(AnalysisResult.created_at.desc())
+            .limit(1)
+        )
+
+        return session.scalar(statement)

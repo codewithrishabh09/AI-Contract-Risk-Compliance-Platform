@@ -1,16 +1,11 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from sqlalchemy import case
 
 from app.models.risk_finding import RiskFinding
 
-case(
-    (RiskFinding.severity == "LOW", 1),
-    else_=0,
-)
+
 class RiskFindingRepository:
     """Repository for contract risk findings."""
 
@@ -55,25 +50,25 @@ class RiskFindingRepository:
                 RiskFinding.category,
                 func.count(RiskFinding.id).label("total"),
                 func.sum(
-                    func.case(
+                    case(
                         (RiskFinding.severity == "LOW", 1),
                         else_=0,
                     )
                 ).label("low"),
                 func.sum(
-                    func.case(
+                    case(
                         (RiskFinding.severity == "MEDIUM", 1),
                         else_=0,
                     )
                 ).label("medium"),
                 func.sum(
-                    func.case(
+                    case(
                         (RiskFinding.severity == "HIGH", 1),
                         else_=0,
                     )
                 ).label("high"),
                 func.sum(
-                    func.case(
+                    case(
                         (RiskFinding.severity == "CRITICAL", 1),
                         else_=0,
                     )

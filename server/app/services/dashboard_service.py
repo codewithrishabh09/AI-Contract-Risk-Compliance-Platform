@@ -11,6 +11,9 @@ from app.repositories.risk_finding_repository import (
 from app.repositories.contract_repository import (
     ContractRepository,
 )
+from app.repositories.contract_version_repository import (
+    ContractVersionRepository,
+)
 from app.schemas.dashboard import (
     ContractDashboardResponse,
     RiskCategorySummary,
@@ -35,6 +38,18 @@ class DashboardService:
         )
 
         if contract is None:
+            return None
+
+        contract_version = (
+            ContractVersionRepository.get_by_id_for_contract(
+                session,
+                organization_id=organization_id,
+                contract_id=contract_id,
+                contract_version_id=contract_version_id,
+            )
+        )
+
+        if contract_version is None:
             return None
 
         analysis_result = (

@@ -61,3 +61,27 @@ class ContractVersionRepository:
         session.add(contract_version)
         session.flush()
         return contract_version
+    
+    @staticmethod
+    def list_for_contract(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+    ) -> list[ContractVersion]:
+        statement = (
+            select(ContractVersion)
+            .join(
+                Contract,
+                Contract.id == ContractVersion.contract_id,
+            )
+            .where(
+                ContractVersion.contract_id == contract_id,
+                Contract.organization_id == organization_id,
+            )
+            .order_by(
+                ContractVersion.version_number.asc(),
+            )
+        )
+
+        return list(session.scalars(statement).all())

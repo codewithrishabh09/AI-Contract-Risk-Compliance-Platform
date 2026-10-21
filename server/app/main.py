@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.version_analysis import (
     router as version_analysis_router,
 )
+from app.api.v1.audit import router as audit_router
 from app.api.v1.findings import router as findings_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.jobs import router as jobs_router
@@ -88,5 +89,10 @@ app.include_router(
 
 app.include_router(
     version_analysis_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    audit_router,
     prefix="/api/v1",
 )

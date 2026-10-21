@@ -44,6 +44,30 @@ class ContractRepository:
         return session.scalar(statement)
 
     @staticmethod
+    def update_status(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+        status: str,
+    ) -> Contract | None:
+        """Update the status of an organization-scoped contract."""
+
+        contract = ContractRepository.get_by_id_for_update(
+            session,
+            organization_id=organization_id,
+            contract_id=contract_id,
+        )
+
+        if contract is None:
+            return None
+
+        contract.status = status
+        session.flush()
+
+        return contract
+
+    @staticmethod
     def list_by_organization(
         session: Session,
         organization_id: uuid.UUID,

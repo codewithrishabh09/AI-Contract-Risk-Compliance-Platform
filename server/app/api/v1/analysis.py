@@ -6,6 +6,7 @@ from app.api.dependencies import CurrentUser, DatabaseSession
 from app.repositories.contract_version_repository import (
     ContractVersionRepository,
 )
+from app.repositories.contract_repository import ContractRepository
 from app.repositories.processing_job_repository import (
     ProcessingJobRepository,
 )
@@ -52,6 +53,13 @@ def analyze_contract(
         requested_by=current_user.id,
         job_type="FULL_ANALYSIS",
         status="QUEUED",
+    )
+
+    ContractRepository.update_status(
+        session,
+        organization_id=current_user.organization_id,
+        contract_id=contract_id,
+        status="PROCESSING",
     )
 
     session.commit()

@@ -2,6 +2,7 @@ import uuid
 
 from app.worker.celery_app import celery_app
 from app.db.session import SessionLocal
+from app.repositories.contract_repository import ContractRepository
 from app.services.analysis.service import (
     ContractAnalysisError,
     ContractAnalysisService,
@@ -50,6 +51,13 @@ def analyze_contract_task(
             organization_id=organization_uuid,
             contract_id=contract_uuid,
             contract_version_id=version_uuid,
+        )
+
+        ContractRepository.update_status(
+            session,
+            organization_id=organization_uuid,
+            contract_id=contract_uuid,
+            status="ANALYZED",
         )
 
         ProcessingService.mark_succeeded(

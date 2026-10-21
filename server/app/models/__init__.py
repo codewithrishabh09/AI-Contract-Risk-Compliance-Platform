@@ -8,6 +8,7 @@ from app.models.organization import Organization
 from app.models.processing_job import ProcessingJob
 from app.models.risk_finding import RiskFinding
 from app.models.user import User
+from app.models.audit_log import AuditLog
 
 __all__ = [
     "Organization",
@@ -20,4 +21,5 @@ __all__ = [
     "Clause",
     "AnalysisResult",
     "RiskFinding",
+    "AuditLog",
 ]

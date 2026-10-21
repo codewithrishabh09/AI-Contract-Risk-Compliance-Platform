@@ -17,12 +17,16 @@ from app.services.analysis.prompts import (
     ANALYSIS_USER_PROMPT,
 )
 from app.services.analysis.retrieval import MultiPassRetriever
-from app.services.llm import get_llm_provider
+from app.services.llm import LLMProviderError, get_llm_provider
 from app.services.retrieval import render_context
 
 
 class ContractAnalysisError(Exception):
     """Base contract analysis error."""
+
+
+class ContractAnalysisEvidenceUnavailableError(ContractAnalysisError):
+    """Raised when a contract version has no extracted evidence."""
 
 
 class ContractAnalysisService:
@@ -54,8 +58,9 @@ class ContractAnalysisService:
         all_chunks = deduplicate_chunks(domain_results)
 
         if not all_chunks:
-            raise ContractAnalysisError(
-                "No contract evidence is available for analysis."
+            raise ContractAnalysisEvidenceUnavailableError(
+                "No extracted contract text is available for analysis. "
+                "Process the document successfully and try again."
             )
 
         context_blocks = build_analysis_context(all_chunks)
@@ -77,12 +82,16 @@ class ContractAnalysisService:
             coverage=coverage_text,
         )
 
-        provider = get_llm_provider()
-
-        response = provider.generate(
-            system_prompt=ANALYSIS_SYSTEM_PROMPT,
-            user_prompt=user_prompt,
-        )
+        try:
+            provider = get_llm_provider()
+            response = provider.generate(
+                system_prompt=ANALYSIS_SYSTEM_PROMPT,
+                user_prompt=user_prompt,
+            )
+        except LLMProviderError as exc:
+            raise ContractAnalysisError(
+                "The analysis provider is unavailable. Please try again."
+            ) from exc
 
         try:
             raw_data = json.loads(response.content)

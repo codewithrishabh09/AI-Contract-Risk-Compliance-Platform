@@ -16,6 +16,7 @@ from app.schemas.analysis import (
 )
 from app.services.analysis.service import (
     ContractAnalysisError,
+    ContractAnalysisEvidenceUnavailableError,
     ContractAnalysisService,
 )
 
@@ -61,6 +62,15 @@ def analyze_contract(
             contract_id=contract_id,
             contract_version_id=version_id,
         )
+
+    except ContractAnalysisEvidenceUnavailableError as exc:
+        session.rollback()
+        logger.info("Contract analysis is not ready: %s", exc)
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
 
     except ContractAnalysisError as exc:
         session.rollback()

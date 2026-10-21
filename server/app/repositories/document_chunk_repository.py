@@ -50,7 +50,11 @@ class DocumentChunkRepository:
         session: Session,
         *,
         contract_version_id: uuid.UUID,
+        limit: int | None = None,
     ) -> list[DocumentChunk]:
+        if limit is not None and limit <= 0:
+            raise ValueError("limit must be greater than zero.")
+
         statement = (
             select(DocumentChunk)
             .where(
@@ -58,6 +62,9 @@ class DocumentChunkRepository:
             )
             .order_by(DocumentChunk.chunk_index.asc())
         )
+
+        if limit is not None:
+            statement = statement.limit(limit)
 
         return list(session.scalars(statement).all())
 

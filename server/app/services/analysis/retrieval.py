@@ -42,11 +42,6 @@ class MultiPassRetriever:
                 candidate_k=candidate_k,
                 top_k=top_k,
             )
-            
-            # --- ADD THIS PRINT STATEMENT ---
-            print(f"DEBUG: Domain '{domain.query}' found {len(chunks)} chunks.")
-            # --------------------------------
-
             results.append(
                 DomainRetrievalResult(
                     domain=domain,

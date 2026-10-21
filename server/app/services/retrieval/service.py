@@ -227,6 +227,30 @@ class RetrievalService:
             keyword_k=candidate_k,
         )
 
+        # Documents processed before embeddings were introduced, or documents
+        # whose domain terms do not all occur in one chunk, can produce no
+        # hybrid candidates.  Keep analysis available by reranking a small,
+        # version-scoped set of extracted chunks in that case.
+        if not candidates:
+            fallback_chunks = (
+                DocumentChunkRepository.list_by_contract_version_id(
+                    session,
+                    contract_version_id=contract_version_id,
+                    limit=candidate_k,
+                )
+            )
+            candidates = [
+                RetrievedChunk(
+                    chunk_id=chunk.id,
+                    chunk_index=chunk.chunk_index,
+                    content=chunk.content,
+                    page_start=chunk.page_start,
+                    page_end=chunk.page_end,
+                    similarity_score=0.0,
+                )
+                for chunk in fallback_chunks
+            ]
+
         if not candidates:
             return []
 

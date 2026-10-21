@@ -68,6 +68,38 @@ class AnalysisResultRepository:
         return session.scalar(statement)
 
     @staticmethod
+    def list_for_contract_versions(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        contract_id: uuid.UUID,
+    ) -> list[AnalysisResult]:
+        """List analysis runs for a contract, newest first.
+
+        The version-analysis service selects the first result for each
+        version, so ordering here ensures it uses that version's latest run.
+        """
+
+        statement = (
+            select(AnalysisResult)
+            .join(
+                ContractVersion,
+                ContractVersion.id == AnalysisResult.contract_version_id,
+            )
+            .join(
+                Contract,
+                Contract.id == ContractVersion.contract_id,
+            )
+            .where(
+                Contract.organization_id == organization_id,
+                Contract.id == contract_id,
+            )
+            .order_by(AnalysisResult.created_at.desc())
+        )
+
+        return list(session.scalars(statement).all())
+
+    @staticmethod
     def create(
         session: Session,
         *,

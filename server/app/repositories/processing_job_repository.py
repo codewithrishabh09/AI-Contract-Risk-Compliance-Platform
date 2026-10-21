@@ -3,6 +3,8 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.contract import Contract
+from app.models.contract_version import ContractVersion
 from app.models.processing_job import ProcessingJob
 
 
@@ -19,6 +21,33 @@ class ProcessingJobRepository:
 
         statement = select(ProcessingJob).where(
             ProcessingJob.id == job_id,
+        )
+
+        return session.scalar(statement)
+
+    @staticmethod
+    def get_by_id_for_organization(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        job_id: uuid.UUID,
+    ) -> ProcessingJob | None:
+        """Get a job only when its contract belongs to the organization."""
+
+        statement = (
+            select(ProcessingJob)
+            .join(
+                ContractVersion,
+                ContractVersion.id == ProcessingJob.contract_version_id,
+            )
+            .join(
+                Contract,
+                Contract.id == ContractVersion.contract_id,
+            )
+            .where(
+                ProcessingJob.id == job_id,
+                Contract.organization_id == organization_id,
+            )
         )
 
         return session.scalar(statement)

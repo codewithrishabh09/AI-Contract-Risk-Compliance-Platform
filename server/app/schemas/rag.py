@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RAGQuestionRequest(BaseModel):
@@ -22,6 +22,8 @@ class Citation(BaseModel):
 
 
 class RAGAnswer(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     answer: str
     citations: list[Citation] = Field(default_factory=list)
     model_provider: str

@@ -3,6 +3,7 @@ from typing import Any
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     field_validator,
     model_validator,
@@ -110,6 +111,8 @@ class RiskFindingResponse(BaseModel):
 
 
 class AnalysisResultResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     id: str
     contract_version_id: str
     overall_risk_score: Decimal | None

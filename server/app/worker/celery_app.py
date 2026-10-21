@@ -7,7 +7,10 @@ celery_app = Celery(
     "ai_contract_intelligence",
     broker=settings.redis_url,
     backend=settings.redis_url,
-    include=["app.worker.tasks"],
+    include=[
+        "app.worker.tasks",
+        "app.worker.analysis_tasks",
+    ],
 )
 
 celery_app.conf.update(

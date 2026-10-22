@@ -21,6 +21,7 @@ from app.api.v1.contracts import router as contracts_router
 from app.api.v1.rag import router as rag_router
 from app.core.config import settings
 from app.core.security import SECURITY_HEADERS
+from app.core.exceptions import unhandled_exception_handler
 
 
 @asynccontextmanager
@@ -116,4 +117,9 @@ app.include_router(
 app.include_router(
     audit_router,
     prefix="/api/v1",
+)
+
+app.add_exception_handler(
+    Exception,
+    unhandled_exception_handler,
 )

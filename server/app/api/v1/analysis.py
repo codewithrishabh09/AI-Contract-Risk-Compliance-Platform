@@ -1,8 +1,14 @@
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.dependencies import CurrentUser, DatabaseSession
+from app.api.dependencies import (
+    DatabaseSession,
+    require_permissions,
+)
+from app.core.permissions import Permission
+from app.models.user import User
 from app.repositories.contract_version_repository import (
     ContractVersionRepository,
 )
@@ -31,6 +37,19 @@ router = APIRouter(
 )
 
 
+# Permission-protected current user dependencies.
+# Flow: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> check
+AnalysisRequester = Annotated[
+    User,
+    Depends(require_permissions(Permission.ANALYSIS_REQUEST)),
+]
+
+AnalysisReader = Annotated[
+    User,
+    Depends(require_permissions(Permission.ANALYSIS_READ)),
+]
+
+
 @router.post(
     "/{contract_id}/versions/{version_id}/analyze",
     response_model=ProcessingJobResponse,
@@ -40,7 +59,7 @@ def analyze_contract(
     contract_id: uuid.UUID,
     version_id: uuid.UUID,
     session: DatabaseSession,
-    current_user: CurrentUser,
+    current_user: AnalysisRequester,
 ) -> ProcessingJobResponse:
 
     contract_version = (
@@ -116,6 +135,7 @@ def analyze_contract(
 
     return ProcessingJobResponse.model_validate(job)
 
+
 @router.get(
     "/{contract_id}/versions/{version_id}/analysis/latest",
     response_model=AnalysisResultResponse,
@@ -123,7 +143,7 @@ def analyze_contract(
 def get_latest_analysis(
     contract_id: uuid.UUID,
     version_id: uuid.UUID,
-    current_user: CurrentUser,
+    current_user: AnalysisReader,
     session: DatabaseSession,
 ):
     contract_version = ContractVersionRepository.get_by_id_for_contract(

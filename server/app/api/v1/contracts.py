@@ -13,8 +13,12 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import CurrentUser
-from app.db.session import SessionLocal
+from app.api.dependencies import (
+    get_db,
+    require_permissions,
+)
+from app.core.permissions import Permission
+from app.models.user import User
 from app.schemas.contract import (
     ContractCreate,
     ContractListResponse,
@@ -42,18 +46,26 @@ router = APIRouter(
 )
 
 
-def get_db():
-    session = SessionLocal()
-
-    try:
-        yield session
-    finally:
-        session.close()
-
-
 DatabaseSession = Annotated[
     Session,
     Depends(get_db),
+]
+
+# Permission-protected current user dependencies.
+# Each one runs: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> check
+ContractReader = Annotated[
+    User,
+    Depends(require_permissions(Permission.CONTRACT_READ)),
+]
+
+ContractCreator = Annotated[
+    User,
+    Depends(require_permissions(Permission.CONTRACT_CREATE)),
+]
+
+ContractUploader = Annotated[
+    User,
+    Depends(require_permissions(Permission.CONTRACT_UPLOAD)),
 ]
 
 
@@ -65,7 +77,7 @@ DatabaseSession = Annotated[
 def create_contract(
     payload: ContractCreate,
     session: DatabaseSession,
-    current_user: CurrentUser,
+    current_user: ContractCreator,
 ) -> ContractResponse:
     try:
         contract = ContractService.create_contract(
@@ -104,7 +116,7 @@ def create_contract(
 )
 def list_contracts(
     session: DatabaseSession,
-    current_user: CurrentUser,
+    current_user: ContractReader,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     contract_status: Annotated[
@@ -145,7 +157,7 @@ def list_contracts(
 def get_contract(
     contract_id: UUID,
     session: DatabaseSession,
-    current_user: CurrentUser,
+    current_user: ContractReader,
 ) -> ContractResponse:
     try:
         contract = ContractService.get_contract(
@@ -170,7 +182,7 @@ def get_contract(
 )
 def upload_contract_document(
     contract_id: UUID,
-    current_user: CurrentUser,
+    current_user: ContractUploader,
     session: DatabaseSession,
     file: UploadFile = File(...),
     change_summary: str | None = Form(

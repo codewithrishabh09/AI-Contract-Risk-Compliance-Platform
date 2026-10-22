@@ -1,10 +1,16 @@
 import math
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import CurrentUser, get_db
+from app.api.dependencies import (
+    get_db,
+    require_permissions,
+)
+from app.core.permissions import Permission
+from app.models.user import User
 from app.repositories.analysis_result_repository import (
     AnalysisResultRepository,
 )
@@ -26,6 +32,20 @@ router = APIRouter(
 )
 
 
+# Permission-protected current user dependencies.
+# Flow: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> check
+FindingReader = Annotated[
+    User,
+    Depends(require_permissions(Permission.FINDING_READ)),
+]
+
+# Reserved for the upcoming finding update endpoint:
+# FindingUpdater = Annotated[
+#     User,
+#     Depends(require_permissions(Permission.FINDING_UPDATE)),
+# ]
+
+
 @router.get(
     "/{contract_id}/versions/{version_id}/findings",
     response_model=RiskFindingListResponse,
@@ -33,7 +53,7 @@ router = APIRouter(
 def list_risk_findings(
     contract_id: uuid.UUID,
     version_id: uuid.UUID,
-    current_user: CurrentUser,
+    current_user: FindingReader,
     session: Session = Depends(get_db),
     severity: str | None = Query(
         default=None,

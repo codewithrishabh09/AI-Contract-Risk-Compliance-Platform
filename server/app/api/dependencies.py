@@ -4,6 +4,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.core.permissions import (
+    Permission,
+    ROLE_PERMISSIONS,
+)
 from app.core.security.jwt import decode_access_token
 from app.db.session import SessionLocal
 from app.models.user import User
@@ -110,6 +114,7 @@ CurrentUser = Annotated[
     Depends(get_current_user),
 ]
 
+
 def require_roles(*allowed_roles: str) -> Callable[..., Any]:
     """
     Create a dependency that allows access only to users
@@ -135,3 +140,35 @@ def require_roles(*allowed_roles: str) -> Callable[..., Any]:
         return current_user
 
     return role_checker
+
+
+def require_permissions(
+    *required_permissions: Permission,
+):
+    """
+    Create a dependency that allows access only to users whose role
+    grants ALL of the required permissions.
+
+    Flow: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> permission check
+    """
+
+    def dependency(
+        current_user: CurrentUser,
+    ) -> CurrentUser:
+        user_permissions = ROLE_PERMISSIONS.get(
+            current_user.role,
+            set(),
+        )
+
+        if not all(
+            permission in user_permissions
+            for permission in required_permissions
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions.",
+            )
+
+        return current_user
+
+    return dependency

@@ -4,9 +4,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
-from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-
 from app.api.routes.health import router as health_router
 from app.api.v1.version_analysis import (
     router as version_analysis_router,
@@ -22,6 +19,12 @@ from app.api.v1.rag import router as rag_router
 from app.core.config import settings
 from app.core.security import SECURITY_HEADERS
 from app.core.exceptions import unhandled_exception_handler
+from app.middleware.request_id import RequestIDMiddleware
+
+
+# Swagger UI loads JS/CSS from a CDN and runs an inline script,
+# so a strict Content-Security-Policy must be skipped on these paths.
+DOCS_PATHS = ("/docs", "/redoc", "/openapi.json")
 
 
 @asynccontextmanager
@@ -40,6 +43,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RequestIDMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +53,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+
 @app.middleware("http")
 async def security_headers_middleware(
     request: Request,
@@ -57,19 +62,14 @@ async def security_headers_middleware(
     """Attach security headers to every API response."""
     response = await call_next(request)
 
+    is_docs = request.url.path.startswith(DOCS_PATHS)
+
     for header_name, header_value in SECURITY_HEADERS.items():
+        if is_docs and header_name.lower() == "content-security-policy":
+            continue
         response.headers[header_name] = header_value
 
     return response
-
-
-@app.get("/health", tags=["Health"])
-def health_check() -> dict[str, str]:
-    """Check whether the API application is running."""
-    return {
-        "status": "healthy",
-        "service": "ai-contract-intelligence",
-    }
 
 
 app.include_router(health_router)

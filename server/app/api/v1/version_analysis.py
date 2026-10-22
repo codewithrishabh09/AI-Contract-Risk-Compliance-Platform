@@ -1,9 +1,15 @@
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import CurrentUser, get_db
+from app.api.dependencies import (
+    get_db,
+    require_permissions,
+)
+from app.core.permissions import Permission
+from app.models.user import User
 from app.schemas.version_analysis import (
     ContractRiskTrendResponse,
 )
@@ -18,13 +24,26 @@ router = APIRouter(
 )
 
 
+# Requires BOTH permissions (require_permissions uses all(...)).
+# Flow: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> check
+RiskTrendViewer = Annotated[
+    User,
+    Depends(
+        require_permissions(
+            Permission.CONTRACT_READ,
+            Permission.ANALYSIS_READ,
+        )
+    ),
+]
+
+
 @router.get(
     "/{contract_id}/risk-trend",
     response_model=ContractRiskTrendResponse,
 )
 def get_contract_risk_trend(
     contract_id: uuid.UUID,
-    current_user: CurrentUser,
+    current_user: RiskTrendViewer,
     session: Session = Depends(get_db),
 ):
     result = VersionAnalysisService.get_risk_trend(

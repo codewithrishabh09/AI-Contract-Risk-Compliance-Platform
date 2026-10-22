@@ -1,9 +1,15 @@
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import CurrentUser, get_db
+from app.api.dependencies import (
+    get_db,
+    require_permissions,
+)
+from app.core.permissions import Permission
+from app.models.user import User
 from app.repositories.audit_log_repository import (
     AuditLogRepository,
 )
@@ -17,13 +23,21 @@ router = APIRouter(
 )
 
 
+# Permission-protected current user dependency.
+# Flow: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> check
+AuditReader = Annotated[
+    User,
+    Depends(require_permissions(Permission.AUDIT_READ)),
+]
+
+
 @router.get(
     "/contracts/{contract_id}",
     response_model=list[AuditLogResponse],
 )
 def get_contract_activity(
     contract_id: uuid.UUID,
-    current_user: CurrentUser,
+    current_user: AuditReader,
     session: Session = Depends(get_db),
     page: int = Query(
         default=1,

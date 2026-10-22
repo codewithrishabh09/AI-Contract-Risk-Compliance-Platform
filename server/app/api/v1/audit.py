@@ -1,12 +1,13 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import CurrentUser, get_db
 from app.repositories.audit_log_repository import (
     AuditLogRepository,
 )
+from app.repositories.contract_repository import ContractRepository
 from app.schemas.audit import AuditLogResponse
 
 
@@ -34,6 +35,18 @@ def get_contract_activity(
         le=100,
     ),
 ):
+    contract = ContractRepository.get_by_id(
+        session,
+        organization_id=current_user.organization_id,
+        contract_id=contract_id,
+    )
+
+    if contract is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found.",
+        )
+
     logs = AuditLogRepository.list_by_contract(
         session,
         organization_id=current_user.organization_id,

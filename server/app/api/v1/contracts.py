@@ -77,6 +77,18 @@ def create_contract(
             description=payload.description,
         )
 
+        AuditService.log(
+            session,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id,
+            contract_id=contract.id,
+            action="CONTRACT_CREATED",
+            resource_type="CONTRACT",
+            resource_id=contract.id,
+            description="Contract created.",
+        )
+        session.commit()
+
         return ContractResponse.model_validate(contract)
 
     except InvalidContractDataError as exc:
@@ -174,7 +186,7 @@ def upload_contract_document(
 
     try:
         (
-            _contract,
+            contract,
             contract_version,
             document,
             processing_job,
@@ -189,6 +201,23 @@ def upload_contract_document(
             change_summary=change_summary,
             storage=storage,
         )
+
+        AuditService.log(
+            session,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id,
+            contract_id=contract.id,
+            contract_version_id=contract_version.id,
+            action="CONTRACT_VERSION_UPLOADED",
+            resource_type="CONTRACT_VERSION",
+            resource_id=contract_version.id,
+            description="Contract version uploaded.",
+            metadata={
+                "filename": document.original_filename,
+                "file_size_bytes": document.file_size_bytes,
+            },
+        )
+        session.commit()
 
         return ContractUploadResponse(
             contract_version=contract_version,
@@ -207,45 +236,3 @@ def upload_contract_document(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
-
-    AuditService.log(
-        session,
-        organization_id=current_user.organization_id,
-        user_id=current_user.id,
-        contract_id=contract.id,
-        action="CONTRACT_CREATED",
-        resource_type="CONTRACT",
-        resource_id=contract.id,
-        description="Contract created.",
-    )
-
-    AuditService.log(
-        session,
-        organization_id=current_user.organization_id,
-        user_id=current_user.id,
-        contract_id=contract.id,
-        contract_version_id=contract_version.id,
-        action="CONTRACT_VERSION_UPLOADED",
-        resource_type="CONTRACT_VERSION",
-        resource_id=contract_version.id,
-        description="Contract version uploaded.",
-        metadata={
-            "filename": document.original_filename,
-            "file_size_bytes": document.file_size_bytes,
-        },
-    )
-
-    AuditService.log(
-        session,
-        organization_id=current_user.organization_id,
-        user_id=current_user.id,
-        contract_id=contract_id,
-        contract_version_id=version_id,
-        action="ANALYSIS_REQUESTED",
-        resource_type="PROCESSING_JOB",
-        resource_id=job.id,
-        description="AI contract analysis requested.",
-        metadata={
-            "job_type": "FULL_ANALYSIS",
-        },
-    )

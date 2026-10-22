@@ -21,6 +21,7 @@ from app.schemas.analysis import (
     RiskFindingResponse,
 )
 from app.schemas.contract_document import ProcessingJobResponse
+from app.services.audit_service import AuditService
 from app.worker.celery_app import celery_app
 
 
@@ -70,6 +71,19 @@ def analyze_contract(
         organization_id=current_user.organization_id,
         contract_id=contract_id,
         status="PROCESSING",
+    )
+
+    AuditService.log(
+        session,
+        organization_id=current_user.organization_id,
+        user_id=current_user.id,
+        contract_id=contract_id,
+        contract_version_id=version_id,
+        action="ANALYSIS_REQUESTED",
+        resource_type="PROCESSING_JOB",
+        resource_id=job.id,
+        description="AI contract analysis requested.",
+        metadata={"job_type": job.job_type},
     )
 
     session.commit()

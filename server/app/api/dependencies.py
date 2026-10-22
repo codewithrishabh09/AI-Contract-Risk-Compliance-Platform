@@ -4,6 +4,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from fastapi import HTTPException, Request
+from redis.exceptions import RedisError
+
+from app.core.redis import redis_client
+from app.services.rate_limiter import RateLimitExceeded, RateLimiter
+
 from app.core.permissions import (
     Permission,
     ROLE_PERMISSIONS,

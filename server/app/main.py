@@ -1,8 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+
+from app.api.routes.health import router as health_router
 from app.api.v1.version_analysis import (
     router as version_analysis_router,
 )
@@ -15,6 +20,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.contracts import router as contracts_router
 from app.api.v1.rag import router as rag_router
 from app.core.config import settings
+from app.core.security import SECURITY_HEADERS
 
 
 @asynccontextmanager
@@ -38,9 +44,22 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+@app.middleware("http")
+async def security_headers_middleware(
+    request: Request,
+    call_next,
+) -> Response:
+    """Attach security headers to every API response."""
+    response = await call_next(request)
+
+    for header_name, header_value in SECURITY_HEADERS.items():
+        response.headers[header_name] = header_value
+
+    return response
 
 
 @app.get("/health", tags=["Health"])
@@ -51,6 +70,8 @@ def health_check() -> dict[str, str]:
         "service": "ai-contract-intelligence",
     }
 
+
+app.include_router(health_router)
 
 app.include_router(
     auth_router,

@@ -1,9 +1,10 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
-
+cors_origins: list[str] = []
 class Settings(BaseSettings):
     app_name: str = "AI Contract Intelligence"
     environment: str = "development"
@@ -58,3 +59,18 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+@field_validator("cors_origins", mode="before")
+@classmethod
+def parse_cors_origins(cls, value: object) -> list[str]:
+    if isinstance(value, str):
+        return [
+            origin.strip()
+            for origin in value.split(",")
+            if origin.strip()
+        ]
+
+    if isinstance(value, list):
+        return value
+
+    return []

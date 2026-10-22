@@ -178,3 +178,49 @@ def require_permissions(
         return current_user
 
     return dependency
+
+rate_limiter = RateLimiter(redis_client)
+
+
+def get_client_identifier(request: Request) -> str:
+    forwarded_for = request.headers.get("X-Forwarded-For")
+
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    return request.client.host if request.client else "unknown"
+
+
+def rate_limit(
+    *,
+    limit: int,
+    window_seconds: int = 60,
+):
+    async def dependency(request: Request) -> None:
+        identifier = get_client_identifier(request)
+
+        try:
+            remaining, _ = rate_limiter.check(
+                key=identifier,
+                limit=limit,
+                window_seconds=window_seconds,
+            )
+
+            request.state.rate_limit_remaining = remaining
+            request.state.rate_limit_limit = limit
+
+        except RateLimitExceeded as exc:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many requests. Please try again later.",
+                headers={
+                    "Retry-After": str(window_seconds),
+                },
+            ) from exc
+
+        except RedisError:
+            # Redis outage should not take down the entire API.
+            request.state.rate_limit_remaining = limit
+            request.state.rate_limit_limit = limit
+
+    return dependency

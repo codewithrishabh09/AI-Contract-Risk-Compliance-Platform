@@ -3,6 +3,7 @@ import uuid
 from fastapi import Request
 from sqlalchemy.orm import Session
 
+from app.core.request_context import get_request_id
 from app.models.audit_log import AuditLog
 from app.repositories.audit_log_repository import (
     AuditLogRepository,
@@ -37,6 +38,13 @@ class AuditService:
             user_agent = request.headers.get(
                 "user-agent",
             )
+
+        # Attach the current request ID so audit rows can be
+        # correlated with application logs.
+        metadata = {
+            **(metadata or {}),
+            "request_id": get_request_id(),
+        }
 
         audit_log = AuditLog(
             organization_id=organization_id,

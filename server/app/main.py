@@ -19,6 +19,8 @@ from app.api.v1.rag import router as rag_router
 from app.core.config import settings
 from app.core.security import SECURITY_HEADERS
 from app.core.exceptions import unhandled_exception_handler
+from app.core.logging import configure_logging
+from app.middleware.logging import RequestLoggingMiddleware
 from app.middleware.request_id import RequestIDMiddleware
 
 
@@ -44,6 +46,7 @@ app = FastAPI(
 )
 
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

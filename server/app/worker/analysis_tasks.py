@@ -1,5 +1,6 @@
 import uuid
 
+from app.core.request_context import set_request_id
 from app.worker.celery_app import celery_app
 from app.db.session import SessionLocal
 from app.repositories.contract_repository import ContractRepository
@@ -24,7 +25,13 @@ def analyze_contract_task(
     organization_id: str,
     contract_id: str,
     contract_version_id: str,
+    request_id: str | None = None,
 ):
+    # Propagate the API request ID so worker logs and audit rows
+    # can be correlated with the originating HTTP request.
+    if request_id:
+        set_request_id(request_id)
+
     session = SessionLocal()
 
     try:

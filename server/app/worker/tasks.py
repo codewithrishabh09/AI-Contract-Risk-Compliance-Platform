@@ -158,3 +158,4 @@ def health_check_task() -> dict[str, str]:
         "status": "success",
         "message": "Celery worker is processing tasks.",
     }
+    

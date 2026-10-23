@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import CurrentUser, require_roles
+from app.api.dependencies import (
+    CurrentUser,
+    rate_limit,
+    require_roles,
+)
 from app.db.session import SessionLocal
 from app.models.user import User
 from app.schemas.auth import (
@@ -44,6 +48,14 @@ DatabaseSession = Annotated[
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[
+        Depends(
+            rate_limit(
+                limit=5,
+                window_seconds=60,
+            )
+        ),
+    ],
 )
 def register(
     payload: UserRegister,
@@ -82,6 +94,14 @@ def register(
 @router.post(
     "/login",
     response_model=TokenResponse,
+    dependencies=[
+        Depends(
+            rate_limit(
+                limit=10,
+                window_seconds=60,
+            )
+        ),
+    ],
 )
 def login(
     payload: LoginRequest,

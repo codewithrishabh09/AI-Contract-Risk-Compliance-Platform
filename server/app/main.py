@@ -71,6 +71,22 @@ async def security_headers_middleware(
 
     return response
 
+@app.middleware("http")
+async def rate_limit_headers_middleware(request, call_next):
+    response = await call_next(request)
+
+    limit = getattr(request.state, "rate_limit_limit", None)
+    remaining = getattr(request.state, "rate_limit_remaining", None)
+
+    if limit is not None:
+        response.headers["X-RateLimit-Limit"] = str(limit)
+
+    if remaining is not None:
+        response.headers["X-RateLimit-Remaining"] = str(
+            remaining
+        )
+
+    return response
 
 app.include_router(health_router)
 

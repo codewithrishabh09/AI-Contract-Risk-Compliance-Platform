@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.dependencies import (
     DatabaseSession,
+    rate_limit,
     require_permissions,
 )
 from app.core.permissions import Permission
@@ -54,6 +55,14 @@ AnalysisReader = Annotated[
     "/{contract_id}/versions/{version_id}/analyze",
     response_model=ProcessingJobResponse,
     status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[
+        Depends(
+            rate_limit(
+                limit=10,
+                window_seconds=60,
+            )
+        ),
+    ],
 )
 def analyze_contract(
     contract_id: uuid.UUID,

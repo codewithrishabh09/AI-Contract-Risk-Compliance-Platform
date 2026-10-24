@@ -28,6 +28,40 @@ from app.middleware.request_id import RequestIDMiddleware
 # so a strict Content-Security-Policy must be skipped on these paths.
 DOCS_PATHS = ("/docs", "/redoc", "/openapi.json")
 
+configure_logging()
+
+
+OPENAPI_TAGS = [
+    {
+        "name": "Health",
+        "description": "Service liveness and readiness checks.",
+    },
+    {
+        "name": "Authentication",
+        "description": "User registration, login and current-user lookup.",
+    },
+    {
+        "name": "Contracts",
+        "description": (
+            "Create contracts, list them, and upload document versions."
+        ),
+    },
+    {
+        "name": "RAG",
+        "description": (
+            "Ask questions about a contract version. Answers are grounded "
+            "in retrieved clauses and include validated citations."
+        ),
+    },
+    {
+        "name": "Contract Analysis",
+        "description": (
+            "Run AI risk analysis on a contract version and "
+            "retrieve the findings."
+        ),
+    },
+]
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,12 +70,19 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AI Contract Intelligence Platform",
+    title="AI Contract Intelligence API",
     description=(
-        "Backend API for contract management, document processing, "
-        "risk analysis, and compliance intelligence."
+        "Enterprise-grade AI Contract Intelligence platform for "
+        "contract analysis, risk detection, compliance review, "
+        "semantic search, and auditability.\n\n"
+        "**Authentication:** call `POST /api/v1/auth/login`, then use "
+        "the **Authorize** button with the returned access token."
     ),
-    version="0.1.0",
+    version="1.0.0",
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_tags=OPENAPI_TAGS,
     lifespan=lifespan,
 )
 
@@ -53,7 +94,12 @@ app.add_middleware(
     allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+    expose_headers=[
+        "X-Request-ID",
+        "X-RateLimit-Limit",
+        "X-RateLimit-Remaining",
+    ],
 )
 
 
@@ -74,6 +120,7 @@ async def security_headers_middleware(
 
     return response
 
+
 @app.middleware("http")
 async def rate_limit_headers_middleware(request, call_next):
     response = await call_next(request)
@@ -90,6 +137,7 @@ async def rate_limit_headers_middleware(request, call_next):
         )
 
     return response
+
 
 app.include_router(health_router)
 

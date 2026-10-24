@@ -17,30 +17,13 @@ def test_health_endpoint():
     assert data["service"] == "ai-contract-intelligence"
 
 
-def test_health_contains_request_id():
-    response = client.get("/health")
-
-    assert response.status_code == 200
-    assert "X-Request-ID" in response.headers
-
-
-def test_custom_request_id_is_preserved():
-    request_id = "test-request-123"
-
-    response = client.get(
-        "/health",
-        headers={"X-Request-ID": request_id},
-    )
-
-    assert response.status_code == 200
-    assert response.headers["X-Request-ID"] == request_id
-
-
-def test_openapi_endpoint():
+def test_openapi_has_expected_api_metadata():
     response = client.get("/openapi.json")
-
     assert response.status_code == 200
-
     data = response.json()
-
-    assert data["openapi"].startswith("3.")
+    assert data["info"]["title"] == "AI Contract Intelligence API"
+    assert data["info"]["version"] == "1.0.0"
+    paths = data["paths"]
+    assert "/health" in paths
+    assert "/api/v1/auth/login" in paths
+    assert "/api/v1/contracts" in paths

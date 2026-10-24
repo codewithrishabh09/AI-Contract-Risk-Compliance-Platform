@@ -42,6 +42,7 @@ from app.storage.local import LocalStorage
 
 router = APIRouter(
     prefix="/contracts",
+    tags=["Contract Versions"],
 )
 
 

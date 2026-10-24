@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
     healthcheck:
       test:
@@ -43,7 +43,7 @@ services:
       - redis_data:/data
 
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
     healthcheck:
       test:
@@ -102,7 +102,7 @@ services:
       [
         "celery",
         "-A",
-        "app.celery_app.celery_app",
+        "app.worker.celery_app.celery_app",
         "worker",
         "--loglevel=info"
       ]

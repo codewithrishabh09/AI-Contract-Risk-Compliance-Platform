@@ -20,7 +20,7 @@ from app.services.version_analysis_service import (
 
 router = APIRouter(
     prefix="/contracts",
-    tags=["Version Analysis"],
+    tags=["Contract Version"],
 )
 
 

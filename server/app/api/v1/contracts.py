@@ -42,7 +42,6 @@ from app.storage.local import LocalStorage
 
 router = APIRouter(
     prefix="/contracts",
-    tags=["Contracts"],
 )
 
 
@@ -73,6 +72,7 @@ ContractUploader = Annotated[
     "",
     response_model=ContractResponse,
     status_code=status.HTTP_201_CREATED,
+    tags=["Contracts"],
 )
 def create_contract(
     payload: ContractCreate,
@@ -113,6 +113,7 @@ def create_contract(
 @router.get(
     "",
     response_model=ContractListResponse,
+    tags=["Contracts"],
 )
 def list_contracts(
     session: DatabaseSession,
@@ -153,6 +154,7 @@ def list_contracts(
 @router.get(
     "/{contract_id}",
     response_model=ContractResponse,
+    tags=["Contracts"],
 )
 def get_contract(
     contract_id: UUID,
@@ -179,6 +181,7 @@ def get_contract(
     "/{contract_id}/versions",
     response_model=ContractUploadResponse,
     status_code=status.HTTP_201_CREATED,
+    tags=["Contract Versions"],
 )
 def upload_contract_document(
     contract_id: UUID,

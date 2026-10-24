@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/contracts",
-    tags=["RAG"],
+    tags=["Analysis"],
 )
 
 

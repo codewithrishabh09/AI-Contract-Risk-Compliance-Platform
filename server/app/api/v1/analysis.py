@@ -34,7 +34,7 @@ from app.worker.celery_app import celery_app
 
 router = APIRouter(
     prefix="/contracts",
-    tags=["Contract Analysis"],
+    tags=["Analysis"],
 )
 
 

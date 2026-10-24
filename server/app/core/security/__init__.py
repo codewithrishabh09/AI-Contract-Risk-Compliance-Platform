@@ -1,3 +1,11 @@
-from app.core.security.headers import SECURITY_HEADERS
+from app.core.security.headers import (
+    SAFE_HTTP_METHODS,
+    SECURITY_HEADERS,
+    raise_unauthorized,
+)
 
-__all__ = ["SECURITY_HEADERS"]
+__all__ = [
+    "SAFE_HTTP_METHODS",
+    "SECURITY_HEADERS",
+    "raise_unauthorized",
+]

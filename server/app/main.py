@@ -38,27 +38,38 @@ OPENAPI_TAGS = [
     },
     {
         "name": "Authentication",
-        "description": "User registration, login and current-user lookup.",
+        "description": "Registration, login and current-user lookup.",
     },
     {
         "name": "Contracts",
+        "description": "Create, list and view contracts.",
+    },
+    {
+        "name": "Contract Versions",
+        "description": "Upload and inspect contract document versions.",
+    },
+    {
+        "name": "Analysis",
         "description": (
-            "Create contracts, list them, and upload document versions."
+            "AI risk analysis and grounded question answering "
+            "with validated citations."
         ),
     },
     {
-        "name": "RAG",
-        "description": (
-            "Ask questions about a contract version. Answers are grounded "
-            "in retrieved clauses and include validated citations."
-        ),
+        "name": "Risk Findings",
+        "description": "Review and update risk findings.",
     },
     {
-        "name": "Contract Analysis",
-        "description": (
-            "Run AI risk analysis on a contract version and "
-            "retrieve the findings."
-        ),
+        "name": "Dashboard",
+        "description": "Organization-level contract and risk summaries.",
+    },
+    {
+        "name": "Jobs",
+        "description": "Background processing job status.",
+    },
+    {
+        "name": "Audit",
+        "description": "Audit log of user actions.",
     },
 ]
 

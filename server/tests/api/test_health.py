@@ -34,3 +34,13 @@ def test_custom_request_id_is_preserved():
 
     assert response.status_code == 200
     assert response.headers["X-Request-ID"] == request_id
+
+
+def test_openapi_endpoint():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["openapi"].startswith("3.")

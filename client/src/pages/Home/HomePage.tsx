@@ -3,20 +3,20 @@ import {
   Check,
   ChevronRight,
   CircleAlert,
-  FileText,
   Lock,
   Search,
-  ShieldCheck,
-  Sparkles,
+  Scale,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
+import LexMindLogo from "../../components/brand/LexMindLogo";
 
 const intelligenceItems = [
   {
     number: "01",
     title: "Read the important parts",
     description:
-      "LexMind breaks long agreements into clauses, obligations and terms your team actually needs to review.",
+      "Long agreements are reduced to the clauses, obligations and terms your team actually needs to review.",
   },
   {
     number: "02",
@@ -39,77 +39,82 @@ const securityItems = [
   "Request-level tracing",
 ];
 
-function LexMindMark() {
+function AnalysisPreview() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-violet-400/30 bg-violet-500/10">
-        <ShieldCheck size={17} strokeWidth={1.8} className="text-violet-300" />
+    <div className="relative mx-auto w-full max-w-[650px]">
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute -inset-20 rounded-full bg-violet-600/[0.045] blur-[100px]" />
+
+      {/* Animated wave */}
+      <div className="pointer-events-none absolute -bottom-24 left-[-15%] h-52 w-[130%] overflow-hidden opacity-80">
+        <div className="lexmind-wave lexmind-wave-one" />
+        <div className="lexmind-wave lexmind-wave-two" />
+        <div className="lexmind-wave lexmind-wave-three" />
       </div>
 
-      <div className="leading-none">
-        <div className="text-[16px] font-semibold tracking-[-0.02em] text-white">
-          LexMind
-        </div>
-
-        <div className="mt-1 text-[8px] font-medium uppercase tracking-[0.19em] text-slate-600">
-          Contract Intelligence
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ContractPreview() {
-  return (
-    <div className="relative">
-      <div className="absolute -inset-10 bg-violet-500/[0.035] blur-[90px]" />
-
-      <div className="relative overflow-hidden rounded-[18px] border border-white/[0.10] bg-[#080d18] shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
-        {/* Window header */}
-        <div className="flex h-12 items-center justify-between border-b border-white/[0.07] px-5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500/10">
-              <FileText size={12} className="text-violet-300" />
+      {/* Main application panel */}
+      <div className="lexmind-float relative overflow-hidden rounded-[20px] border border-white/[0.10] bg-[#080c16] shadow-[0_35px_100px_rgba(0,0,0,0.50)]">
+        {/* Top bar */}
+        <div className="flex h-[52px] items-center justify-between border-b border-white/[0.07] px-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/10">
+              <Scale
+                size={14}
+                strokeWidth={1.7}
+                className="text-violet-300"
+              />
             </div>
 
-            <span className="text-[10px] font-medium text-slate-400">
-              Contract review
-            </span>
+            <div>
+              <p className="text-[10px] font-medium text-slate-300">
+                Contract Intelligence
+              </p>
+
+              <p className="mt-0.5 text-[8px] text-slate-600">
+                Enterprise Services Agreement
+              </p>
+            </div>
           </div>
 
-          <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-emerald-400">
-            Analysis complete
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
+
+            <span className="text-[8px] font-semibold uppercase tracking-[0.14em] text-emerald-400">
+              Analysis complete
+            </span>
+          </div>
         </div>
 
         <div className="p-5 sm:p-7">
-          {/* Contract heading */}
-          <div className="flex items-start justify-between gap-5">
+          {/* Document header */}
+          <div className="flex items-start justify-between gap-6">
             <div>
-              <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-slate-600">
+              <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-slate-600">
                 Agreement
               </p>
 
-              <h3 className="mt-2 text-[15px] font-semibold tracking-[-0.01em] text-slate-100">
+              <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.02em] text-white">
                 Enterprise Services Agreement
               </h3>
 
-              <p className="mt-1.5 text-[10px] text-slate-600">
+              <p className="mt-1.5 text-[9px] text-slate-600">
                 Version 3 · 24 pages · Updated today
               </p>
             </div>
 
             <div className="text-right">
-              <p className="text-[9px] uppercase tracking-[0.12em] text-slate-600">
+              <p className="text-[8px] uppercase tracking-[0.15em] text-slate-600">
                 Risk score
               </p>
 
               <div className="mt-1 flex items-baseline justify-end gap-1.5">
-                <span className="text-3xl font-semibold tracking-[-0.04em] text-white">
+                <span className="text-[31px] font-semibold tracking-[-0.05em] text-white">
                   34
                 </span>
 
-                <span className="text-[9px] text-slate-600">/ 100</span>
+                <span className="text-[8px] text-slate-600">
+                  / 100
+                </span>
               </div>
 
               <span className="mt-1 inline-flex rounded-full border border-amber-400/20 bg-amber-400/[0.07] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-amber-300">
@@ -118,30 +123,41 @@ function ContractPreview() {
             </div>
           </div>
 
-          {/* Risk bar */}
-          <div className="mt-6 h-1 overflow-hidden rounded-full bg-white/[0.06]">
-            <div className="h-full w-[34%] rounded-full bg-amber-400" />
+          {/* Animated risk progress */}
+          <div className="mt-6">
+            <div className="h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
+              <div className="lexmind-risk-bar h-full w-[34%] rounded-full bg-amber-400" />
+            </div>
           </div>
 
-          {/* Findings */}
+          {/* Analysis section */}
           <div className="mt-7">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-[10px] font-medium text-slate-400">
-                Material findings
-              </span>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-medium text-slate-300">
+                  Material findings
+                </p>
+
+                <p className="mt-1 text-[8px] text-slate-600">
+                  AI identified areas that need attention
+                </p>
+              </div>
 
               <span className="text-[9px] text-slate-600">
                 12 findings
               </span>
             </div>
 
-            <div className="space-y-2">
-              <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5">
+            <div className="mt-4 space-y-2.5">
+              {/* Finding 1 */}
+              <div className="group rounded-xl border border-white/[0.07] bg-white/[0.025] p-4 transition duration-300 hover:border-rose-400/20 hover:bg-rose-400/[0.025]">
                 <div className="flex items-start gap-3">
-                  <CircleAlert
-                    size={14}
-                    className="mt-0.5 shrink-0 text-rose-400"
-                  />
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-rose-400/[0.08]">
+                    <CircleAlert
+                      size={13}
+                      className="text-rose-400"
+                    />
+                  </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
@@ -149,7 +165,7 @@ function ContractPreview() {
                         Limitation of liability
                       </span>
 
-                      <span className="text-[8px] font-semibold uppercase text-rose-400">
+                      <span className="text-[8px] font-semibold uppercase tracking-[0.08em] text-rose-400">
                         High
                       </span>
                     </div>
@@ -166,12 +182,15 @@ function ContractPreview() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5">
+              {/* Finding 2 */}
+              <div className="group rounded-xl border border-white/[0.07] bg-white/[0.025] p-4 transition duration-300 hover:border-amber-400/20 hover:bg-amber-400/[0.025]">
                 <div className="flex items-start gap-3">
-                  <CircleAlert
-                    size={14}
-                    className="mt-0.5 shrink-0 text-amber-400"
-                  />
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-400/[0.08]">
+                    <CircleAlert
+                      size={13}
+                      className="text-amber-400"
+                    />
+                  </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
@@ -179,7 +198,7 @@ function ContractPreview() {
                         Automatic renewal
                       </span>
 
-                      <span className="text-[8px] font-semibold uppercase text-amber-400">
+                      <span className="text-[8px] font-semibold uppercase tracking-[0.08em] text-amber-400">
                         Medium
                       </span>
                     </div>
@@ -198,19 +217,58 @@ function ContractPreview() {
             </div>
           </div>
 
-          {/* Footer */}
+          {/* AI evidence strip */}
           <div className="mt-5 flex items-center justify-between border-t border-white/[0.07] pt-4">
-            <div className="flex items-center gap-2">
-              <Sparkles size={11} className="text-violet-300" />
-              <span className="text-[9px] text-slate-500">
-                Evidence-backed analysis
-              </span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500/10">
+                <Search
+                  size={11}
+                  className="text-violet-300"
+                />
+              </div>
+
+              <div>
+                <p className="text-[9px] font-medium text-slate-400">
+                  Evidence-backed analysis
+                </p>
+
+                <p className="mt-0.5 text-[8px] text-slate-600">
+                  18 relevant clauses indexed
+                </p>
+              </div>
             </div>
 
             <span className="flex items-center gap-1 text-[9px] font-medium text-violet-300">
               View report
               <ChevronRight size={11} />
             </span>
+          </div>
+        </div>
+
+        {/* Scanning line */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-full overflow-hidden">
+          <div className="lexmind-scan-line absolute left-0 h-px w-full bg-gradient-to-r from-transparent via-violet-400/50 to-transparent" />
+        </div>
+      </div>
+
+      {/* Floating insight badge */}
+      <div className="lexmind-insight absolute -bottom-7 left-5 z-10 hidden w-[230px] rounded-xl border border-violet-400/20 bg-[#0a0d18]/95 p-3 shadow-[0_18px_45px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:block">
+        <div className="flex items-start gap-2.5">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+            <Scale
+              size={13}
+              className="text-violet-300"
+            />
+          </div>
+
+          <div>
+            <p className="text-[9px] font-semibold text-slate-200">
+              Smarter contract review
+            </p>
+
+            <p className="mt-1 text-[8px] leading-4 text-slate-600">
+              Evidence first. Risk second. Decisions faster.
+            </p>
           </div>
         </div>
       </div>
@@ -222,11 +280,9 @@ function HomePage() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
       {/* Navigation */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#05070d]/88 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#05070d]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
-          <Link to="/" aria-label="LexMind home">
-            <LexMindMark />
-          </Link>
+          <LexMindLogo />
 
           <nav className="hidden items-center gap-8 lg:flex">
             <a
@@ -261,7 +317,7 @@ function HomePage() {
 
             <Link
               to="/register"
-              className="rounded-lg border border-white/[0.12] bg-white px-4 py-2 text-[11px] font-semibold text-[#080b12] transition hover:bg-slate-200"
+              className="rounded-lg border border-violet-400/25 bg-violet-500 px-4 py-2 text-[11px] font-semibold text-white shadow-[0_8px_25px_rgba(139,92,246,0.12)] transition hover:bg-violet-400"
             >
               Get started
             </Link>
@@ -271,24 +327,26 @@ function HomePage() {
 
       <main>
         {/* Hero */}
-        <section className="relative px-5 pb-28 pt-36 sm:px-8 lg:pb-36 lg:pt-44">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[620px] overflow-hidden">
-            <div className="absolute left-[58%] top-[15%] h-[420px] w-[420px] rounded-full bg-violet-600/[0.045] blur-[130px]" />
+        <section className="relative px-5 pb-32 pt-36 sm:px-8 lg:pb-40 lg:pt-44">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[680px] overflow-hidden">
+            <div className="absolute left-[58%] top-[8%] h-[480px] w-[480px] rounded-full bg-violet-600/[0.045] blur-[140px]" />
           </div>
 
-          <div className="relative mx-auto grid max-w-[1240px] items-center gap-16 lg:grid-cols-[0.91fr_1.09fr] lg:gap-20">
-            <div>
+          <div className="relative mx-auto grid max-w-[1240px] items-center gap-16 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20">
+            {/* Copy */}
+            <div className="relative z-10">
               <div className="mb-7 flex items-center gap-2">
                 <span className="h-px w-7 bg-violet-400/70" />
 
                 <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
-                  Enterprise contract intelligence
+                  AI-powered contract intelligence
                 </span>
               </div>
 
-              <h1 className="max-w-[650px] text-[46px] font-semibold leading-[0.98] tracking-[-0.055em] text-white sm:text-[58px] lg:text-[70px]">
+              <h1 className="max-w-[680px] text-[46px] font-semibold leading-[0.97] tracking-[-0.055em] text-white sm:text-[58px] lg:text-[70px]">
                 Understand the contract.
-                <span className="mt-2 block font-serif font-normal italic text-slate-400">
+
+                <span className="mt-3 block font-serif font-normal italic text-slate-400">
                   Before you sign it.
                 </span>
               </h1>
@@ -302,12 +360,13 @@ function HomePage() {
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <Link
                   to="/register"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-violet-500 px-5 py-3 text-[11px] font-semibold text-white transition hover:bg-violet-400"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-violet-400/25 bg-violet-500 px-5 py-3 text-[11px] font-semibold text-white shadow-[0_10px_30px_rgba(139,92,246,0.13)] transition hover:bg-violet-400"
                 >
                   Analyze a contract
+
                   <ArrowUpRight
                     size={14}
-                    className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                   />
                 </Link>
 
@@ -316,29 +375,42 @@ function HomePage() {
                   className="inline-flex items-center gap-2 rounded-lg border border-white/[0.10] px-5 py-3 text-[11px] font-semibold text-slate-300 transition hover:border-white/[0.18] hover:text-white"
                 >
                   See how it works
+
                   <ChevronRight size={13} />
                 </a>
               </div>
 
               <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-[10px] text-slate-600">
                 <span className="flex items-center gap-2">
-                  <Check size={12} className="text-emerald-400" />
+                  <Check
+                    size={12}
+                    className="text-emerald-400"
+                  />
                   Clause-level analysis
                 </span>
 
                 <span className="flex items-center gap-2">
-                  <Check size={12} className="text-emerald-400" />
+                  <Check
+                    size={12}
+                    className="text-emerald-400"
+                  />
                   Evidence-backed answers
                 </span>
 
                 <span className="flex items-center gap-2">
-                  <Check size={12} className="text-emerald-400" />
+                  <Check
+                    size={12}
+                    className="text-emerald-400"
+                  />
                   Enterprise access controls
                 </span>
               </div>
             </div>
 
-            <ContractPreview />
+            {/* Product visualization */}
+            <div className="relative z-10 pt-4 lg:pt-0">
+              <AnalysisPreview />
+            </div>
           </div>
         </section>
 
@@ -355,6 +427,7 @@ function HomePage() {
 
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl lg:text-[46px]">
                 Less time reading.
+
                 <span className="block text-slate-500">
                   More time deciding.
                 </span>
@@ -371,7 +444,9 @@ function HomePage() {
                 <div
                   key={item.number}
                   className={`py-8 md:px-8 ${
-                    index !== 0 ? "border-t border-white/[0.08] md:border-l md:border-t-0" : ""
+                    index !== 0
+                      ? "border-t border-white/[0.08] md:border-l md:border-t-0"
+                      : ""
                   }`}
                 >
                   <span className="text-[10px] font-medium tracking-[0.16em] text-violet-300">
@@ -405,6 +480,7 @@ function HomePage() {
 
                 <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">
                   From document
+
                   <span className="block text-slate-500">
                     to decision.
                   </span>
@@ -473,7 +549,10 @@ function HomePage() {
             <div className="grid gap-14 lg:grid-cols-[1fr_1fr] lg:items-center">
               <div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-violet-400/20 bg-violet-500/[0.06]">
-                  <Lock size={17} className="text-violet-300" />
+                  <Lock
+                    size={17}
+                    className="text-violet-300"
+                  />
                 </div>
 
                 <p className="mt-7 text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
@@ -482,8 +561,10 @@ function HomePage() {
 
                 <h2 className="mt-4 max-w-[560px] text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">
                   Security should be part of the workflow,
+
                   <span className="text-slate-500">
-                    {" "}not an afterthought.
+                    {" "}
+                    not an afterthought.
                   </span>
                 </h2>
 
@@ -503,7 +584,10 @@ function HomePage() {
                       {item}
                     </span>
 
-                    <Check size={14} className="text-emerald-400" />
+                    <Check
+                      size={14}
+                      className="text-emerald-400"
+                    />
                   </div>
                 ))}
               </div>
@@ -511,11 +595,17 @@ function HomePage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="px-5 py-28 text-center sm:px-8 lg:py-36">
-          <div className="mx-auto max-w-[760px]">
+        {/* Final CTA */}
+        <section className="relative overflow-hidden px-5 py-28 text-center sm:px-8 lg:py-36">
+          <div className="pointer-events-none absolute bottom-0 left-1/2 h-48 w-[700px] -translate-x-1/2 rounded-full bg-violet-600/[0.035] blur-[100px]" />
+
+          <div className="relative mx-auto max-w-[760px]">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg border border-violet-400/20 bg-violet-500/[0.06]">
-              <Search size={16} className="text-violet-300" />
+              <Scale
+                size={16}
+                strokeWidth={1.7}
+                className="text-violet-300"
+              />
             </div>
 
             <p className="mt-7 text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
@@ -533,10 +623,14 @@ function HomePage() {
 
             <Link
               to="/register"
-              className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-[11px] font-semibold text-[#080b12] transition hover:bg-slate-200"
+              className="group mt-8 inline-flex items-center gap-2 rounded-lg border border-violet-400/25 bg-violet-500 px-5 py-3 text-[11px] font-semibold text-white shadow-[0_10px_30px_rgba(139,92,246,0.13)] transition hover:bg-violet-400"
             >
               Create your workspace
-              <ArrowUpRight size={14} />
+
+              <ArrowUpRight
+                size={14}
+                className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
         </section>
@@ -545,7 +639,7 @@ function HomePage() {
       {/* Footer */}
       <footer className="border-t border-white/[0.07] px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <LexMindMark />
+          <LexMindLogo />
 
           <div className="text-[10px] text-slate-600">
             © 2026 LexMind · Enterprise Contract Intelligence

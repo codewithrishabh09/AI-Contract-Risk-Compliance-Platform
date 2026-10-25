@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
+from app.api.routes import dashboard
 from app.api.routes.health import router as health_router
 from app.api.v1.version_analysis import (
     router as version_analysis_router,
@@ -194,6 +195,11 @@ app.include_router(
 
 app.include_router(
     audit_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    dashboard.router,
     prefix="/api/v1",
 )
 

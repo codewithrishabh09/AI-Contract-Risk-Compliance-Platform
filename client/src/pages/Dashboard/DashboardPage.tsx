@@ -1,77 +1,285 @@
 import {
-  Activity,
-  ArrowUpRight,
-  CalendarDays,
+  AlertTriangle,
+  Clock3,
+  FileText,
+  LoaderCircle,
   ShieldAlert,
 } from "lucide-react";
 
+import MetricCard from "../../components/ui/MetricCard";
+import { useDashboardOverview } from "../../features/dashboard/useDashboard";
+
 function DashboardPage() {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+  } = useDashboardOverview();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-72px)] items-center justify-center">
+        <div className="flex items-center gap-3 text-sm text-slate-400">
+          <LoaderCircle
+            size={18}
+            className="animate-spin text-indigo-400"
+          />
+          Loading contract intelligence...
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-5">
+          <div className="flex items-center gap-3">
+            <AlertTriangle
+              size={18}
+              className="text-rose-400"
+            />
+
+            <div>
+              <h2 className="text-sm font-semibold text-rose-300">
+                Unable to load dashboard
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-500">
+                {error instanceof Error
+                  ? error.message
+                  : "Something went wrong."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
   return (
     <div className="relative overflow-hidden">
-      {/* Ambient background */}
       <div className="pointer-events-none absolute right-0 top-0 h-[360px] w-[520px] rounded-full bg-indigo-600/[0.06] blur-3xl" />
 
       <div className="relative mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-indigo-400">
-              <Activity size={13} />
-              Contract Intelligence
-            </div>
-
-            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Good morning, Rishabh
-              <span className="ml-2">👋</span>
-            </h1>
-
-            <p className="mt-1.5 text-sm text-slate-500">
-              Here&apos;s what&apos;s happening with your contracts today.
-            </p>
+        <div className="mb-7">
+          <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-indigo-400">
+            Contract Intelligence
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 text-xs text-slate-500 sm:flex">
-              <CalendarDays size={15} />
-              Oct 26, 2026
+          <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+            Good morning, Rishabh 👋
+          </h1>
+
+          <p className="mt-1.5 text-sm text-slate-500">
+            Here&apos;s what&apos;s happening with your contracts today.
+          </p>
+        </div>
+
+        {/* Metrics */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            label="Total Contracts"
+            value={data.total_contracts}
+            change={12}
+            description="vs last 7 days"
+          />
+
+          <MetricCard
+            label="High Risk Contracts"
+            value={data.high_risk_contracts}
+            change={-3}
+            description="requires attention"
+          />
+
+          <MetricCard
+            label="Critical Findings"
+            value={data.critical_findings}
+            change={-1}
+            description="open critical issues"
+          />
+
+          <MetricCard
+            label="Pending Analysis"
+            value={data.pending_analysis}
+            change={-40}
+            description="currently processing"
+          />
+        </div>
+
+        {/* Risk summary */}
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5 lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-200">
+                  Risk Overview
+                </h2>
+
+                <p className="mt-1 text-[11px] text-slate-600">
+                  Contract risk activity
+                </p>
+              </div>
+
+              <ShieldAlert
+                size={17}
+                className="text-indigo-400"
+              />
             </div>
 
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs font-medium text-indigo-300 transition hover:bg-indigo-500/15"
-            >
-              <ShieldAlert size={14} />
-              Review risks
-              <ArrowUpRight size={13} />
-            </button>
+            <div className="mt-8 flex h-48 items-center justify-center rounded-lg border border-dashed border-[#173052] text-xs text-slate-600">
+              Risk trend chart
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
+            <h2 className="text-sm font-semibold text-slate-200">
+              Risk Distribution
+            </h2>
+
+            <div className="mt-6 space-y-4">
+              {[
+                ["Low", data.risk_distribution.low, "bg-emerald-400"],
+                ["Medium", data.risk_distribution.medium, "bg-amber-400"],
+                ["High", data.risk_distribution.high, "bg-orange-400"],
+                ["Critical", data.risk_distribution.critical, "bg-rose-500"],
+              ].map(([label, value, color]) => (
+                <div
+                  key={label as string}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`h-2 w-2 rounded-full ${color}`}
+                    />
+
+                    <span className="text-xs text-slate-400">
+                      {label}
+                    </span>
+                  </div>
+
+                  <span className="text-xs font-semibold text-slate-200">
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Placeholder KPI area */}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            ["Total Contracts", "42"],
-            ["High Risk Contracts", "8"],
-            ["Critical Findings", "3"],
-            ["Pending Analysis", "6"],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5"
-            >
-              <div className="text-xs text-slate-500">
-                {label}
-              </div>
+        {/* Recent contracts */}
+        <div className="mt-6 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
+          <div className="flex items-center justify-between border-b border-[#173052] px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-200">
+                Recent Contracts
+              </h2>
 
-              <div className="mt-2 text-3xl font-semibold tracking-tight text-white">
-                {value}
-              </div>
-
-              <div className="mt-2 text-[11px] text-emerald-400">
-                +12% vs last 7 days
-              </div>
+              <p className="mt-1 text-[11px] text-slate-600">
+                Latest activity in your organization
+              </p>
             </div>
-          ))}
+
+            <FileText
+              size={17}
+              className="text-indigo-400"
+            />
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px]">
+              <thead>
+                <tr className="border-b border-[#173052] text-left">
+                  <th className="px-5 py-3 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                    Contract
+                  </th>
+
+                  <th className="px-5 py-3 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                    Type
+                  </th>
+
+                  <th className="px-5 py-3 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                    Risk
+                  </th>
+
+                  <th className="px-5 py-3 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                    Status
+                  </th>
+
+                  <th className="px-5 py-3 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                    Updated
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {data.recent_contracts.map((contract) => (
+                  <tr
+                    key={contract.id}
+                    className="border-b border-[#102744] last:border-0 hover:bg-white/[0.015]"
+                  >
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+                          <FileText size={15} />
+                        </div>
+
+                        <span className="text-xs font-medium text-slate-300">
+                          {contract.title}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-5 py-4 text-xs text-slate-500">
+                      {contract.contract_type}
+                    </td>
+
+                    <td className="px-5 py-4">
+                      {contract.risk_score !== null ? (
+                        <span className="text-xs font-semibold text-slate-300">
+                          {contract.risk_score}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-600">
+                          —
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="px-5 py-4">
+                      <span className="rounded-full border border-[#24446C] px-2.5 py-1 text-[10px] text-slate-400">
+                        {contract.risk_level ?? contract.status}
+                      </span>
+                    </td>
+
+                    <td className="px-5 py-4 text-xs text-slate-600">
+                      {new Date(
+                        contract.updated_at,
+                      ).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Review time */}
+        <div className="mt-6 flex items-center gap-3 rounded-xl border border-[#173052] bg-[#071426]/60 px-5 py-4">
+          <Clock3
+            size={17}
+            className="text-indigo-400"
+          />
+
+          <span className="text-xs text-slate-500">
+            AI-powered contract review is active for this workspace.
+          </span>
         </div>
       </div>
     </div>

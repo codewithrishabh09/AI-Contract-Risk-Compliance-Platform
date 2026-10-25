@@ -1,180 +1,434 @@
 import {
-  ArrowLeft,
+  ArrowRight,
   Eye,
   EyeOff,
+  LoaderCircle,
+  LockKeyhole,
+  Mail,
   Scale,
-  ShieldCheck,
+  UserRound,
 } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  useState,
+} from "react";
+import type { FormEvent } from "react";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import { ApiError } from "../../lib/api/api";
+import { useAuth } from "../../context/AuthContext";
 
 function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const { register } = useAuth();
+
+  const [fullName, setFullName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [organizationId, setOrganizationId] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [acceptedTerms, setAcceptedTerms] =
+    useState(false);
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    setError("");
+
+    const normalizedName =
+      fullName.trim();
+
+    const normalizedEmail =
+      email.trim().toLowerCase();
+
+    const normalizedOrganizationId =
+      organizationId.trim();
+
+    if (!normalizedName) {
+      setError(
+        "Please enter your full name.",
+      );
+      return;
+    }
+
+    if (!normalizedEmail) {
+      setError(
+        "Please enter your work email.",
+      );
+      return;
+    }
+
+    if (!normalizedOrganizationId) {
+      setError(
+        "Please enter your organization ID.",
+      );
+      return;
+    }
+
+    if (password.length < 8) {
+      setError(
+        "Password must contain at least 8 characters.",
+      );
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setError(
+        "Please accept the workspace terms to continue.",
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const user =
+        await register({
+          full_name:
+            normalizedName,
+          email: normalizedEmail,
+          organization_id:
+            normalizedOrganizationId,
+          password,
+        });
+
+      /*
+       * If backend returns a JWT during registration,
+       * AuthProvider automatically creates the session.
+       */
+      if (user) {
+        navigate(
+          "/dashboard",
+          { replace: true },
+        );
+        return;
+      }
+
+      /*
+       * If backend registration succeeds without
+       * returning a token, send the user to login.
+       */
+      navigate("/login", {
+        replace: true,
+        state: {
+          registered: true,
+          email: normalizedEmail,
+        },
+      });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError(
+          "Unable to create your workspace. Please check your connection and try again.",
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-[#020817]">
-      <div className="grid min-h-screen lg:grid-cols-[0.9fr_1fr]">
+    <div className="min-h-screen bg-[#05070d] text-slate-100">
+      <div className="grid min-h-screen lg:grid-cols-2">
         {/* Form */}
-        <div className="order-2 flex items-center justify-center px-5 py-10 sm:px-8 lg:order-1">
-          <div className="w-full max-w-[440px]">
+        <section className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-16">
+          <div className="w-full max-w-[430px]">
             <Link
               to="/"
-              className="mb-10 inline-flex items-center gap-2 text-xs text-slate-500 transition hover:text-white"
+              className="mb-9 inline-flex items-center gap-2 text-xs text-slate-500 transition hover:text-white"
             >
-              <ArrowLeft size={14} />
-              Back to LexMind
+              ← Back to LexMind
             </Link>
 
-            <div className="mb-8">
-              <div className="mb-5 flex items-center gap-3 lg:hidden">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500">
-                  <Scale size={18} />
-                </div>
-
-                <span className="text-lg font-semibold text-white">
-                  LexMind
-                </span>
+            <div className="mb-7 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-violet-400/30 bg-violet-500/10">
+                <Scale
+                  size={20}
+                  strokeWidth={1.8}
+                  className="text-violet-300"
+                />
               </div>
 
-              <h1 className="text-2xl font-semibold tracking-tight text-white">
-                Create your workspace
-              </h1>
+              <div>
+                <div className="text-[16px] font-semibold text-white">
+                  LexMind
+                </div>
 
-              <p className="mt-2 text-sm text-slate-500">
-                Start building a smarter contract review workflow.
-              </p>
+                <div className="text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                  Contract Intelligence
+                </div>
+              </div>
             </div>
 
-            <form className="space-y-4">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
+              Create your workspace
+            </p>
+
+            <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+              Start with a smarter review workflow.
+            </h1>
+
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              Create your organization workspace and start turning contracts into decisions.
+            </p>
+
+            {error && (
+              <div className="mt-6 rounded-lg border border-rose-400/20 bg-rose-400/[0.06] px-4 py-3 text-xs leading-5 text-rose-300">
+                {error}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit}
+              className="mt-7 space-y-4"
+            >
               <div>
-                <label className="mb-2 block text-xs font-medium text-slate-400">
+                <label
+                  htmlFor="fullName"
+                  className="mb-2 block text-[11px] font-medium text-slate-400"
+                >
                   Full name
                 </label>
 
-                <input
-                  type="text"
-                  placeholder="Rishabh Dwivedi"
-                  className="h-11 w-full rounded-lg border border-[#203858] bg-[#071426] px-3.5 text-sm text-white outline-none placeholder:text-slate-700 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10"
-                />
+                <div className="relative">
+                  <UserRound
+                    size={15}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
+                  />
+
+                  <input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(event) =>
+                      setFullName(
+                        event.target.value,
+                      )
+                    }
+                    placeholder="Rishabh Dwivedi"
+                    autoComplete="name"
+                    disabled={isSubmitting}
+                    className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-medium text-slate-400">
+                <label
+                  htmlFor="email"
+                  className="mb-2 block text-[11px] font-medium text-slate-400"
+                >
                   Work email
                 </label>
 
-                <input
-                  type="email"
-                  placeholder="you@company.com"
-                  className="h-11 w-full rounded-lg border border-[#203858] bg-[#071426] px-3.5 text-sm text-white outline-none placeholder:text-slate-700 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10"
-                />
+                <div className="relative">
+                  <Mail
+                    size={15}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
+                  />
+
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) =>
+                      setEmail(
+                        event.target.value,
+                      )
+                    }
+                    placeholder="you@company.com"
+                    autoComplete="email"
+                    disabled={isSubmitting}
+                    className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-medium text-slate-400">
-                  Organization
+                <label
+                  htmlFor="organizationId"
+                  className="mb-2 block text-[11px] font-medium text-slate-400"
+                >
+                  Organization ID
                 </label>
 
                 <input
+                  id="organizationId"
                   type="text"
-                  placeholder="Acme Corporation"
-                  className="h-11 w-full rounded-lg border border-[#203858] bg-[#071426] px-3.5 text-sm text-white outline-none placeholder:text-slate-700 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10"
+                  value={organizationId}
+                  onChange={(event) =>
+                    setOrganizationId(
+                      event.target.value,
+                    )
+                  }
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  autoComplete="off"
+                  disabled={isSubmitting}
+                  className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] px-4 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-medium text-slate-400">
+                <label
+                  htmlFor="password"
+                  className="mb-2 block text-[11px] font-medium text-slate-400"
+                >
                   Password
                 </label>
 
                 <div className="relative">
+                  <LockKeyhole
+                    size={15}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
+                  />
+
                   <input
-                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    type={
+                      showPassword
+                        ? "text"
+                        : "password"
+                    }
+                    value={password}
+                    onChange={(event) =>
+                      setPassword(
+                        event.target.value,
+                      )
+                    }
                     placeholder="Create a secure password"
-                    className="h-11 w-full rounded-lg border border-[#203858] bg-[#071426] px-3.5 pr-11 text-sm text-white outline-none placeholder:text-slate-700 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10"
+                    autoComplete="new-password"
+                    disabled={isSubmitting}
+                    className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] pl-10 pr-11 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
                   />
 
                   <button
                     type="button"
                     onClick={() =>
-                      setShowPassword((value) => !value)
+                      setShowPassword(
+                        (value) => !value,
+                      )
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 transition hover:text-slate-300"
                   >
                     {showPassword ? (
-                      <EyeOff size={17} />
+                      <EyeOff size={16} />
                     ) : (
-                      <Eye size={17} />
+                      <Eye size={16} />
                     )}
                   </button>
                 </div>
+
+                <p className="mt-2 text-[10px] text-slate-600">
+                  Use at least 8 characters.
+                </p>
               </div>
 
-              <label className="flex items-start gap-2 pt-1 text-[11px] leading-5 text-slate-600">
+              <label className="flex items-start gap-3 pt-1">
                 <input
                   type="checkbox"
-                  className="mt-1 rounded border-[#29415F] bg-[#071426]"
+                  checked={acceptedTerms}
+                  onChange={(event) =>
+                    setAcceptedTerms(
+                      event.target.checked,
+                    )
+                  }
+                  disabled={isSubmitting}
+                  className="mt-0.5 h-4 w-4 accent-violet-500"
                 />
 
-                <span>
-                  I agree to the workspace terms and understand that
-                  contract data is processed within my organization&apos;s
-                  workspace.
+                <span className="text-[10px] leading-5 text-slate-600">
+                  I agree to the workspace terms
+                  and understand that contract
+                  data is processed within my
+                  organization&apos;s workspace.
                 </span>
               </label>
 
               <button
                 type="submit"
-                className="mt-2 h-11 w-full rounded-lg bg-indigo-500 text-xs font-semibold text-white transition hover:bg-indigo-400"
+                disabled={isSubmitting}
+                className="group flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-violet-500 text-sm font-semibold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Create workspace
+                {isSubmitting ? (
+                  <>
+                    <LoaderCircle
+                      size={16}
+                      className="animate-spin"
+                    />
+                    Creating workspace...
+                  </>
+                ) : (
+                  <>
+                    Create workspace
+                    <ArrowRight
+                      size={15}
+                      className="transition-transform group-hover:translate-x-0.5"
+                    />
+                  </>
+                )}
               </button>
             </form>
 
-            <p className="mt-7 text-center text-xs text-slate-500">
+            <p className="mt-6 text-center text-xs text-slate-600">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-medium text-indigo-400 hover:text-indigo-300"
+                className="text-violet-300 transition hover:text-violet-200"
               >
                 Sign in
               </Link>
             </p>
           </div>
-        </div>
+        </section>
 
         {/* Brand panel */}
-        <div className="relative order-1 hidden overflow-hidden border-l border-[#173052] bg-[#030D1C] lg:order-2 lg:flex lg:flex-col lg:justify-center">
-          <div className="pointer-events-none absolute right-[-100px] top-1/2 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-blue-600/[0.06] blur-[130px]" />
+        <section className="relative hidden overflow-hidden border-l border-white/[0.07] bg-[#03050b] lg:flex lg:items-center lg:px-16">
+          <div className="absolute right-[-100px] top-[-100px] h-[460px] w-[460px] rounded-full bg-violet-600/[0.07] blur-[130px]" />
 
-          <div className="relative max-w-[560px] px-12">
-            <Link
-              to="/"
-              className="mb-16 inline-flex items-center gap-3"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600">
-                <Scale size={18} />
-              </div>
+          <div className="relative max-w-[560px]">
+            <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-xl border border-violet-400/25 bg-violet-500/[0.08]">
+              <Scale
+                size={20}
+                strokeWidth={1.8}
+                className="text-violet-300"
+              />
+            </div>
 
-              <span className="text-lg font-semibold text-white">
-                LexMind
-              </span>
-            </Link>
-
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-400">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
               Built for high-stakes decisions
             </p>
 
-            <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-tight text-white">
+            <h2 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-white xl:text-5xl">
               One workspace for contracts, risk and compliance.
             </h2>
 
-            <p className="mt-5 text-sm leading-6 text-slate-500">
-              Give legal and compliance teams the intelligence they
-              need without losing control over the underlying evidence.
+            <p className="mt-6 max-w-[500px] text-sm leading-7 text-slate-500">
+              Give legal and compliance teams the intelligence they need without losing control over the underlying evidence.
             </p>
 
-            <div className="mt-10 space-y-4">
+            <div className="mt-8 space-y-4">
               {[
                 "Analyze contracts with contextual AI",
                 "Track risks across contract versions",
@@ -182,21 +436,18 @@ function RegisterPage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-3 text-xs text-slate-400"
                 >
-                  <ShieldCheck
-                    size={16}
-                    className="text-emerald-400"
-                  />
-
-                  <span className="text-xs text-slate-400">
-                    {item}
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-400/[0.05] text-emerald-400">
+                    ✓
                   </span>
+
+                  {item}
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

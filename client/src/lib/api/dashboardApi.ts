@@ -1,10 +1,8 @@
-import apiClient from "./apiClient";
 import type { DashboardOverview } from "../../types/dashboard";
+import { apiRequest } from "./api";
 
 export async function getDashboardOverview(): Promise<DashboardOverview> {
-  const response = await apiClient.get<DashboardOverview>(
+  return apiRequest<DashboardOverview>(
     "/dashboard/overview",
   );
-
-  return response.data;
 }

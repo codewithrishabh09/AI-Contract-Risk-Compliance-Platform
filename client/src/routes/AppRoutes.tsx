@@ -1,11 +1,25 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
+import PublicLayout from "../layouts/PublicLayout";
+
+import HomePage from "../pages/Home/HomePage";
+import LoginPage from "../pages/Auth/LoginPage";
+import RegisterPage from "../pages/Auth/RegisterPage";
+
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Route>
+
+      {/* Application */}
       <Route element={<DashboardLayout />}>
         <Route
           path="/dashboard"
@@ -86,13 +100,8 @@ function AppRoutes() {
       </Route>
 
       <Route
-        path="/"
-        element={<Navigate to="/dashboard" replace />}
-      />
-
-      <Route
         path="*"
-        element={<Navigate to="/dashboard" replace />}
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   );

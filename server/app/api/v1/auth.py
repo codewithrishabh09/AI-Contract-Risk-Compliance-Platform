@@ -8,7 +8,7 @@ from app.api.dependencies import (
     rate_limit,
     require_roles,
 )
-from app.db.session import SessionLocal
+from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
@@ -23,19 +23,11 @@ from app.services.auth_service import (
     UserAlreadyExistsError,
 )
 
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
 )
-
-
-def get_db():
-    session = SessionLocal()
-
-    try:
-        yield session
-    finally:
-        session.close()
 
 
 DatabaseSession = Annotated[

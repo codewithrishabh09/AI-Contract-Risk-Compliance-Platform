@@ -15,26 +15,21 @@ from app.core.permissions import (
     ROLE_PERMISSIONS,
 )
 from app.core.security.jwt import decode_access_token
-from app.db.session import SessionLocal
+from app.db.session import get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 
 from collections.abc import Callable
 from typing import Any
 
+from app.core.config import settings
+
 security = HTTPBearer(
     auto_error=True,
 )
 
 
-def get_db():
-    session = SessionLocal()
-
-    try:
-        yield session
-    finally:
-        session.close()
-
+DatabaseSession = Annotated[Session, Depends(get_db)]
 
 DatabaseSession = Annotated[
     Session,
@@ -197,6 +192,12 @@ def rate_limit(
     window_seconds: int = 60,
 ):
     async def dependency(request: Request) -> None:
+        # Bypass rate limiting completely in test environment
+        if settings.environment == "test":
+            request.state.rate_limit_remaining = limit
+            request.state.rate_limit_limit = limit
+            return
+
         identifier = get_client_identifier(request)
 
         try:

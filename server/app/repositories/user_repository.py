@@ -32,6 +32,7 @@ class UserRepository:
         password_hash: str,
         full_name: str,
         role: str = "EMPLOYEE",
+        status: str = "INVITED",
     ) -> User:
         user = User(
             organization_id=organization_id,
@@ -39,6 +40,7 @@ class UserRepository:
             password_hash=password_hash,
             full_name=full_name,
             role=role,
+            status=status,
         )
 
         session.add(user)

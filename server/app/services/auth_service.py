@@ -40,7 +40,10 @@ class AuthService:
         if not normalized_name:
             raise ValueError("Full name cannot be empty.")
 
-        if UserRepository.get_by_email(session, normalized_email):
+        if UserRepository.get_by_email(
+            session,
+            normalized_email,
+        ):
             raise UserAlreadyExistsError(
                 "A user with this email already exists."
             )
@@ -54,6 +57,7 @@ class AuthService:
                 email=normalized_email,
                 password_hash=password_hash,
                 full_name=normalized_name,
+                status="ACTIVE",
             )
 
             session.commit()
@@ -95,7 +99,10 @@ class AuthService:
                 "Invalid email or password."
             )
 
-        if not verify_password(password, user.password_hash):
+        if not verify_password(
+            password,
+            user.password_hash,
+        ):
             raise InvalidCredentialsError(
                 "Invalid email or password."
             )

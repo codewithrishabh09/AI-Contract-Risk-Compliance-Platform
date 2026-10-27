@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 import MetricCard from "../../components/ui/MetricCard";
-import { useDashboardOverview } from "../../features/dashboard/useDashboard";
+import { useDashboard } from "../../features/dashboard/useDashboard";
 
 function DashboardPage() {
   const {
@@ -15,7 +15,7 @@ function DashboardPage() {
     isLoading,
     isError,
     error,
-  } = useDashboardOverview();
+  } = useDashboard();
 
   if (isLoading) {
     return (
@@ -281,6 +281,11 @@ function DashboardPage() {
             AI-powered contract review is active for this workspace.
           </span>
         </div>
+
+        {/* TEMPORARY: API verification — verify hone ke baad delete kar dena */}
+        <pre className="mt-6 overflow-auto rounded-xl border border-white/10 bg-black/20 p-4 text-xs text-slate-400">
+          {JSON.stringify(data, null, 2)}
+        </pre>
       </div>
     </div>
   );

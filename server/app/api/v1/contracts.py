@@ -19,12 +19,19 @@ from app.api.dependencies import (
 )
 from app.core.permissions import Permission
 from app.models.user import User
+from app.repositories.contract_version_repository import (
+    ContractVersionRepository,
+)
 from app.schemas.contract import (
     ContractCreate,
     ContractListResponse,
     ContractResponse,
+    ContractVersionListResponse,
 )
-from app.schemas.contract_document import ContractUploadResponse
+from app.schemas.contract_document import (
+    ContractUploadResponse,
+    ContractVersionResponse,
+)
 from app.services.contract_document_service import (
     ContractDocumentService,
     ContractDocumentServiceError,
@@ -170,6 +177,43 @@ def get_contract(
         )
 
         return ContractResponse.model_validate(contract)
+
+    except ContractNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Contract not found.",
+        ) from exc
+
+
+@router.get(
+    "/{contract_id}/versions",
+    response_model=ContractVersionListResponse,
+    tags=["Contract Versions"],
+)
+def list_contract_versions(
+    contract_id: UUID,
+    session: DatabaseSession,
+    current_user: ContractReader,
+) -> ContractVersionListResponse:
+    try:
+        contract = ContractService.get_contract(
+            session,
+            organization_id=current_user.organization_id,
+            contract_id=contract_id,
+        )
+
+        versions = ContractVersionRepository.list_for_contract(
+            session,
+            organization_id=current_user.organization_id,
+            contract_id=contract.id,
+        )
+
+        return ContractVersionListResponse(
+            items=[
+                ContractVersionResponse.model_validate(version)
+                for version in versions
+            ],
+        )
 
     except ContractNotFoundError as exc:
         raise HTTPException(

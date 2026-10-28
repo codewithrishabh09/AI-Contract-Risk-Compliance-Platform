@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.contract_document import ContractVersionResponse
+
 
 ContractType = Literal[
     "NDA",
@@ -69,3 +71,9 @@ class ContractListResponse(BaseModel):
     total: int = Field(ge=0)
     offset: int = Field(ge=0)
     limit: int = Field(ge=1, le=100)
+
+
+class ContractVersionListResponse(BaseModel):
+    """Version history for a contract."""
+
+    items: list[ContractVersionResponse]

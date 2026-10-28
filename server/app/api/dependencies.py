@@ -1,35 +1,28 @@
-from typing import Annotated
+import uuid
+from collections.abc import Callable
+from enum import Enum
+from typing import Annotated, Any
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from redis.exceptions import RedisError
 from sqlalchemy.orm import Session
 
-from fastapi import HTTPException, Request
-from redis.exceptions import RedisError
-
-from app.core.redis import redis_client
-from app.services.rate_limiter import RateLimitExceeded, RateLimiter
-
+from app.core.config import settings
 from app.core.permissions import (
     Permission,
     ROLE_PERMISSIONS,
 )
+from app.core.redis import redis_client
 from app.core.security.jwt import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-
-from collections.abc import Callable
-from typing import Any
-
-from app.core.config import settings
+from app.services.rate_limiter import RateLimitExceeded, RateLimiter
 
 security = HTTPBearer(
     auto_error=True,
 )
-
-
-DatabaseSession = Annotated[Session, Depends(get_db)]
 
 DatabaseSession = Annotated[
     Session,
@@ -70,8 +63,6 @@ def get_current_user(
         )
 
     try:
-        import uuid
-
         parsed_user_id = uuid.UUID(user_id)
         parsed_organization_id = uuid.UUID(organization_id)
     except ValueError as exc:
@@ -116,6 +107,13 @@ CurrentUser = Annotated[
 ]
 
 
+def _role_name(role: Any) -> str:
+    """Normalize a role (str or Enum) to an upper-case string."""
+    if isinstance(role, Enum):
+        role = role.value
+    return str(role).strip().upper()
+
+
 def require_roles(*allowed_roles: str) -> Callable[..., Any]:
     """
     Create a dependency that allows access only to users
@@ -130,9 +128,7 @@ def require_roles(*allowed_roles: str) -> Callable[..., Any]:
     def role_checker(
         current_user: CurrentUser,
     ) -> User:
-        user_role = current_user.role.upper()
-
-        if user_role not in normalized_roles:
+        if _role_name(current_user.role) not in normalized_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to perform this action.",
@@ -141,6 +137,23 @@ def require_roles(*allowed_roles: str) -> Callable[..., Any]:
         return current_user
 
     return role_checker
+
+
+def _permissions_for_role(role: Any) -> set:
+    """
+    Look up permissions for a role regardless of key style in
+    ROLE_PERMISSIONS (enum, lower-case, or upper-case string).
+    """
+    direct = ROLE_PERMISSIONS.get(role)
+    if direct is not None:
+        return direct
+
+    target = _role_name(role)
+    for key, permissions in ROLE_PERMISSIONS.items():
+        if _role_name(key) == target:
+            return permissions
+
+    return set()
 
 
 def require_permissions(
@@ -155,11 +168,8 @@ def require_permissions(
 
     def dependency(
         current_user: CurrentUser,
-    ) -> CurrentUser:
-        user_permissions = ROLE_PERMISSIONS.get(
-            current_user.role,
-            set(),
-        )
+    ) -> User:
+        user_permissions = _permissions_for_role(current_user.role)
 
         if not all(
             permission in user_permissions
@@ -173,6 +183,7 @@ def require_permissions(
         return current_user
 
     return dependency
+
 
 rate_limiter = RateLimiter(redis_client)
 

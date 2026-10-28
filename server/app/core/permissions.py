@@ -22,7 +22,8 @@ class Permission(str, Enum):
 
 
 ROLE_PERMISSIONS: dict[str, set[Permission]] = {
-    "ADMIN": {
+    # Full platform access.
+    "SUPER_ADMIN": {
         Permission.CONTRACT_READ,
         Permission.CONTRACT_CREATE,
         Permission.CONTRACT_UPDATE,
@@ -37,6 +38,23 @@ ROLE_PERMISSIONS: dict[str, set[Permission]] = {
         Permission.CONTRACT_APPROVE,
     },
 
+    # Organization-level administration.
+    "ORG_ADMIN": {
+        Permission.CONTRACT_READ,
+        Permission.CONTRACT_CREATE,
+        Permission.CONTRACT_UPDATE,
+        Permission.CONTRACT_UPLOAD,
+        Permission.ANALYSIS_REQUEST,
+        Permission.ANALYSIS_READ,
+        Permission.FINDING_READ,
+        Permission.FINDING_UPDATE,
+        Permission.AUDIT_READ,
+        Permission.USER_READ,
+        Permission.USER_MANAGE,
+        Permission.CONTRACT_APPROVE,
+    },
+
+    # Legal review and contract lifecycle.
     "LEGAL_REVIEWER": {
         Permission.CONTRACT_READ,
         Permission.CONTRACT_UPDATE,
@@ -49,17 +67,17 @@ ROLE_PERMISSIONS: dict[str, set[Permission]] = {
         Permission.CONTRACT_APPROVE,
     },
 
-    "ANALYST": {
+    # Compliance-focused access.
+    "COMPLIANCE_OFFICER": {
         Permission.CONTRACT_READ,
-        Permission.CONTRACT_CREATE,
-        Permission.CONTRACT_UPLOAD,
-        Permission.ANALYSIS_REQUEST,
         Permission.ANALYSIS_READ,
         Permission.FINDING_READ,
         Permission.FINDING_UPDATE,
+        Permission.AUDIT_READ,
     },
 
-    "VIEWER": {
+    # Standard employee read access.
+    "EMPLOYEE": {
         Permission.CONTRACT_READ,
         Permission.ANALYSIS_READ,
         Permission.FINDING_READ,

@@ -7,9 +7,34 @@ import {
 } from "lucide-react";
 
 import MetricCard from "../../components/ui/MetricCard";
+import { useAuth } from "../../context/AuthContext";
 import { useDashboard } from "../../features/dashboard/useDashboard";
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 18) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+}
+
+function getFirstName(fullName?: string): string {
+  if (!fullName?.trim()) {
+    return "there";
+  }
+
+  return fullName.trim().split(/\s+/)[0];
+}
+
 function DashboardPage() {
+  const { user } = useAuth();
+
   const {
     data,
     isLoading,
@@ -25,6 +50,7 @@ function DashboardPage() {
             size={18}
             className="animate-spin text-indigo-400"
           />
+
           Loading contract intelligence...
         </div>
       </div>
@@ -62,6 +88,8 @@ function DashboardPage() {
     return null;
   }
 
+  const firstName = getFirstName(user?.full_name);
+
   return (
     <div className="relative overflow-hidden">
       <div className="pointer-events-none absolute right-0 top-0 h-[360px] w-[520px] rounded-full bg-indigo-600/[0.06] blur-3xl" />
@@ -74,7 +102,7 @@ function DashboardPage() {
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Good morning, Rishabh 👋
+            {getGreeting()}, {firstName} 👋
           </h1>
 
           <p className="mt-1.5 text-sm text-slate-500">
@@ -87,28 +115,24 @@ function DashboardPage() {
           <MetricCard
             label="Total Contracts"
             value={data.total_contracts}
-            change={12}
-            description="vs last 7 days"
+            description="contracts in workspace"
           />
 
           <MetricCard
             label="High Risk Contracts"
             value={data.high_risk_contracts}
-            change={-3}
             description="requires attention"
           />
 
           <MetricCard
             label="Critical Findings"
             value={data.critical_findings}
-            change={-1}
             description="open critical issues"
           />
 
           <MetricCard
             label="Pending Analysis"
             value={data.pending_analysis}
-            change={-40}
             description="currently processing"
           />
         </div>
@@ -145,10 +169,26 @@ function DashboardPage() {
 
             <div className="mt-6 space-y-4">
               {[
-                ["Low", data.risk_distribution.low, "bg-emerald-400"],
-                ["Medium", data.risk_distribution.medium, "bg-amber-400"],
-                ["High", data.risk_distribution.high, "bg-orange-400"],
-                ["Critical", data.risk_distribution.critical, "bg-rose-500"],
+                [
+                  "Low",
+                  data.risk_distribution.low,
+                  "bg-emerald-400",
+                ],
+                [
+                  "Medium",
+                  data.risk_distribution.medium,
+                  "bg-amber-400",
+                ],
+                [
+                  "High",
+                  data.risk_distribution.high,
+                  "bg-orange-400",
+                ],
+                [
+                  "Critical",
+                  data.risk_distribution.critical,
+                  "bg-rose-500",
+                ],
               ].map(([label, value, color]) => (
                 <div
                   key={label as string}
@@ -219,52 +259,63 @@ function DashboardPage() {
               </thead>
 
               <tbody>
-                {data.recent_contracts.map((contract) => (
-                  <tr
-                    key={contract.id}
-                    className="border-b border-[#102744] last:border-0 hover:bg-white/[0.015]"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
-                          <FileText size={15} />
+                {data.recent_contracts.length > 0 ? (
+                  data.recent_contracts.map((contract) => (
+                    <tr
+                      key={contract.id}
+                      className="border-b border-[#102744] last:border-0 hover:bg-white/[0.015]"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+                            <FileText size={15} />
+                          </div>
+
+                          <span className="text-xs font-medium text-slate-300">
+                            {contract.title}
+                          </span>
                         </div>
+                      </td>
 
-                        <span className="text-xs font-medium text-slate-300">
-                          {contract.title}
+                      <td className="px-5 py-4 text-xs text-slate-500">
+                        {contract.contract_type}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        {contract.risk_score !== null ? (
+                          <span className="text-xs font-semibold text-slate-300">
+                            {contract.risk_score}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-600">
+                            —
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <span className="rounded-full border border-[#24446C] px-2.5 py-1 text-[10px] text-slate-400">
+                          {contract.risk_level ?? contract.status}
                         </span>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-4 text-xs text-slate-500">
-                      {contract.contract_type}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      {contract.risk_score !== null ? (
-                        <span className="text-xs font-semibold text-slate-300">
-                          {contract.risk_score}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-600">
-                          —
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span className="rounded-full border border-[#24446C] px-2.5 py-1 text-[10px] text-slate-400">
-                        {contract.risk_level ?? contract.status}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-xs text-slate-600">
-                      {new Date(
-                        contract.updated_at,
-                      ).toLocaleDateString()}
+                      <td className="px-5 py-4 text-xs text-slate-600">
+                        {new Date(
+                          contract.updated_at,
+                        ).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-5 py-10 text-center text-xs text-slate-600"
+                    >
+                      No contracts available yet.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -281,11 +332,6 @@ function DashboardPage() {
             AI-powered contract review is active for this workspace.
           </span>
         </div>
-
-        {/* TEMPORARY: API verification — verify hone ke baad delete kar dena */}
-        <pre className="mt-6 overflow-auto rounded-xl border border-white/10 bg-black/20 p-4 text-xs text-slate-400">
-          {JSON.stringify(data, null, 2)}
-        </pre>
       </div>
     </div>
   );

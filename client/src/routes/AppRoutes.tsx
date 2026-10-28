@@ -15,6 +15,8 @@ import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 
 import DashboardPage from "../pages/Dashboard/DashboardPage";
+import ContractsPage from "../pages/Contracts/ContractsPage";
+import UploadPage from "../pages/Upload/UploadPage";
 
 function AppRoutes() {
   return (
@@ -50,20 +52,12 @@ function AppRoutes() {
 
           <Route
             path="/contracts"
-            element={
-              <div className="p-8 text-slate-300">
-                Contracts
-              </div>
-            }
+            element={<ContractsPage />}
           />
 
           <Route
             path="/upload"
-            element={
-              <div className="p-8 text-slate-300">
-                Upload &amp; Process
-              </div>
-            }
+            element={<UploadPage />}
           />
 
           <Route

@@ -9,6 +9,10 @@ import {
   useState,
 } from "react";
 
+import {
+  useNavigate,
+} from "react-router-dom";
+
 import ContractStatusBadge from "../../components/contracts/ContractStatusBadge";
 import RiskBadge from "../../components/contracts/RiskBadge";
 
@@ -17,6 +21,8 @@ import {
 } from "../../features/contracts/useContracts";
 
 function ContractsPage() {
+  const navigate = useNavigate();
+
   const [search, setSearch] =
     useState("");
 
@@ -57,6 +63,9 @@ function ContractsPage() {
 
           <button
             type="button"
+            onClick={() =>
+              navigate("/upload")
+            }
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 text-xs font-semibold text-indigo-300 transition hover:border-indigo-400/50 hover:bg-indigo-500/15 hover:text-indigo-200"
           >
             <FilePlus2 size={16} />
@@ -163,7 +172,12 @@ function ContractsPage() {
                     {data?.items.map((contract) => (
                       <tr
                         key={contract.id}
-                        className="border-b border-[#102744] last:border-0 transition hover:bg-white/[0.015]"
+                        onClick={() =>
+                          navigate(
+                            `/contracts/${contract.id}`,
+                          )
+                        }
+                        className="cursor-pointer border-b border-[#102744] last:border-0 transition hover:bg-white/[0.015]"
                       >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">

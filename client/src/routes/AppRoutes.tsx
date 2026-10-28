@@ -16,6 +16,7 @@ import RegisterPage from "../pages/Auth/RegisterPage";
 
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ContractsPage from "../pages/Contracts/ContractsPage";
+import ContractDetailPage from "../pages/Contracts/ContractDetailPage";
 import UploadPage from "../pages/Upload/UploadPage";
 
 function AppRoutes() {
@@ -53,6 +54,11 @@ function AppRoutes() {
           <Route
             path="/contracts"
             element={<ContractsPage />}
+          />
+
+          <Route
+            path="/contracts/:contractId"
+            element={<ContractDetailPage />}
           />
 
           <Route

@@ -1,5 +1,7 @@
 import type {
+  ContractDetail,
   ContractListResponse,
+  ContractVersionListResponse,
 } from "../../types/contracts";
 
 import { apiRequest } from "./api";
@@ -64,5 +66,21 @@ export async function getContracts(
 
   return apiRequest<ContractListResponse>(
     `/contracts${query ? `?${query}` : ""}`,
+  );
+}
+
+export async function getContract(
+  contractId: string,
+): Promise<ContractDetail> {
+  return apiRequest<ContractDetail>(
+    `/contracts/${encodeURIComponent(contractId)}`,
+  );
+}
+
+export async function getContractVersions(
+  contractId: string,
+): Promise<ContractVersionListResponse> {
+  return apiRequest<ContractVersionListResponse>(
+    `/contracts/${encodeURIComponent(contractId)}/versions`,
   );
 }

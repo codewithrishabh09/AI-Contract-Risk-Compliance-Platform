@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import MetricCard from "../../components/ui/MetricCard";
+import RiskTrendChart from "../../components/dashboard/RiskTrendChart";
 import { useAuth } from "../../context/AuthContext";
 import { useDashboard } from "../../features/dashboard/useDashboard";
 
@@ -157,8 +158,8 @@ function DashboardPage() {
               />
             </div>
 
-            <div className="mt-8 flex h-48 items-center justify-center rounded-lg border border-dashed border-[#173052] text-xs text-slate-600">
-              Risk trend chart
+            <div className="mt-6">
+              <RiskTrendChart data={data.risk_trend} />
             </div>
           </div>
 

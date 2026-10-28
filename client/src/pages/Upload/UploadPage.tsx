@@ -12,6 +12,10 @@ import {
 } from "react";
 
 import {
+  useSearchParams,
+} from "react-router-dom";
+
+import {
   useContracts,
 } from "../../features/contracts/useContracts";
 
@@ -36,8 +40,14 @@ function formatFileSize(bytes: number) {
 }
 
 function UploadPage() {
+  const [searchParams] =
+    useSearchParams();
+
+  const contractIdFromUrl =
+    searchParams.get("contractId");
+
   const [contractId, setContractId] =
-    useState("");
+    useState(contractIdFromUrl ?? "");
 
   const [file, setFile] =
     useState<File | null>(null);

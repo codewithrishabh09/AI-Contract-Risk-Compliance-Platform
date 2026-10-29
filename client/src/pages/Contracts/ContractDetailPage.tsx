@@ -11,6 +11,7 @@ import {
   LoaderCircle,
   RefreshCw,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 
@@ -28,6 +29,8 @@ import {
   useLatestContractAnalysis,
   useStartContractAnalysis,
 } from "../../features/contracts/useContractAnalysis";
+
+import RiskFindingCard from "../../components/findings/RiskFindingCard";
 
 function formatDate(
   value: string,
@@ -544,6 +547,125 @@ function ContractDetailPage() {
             </div>
           </section>
         )}
+
+        {/* Risk findings */}
+        <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
+          <div className="flex flex-col gap-4 border-b border-[#173052] px-5 py-5 sm:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
+                  AI Risk Intelligence
+                </div>
+
+                <h2 className="mt-1 text-sm font-semibold text-white">
+                  Risk Findings
+                </h2>
+
+                <p className="mt-1 text-xs text-slate-600">
+                  Identified contract risks from the latest available analysis.
+                </p>
+              </div>
+
+              {analysisQuery.data ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-rose-500/20 bg-rose-500/5 px-3 py-1.5 text-[10px] font-semibold text-rose-300">
+                    {analysisQuery.data.findings.filter(
+                      (finding) =>
+                        finding.severity === "CRITICAL",
+                    ).length}{" "}
+                    Critical
+                  </span>
+
+                  <span className="rounded-full border border-orange-500/20 bg-orange-500/5 px-3 py-1.5 text-[10px] font-semibold text-orange-300">
+                    {analysisQuery.data.findings.filter(
+                      (finding) =>
+                        finding.severity === "HIGH",
+                    ).length}{" "}
+                    High
+                  </span>
+
+                  <span className="rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 text-[10px] font-semibold text-amber-300">
+                    {analysisQuery.data.findings.filter(
+                      (finding) =>
+                        finding.severity === "MEDIUM",
+                    ).length}{" "}
+                    Medium
+                  </span>
+
+                  <span className="rounded-full border border-indigo-500/20 bg-indigo-500/5 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
+                    {analysisQuery.data.findings.length}{" "}
+                    Total
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {analysisQuery.isLoading ? (
+            <div className="flex min-h-[220px] items-center justify-center">
+              <div className="flex items-center gap-3 text-sm text-slate-500">
+                <LoaderCircle
+                  size={18}
+                  className="animate-spin text-indigo-400"
+                />
+
+                Loading risk findings...
+              </div>
+            </div>
+          ) : analysisQuery.isError ? (
+            <div className="p-6">
+              <div className="flex items-start gap-3 rounded-lg border border-[#173052] bg-[#0B1930]/60 p-5">
+                <ShieldCheck
+                  size={18}
+                  className="mt-0.5 shrink-0 text-slate-600"
+                />
+
+                <div>
+                  <p className="text-sm font-medium text-slate-400">
+                    No completed analysis available
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    Run AI analysis on this contract version to generate
+                    risk findings.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : !analysisQuery.data ||
+            analysisQuery.data.findings.length === 0 ? (
+            <div className="flex min-h-[220px] items-center justify-center px-6 text-center">
+              <div>
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[#173052] bg-[#0B1930]">
+                  <CheckCircle2
+                    size={18}
+                    className="text-emerald-400"
+                  />
+                </div>
+
+                <h3 className="mt-4 text-sm font-semibold text-slate-300">
+                  No risk findings
+                </h3>
+
+                <p className="mt-1 max-w-md text-xs leading-5 text-slate-600">
+                  No risk findings are currently available for the latest
+                  contract version.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 p-5 sm:p-6">
+              {analysisQuery.data.findings.map(
+                (finding) => (
+                  <RiskFindingCard
+                    key={finding.id}
+                    finding={finding}
+                  />
+                ),
+              )}
+            </div>
+          )}
+        </section>
 
         {/* Version history */}
         <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">

@@ -1,4 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
+
 import {
+  AlertCircle,
   ArrowLeft,
   CalendarDays,
   CheckCircle2,
@@ -8,6 +11,7 @@ import {
   LoaderCircle,
   RefreshCw,
   ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -18,6 +22,12 @@ import {
 import {
   useContractDetail,
 } from "../../features/contracts/useContractDetail";
+
+import {
+  useAnalysisJob,
+  useLatestContractAnalysis,
+  useStartContractAnalysis,
+} from "../../features/contracts/useContractAnalysis";
 
 function formatDate(
   value: string,
@@ -82,6 +92,75 @@ function ContractDetailPage() {
     contractQuery,
     versionsQuery,
   } = useContractDetail(contractId);
+
+  // NOTE: All hooks must run before any early return (Rules of Hooks),
+  // so versions/currentVersion and analysis state live up here.
+  const versions = useMemo(
+    () =>
+      [...(versionsQuery.data?.items ?? [])].sort(
+        (a, b) =>
+          b.version_number -
+          a.version_number,
+      ),
+    [versionsQuery.data?.items],
+  );
+
+  const currentVersion =
+    versions[0] ?? null;
+
+  const [analysisJobId, setAnalysisJobId] =
+    useState<string | null>(null);
+
+  const startAnalysisMutation =
+    useStartContractAnalysis();
+
+  const analysisJobQuery =
+    useAnalysisJob(analysisJobId);
+
+  const analysisQuery =
+    useLatestContractAnalysis(
+      contractId ?? "",
+      currentVersion?.id ?? null,
+    );
+
+  // Derive "analyzing" from job status instead of resetting state in an effect
+  const jobStatus = analysisJobQuery.data?.status;
+
+  const isJobFinished =
+    jobStatus === "SUCCEEDED" ||
+    jobStatus === "FAILED" ||
+    jobStatus === "CANCELLED";
+
+  const isAnalyzing =
+    Boolean(analysisJobId) && !isJobFinished;
+
+  const handleAnalyzeContract = async () => {
+    const id = contractQuery.data?.id;
+
+    if (!id || !currentVersion?.id) {
+      return;
+    }
+
+    try {
+      const result =
+        await startAnalysisMutation.mutateAsync({
+          contractId: id,
+          versionId: currentVersion.id,
+        });
+
+      setAnalysisJobId(result.job_id);
+    } catch {
+      // Error is exposed through startAnalysisMutation.error
+    }
+  };
+
+  // Refresh analysis once the job succeeds (syncs with server, no setState)
+  useEffect(() => {
+    if (jobStatus === "SUCCEEDED") {
+      analysisQuery.refetch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobStatus]);
 
   if (
     contractQuery.isLoading ||
@@ -156,17 +235,6 @@ function ContractDetailPage() {
   const contract =
     contractQuery.data;
 
-  const versions =
-    [...(versionsQuery.data?.items ?? [])]
-      .sort(
-        (a, b) =>
-          b.version_number -
-          a.version_number,
-      );
-
-  const currentVersion =
-    versions[0] ?? null;
-
   return (
     <div className="relative min-h-full overflow-hidden">
       <div className="pointer-events-none absolute right-0 top-0 h-[420px] w-[620px] rounded-full bg-indigo-600/[0.05] blur-3xl" />
@@ -186,19 +254,45 @@ function ContractDetailPage() {
             Back to Contracts
           </button>
 
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                `/upload?contractId=${contract.id}`,
-              )
-            }
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 text-xs font-semibold text-indigo-300 transition hover:border-indigo-400/50 hover:bg-indigo-500/15 hover:text-indigo-200"
-          >
-            <FilePlus2 size={16} />
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleAnalyzeContract}
+              disabled={
+                !currentVersion ||
+                startAnalysisMutation.isPending ||
+                isAnalyzing
+              }
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-4 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {startAnalysisMutation.isPending ||
+              isAnalyzing ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
 
-            Upload New Version
-          </button>
+              {isAnalyzing
+                ? "Analyzing..."
+                : startAnalysisMutation.isPending
+                  ? "Starting..."
+                  : "Analyze Contract"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate(
+                  `/upload?contractId=${contract.id}`,
+                )
+              }
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 text-xs font-semibold text-indigo-300 transition hover:border-indigo-400/50 hover:bg-indigo-500/15 hover:text-indigo-200"
+            >
+              <FilePlus2 size={16} />
+
+              Upload New Version
+            </button>
+          </div>
         </div>
 
         {/* Contract header */}
@@ -312,6 +406,144 @@ function ContractDetailPage() {
             </p>
           </section>
         ) : null}
+
+        {/* Analysis errors */}
+        {startAnalysisMutation.isError && (
+          <section className="mt-5 rounded-2xl border border-red-400/20 bg-red-500/5 p-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-red-500/10 p-3">
+                <AlertCircle className="h-5 w-5 text-red-300" />
+              </div>
+
+              <div>
+                <h2 className="text-sm font-semibold text-red-200">
+                  Analysis could not be started
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  Please try again. If the problem continues, check the processing
+                  service and backend logs.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {analysisJobQuery.data?.status === "FAILED" && (
+          <section className="mt-5 rounded-2xl border border-red-400/20 bg-red-500/5 p-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-red-500/10 p-3">
+                <AlertCircle className="h-5 w-5 text-red-300" />
+              </div>
+
+              <div>
+                <h2 className="text-sm font-semibold text-red-200">
+                  Contract analysis failed
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  {analysisJobQuery.data.error_message ??
+                    "The AI analysis job failed. Please try again."}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Analysis in progress */}
+        {isAnalyzing && (
+          <section className="mt-5 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-violet-500/10 p-3">
+                <LoaderCircle className="h-5 w-5 animate-spin text-violet-300" />
+              </div>
+
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  AI analysis in progress
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  LexMind is analyzing the latest contract version for risks,
+                  compliance issues, and important clauses.
+                </p>
+
+                <div className="mt-4 flex items-center gap-2 text-xs text-violet-300">
+                  <span className="rounded-full bg-violet-500/10 px-2.5 py-1">
+                    {analysisJobQuery.data?.status ?? "QUEUED"}
+                  </span>
+
+                  <span className="text-slate-500">
+                    This page will update automatically.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* AI analysis result */}
+        {analysisQuery.data && (
+          <section className="mt-5 rounded-2xl border border-white/10 bg-slate-950/50 p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-violet-300" />
+
+                  <h2 className="text-lg font-semibold text-white">
+                    AI Risk Analysis
+                  </h2>
+                </div>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  Automated analysis of the latest contract version.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-center">
+                  <p className="text-xs uppercase tracking-wider text-slate-500">
+                    Risk Score
+                  </p>
+
+                  <p className="mt-1 text-2xl font-bold text-white">
+                    {analysisQuery.data.overall_risk_score ?? "—"}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-center">
+                  <p className="text-xs uppercase tracking-wider text-slate-500">
+                    Risk Level
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-violet-200">
+                    {analysisQuery.data.risk_level}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {analysisQuery.data.summary && (
+              <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  AI Summary
+                </p>
+
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  {analysisQuery.data.summary}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center gap-2 text-xs text-slate-500">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+
+              <span>
+                Analysis status: {analysisQuery.data.status}
+              </span>
+            </div>
+          </section>
+        )}
 
         {/* Version history */}
         <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">

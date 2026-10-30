@@ -1,8 +1,4 @@
-export type RiskLevel =
-  | "LOW"
-  | "MEDIUM"
-  | "HIGH"
-  | "CRITICAL";
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export type AnalysisStatus =
   | "COMPLETED"
@@ -34,4 +30,22 @@ export interface AnalysisResult {
   model_name: string | null;
   prompt_version: string | null;
   findings: RiskFinding[];
+}
+
+export interface RiskFindingListResponse {
+  items: RiskFinding[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface RiskFindingFilters {
+  severity?: string;
+  category?: string;
+  status?: string;
+  page?: number;
+  page_size?: number;
 }

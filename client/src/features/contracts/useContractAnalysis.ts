@@ -7,6 +7,7 @@ import {
 import {
   getAnalysisJobStatus,
   getLatestContractAnalysis,
+  getRiskFindings,
   startContractAnalysis,
 } from "../../lib/api/analysisApi";
 
@@ -26,13 +27,18 @@ export function useStartContractAnalysis() {
         versionId,
       ),
 
-    onSuccess: (
-      _data,
-      variables,
-    ) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "contract-analysis",
+          variables.contractId,
+          variables.versionId,
+        ],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "risk-findings",
           variables.contractId,
           variables.versionId,
         ],
@@ -45,21 +51,15 @@ export function useAnalysisJob(
   jobId: string | null,
 ) {
   return useQuery({
-    queryKey: [
-      "analysis-job",
-      jobId,
-    ],
+    queryKey: ["analysis-job", jobId],
 
     queryFn: () =>
       getAnalysisJobStatus(jobId!),
 
     enabled: Boolean(jobId),
 
-    refetchInterval: (
-      query,
-    ) => {
-      const status =
-        query.state.data?.status;
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
 
       if (
         status === "SUCCEEDED" ||
@@ -89,6 +89,38 @@ export function useLatestContractAnalysis(
       getLatestContractAnalysis(
         contractId,
         versionId!,
+      ),
+
+    enabled:
+      Boolean(contractId) &&
+      Boolean(versionId),
+  });
+}
+
+export function useRiskFindings(
+  contractId: string,
+  versionId: string | null,
+  filters: {
+    severity?: string;
+    category?: string;
+    status?: string;
+    page?: number;
+    page_size?: number;
+  } = {},
+) {
+  return useQuery({
+    queryKey: [
+      "risk-findings",
+      contractId,
+      versionId,
+      filters,
+    ],
+
+    queryFn: () =>
+      getRiskFindings(
+        contractId,
+        versionId!,
+        filters,
       ),
 
     enabled:

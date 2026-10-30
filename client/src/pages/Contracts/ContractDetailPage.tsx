@@ -5,14 +5,18 @@ import {
   ArrowLeft,
   CalendarDays,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   FilePlus2,
   FileText,
+  Filter,
   LoaderCircle,
   RefreshCw,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  X,
 } from "lucide-react";
 
 import {
@@ -27,6 +31,7 @@ import {
 import {
   useAnalysisJob,
   useLatestContractAnalysis,
+  useRiskFindings,
   useStartContractAnalysis,
 } from "../../features/contracts/useContractAnalysis";
 
@@ -96,8 +101,7 @@ function ContractDetailPage() {
     versionsQuery,
   } = useContractDetail(contractId);
 
-  // NOTE: All hooks must run before any early return (Rules of Hooks),
-  // so versions/currentVersion and analysis state live up here.
+  // NOTE: All hooks must run before any early return.
   const versions = useMemo(
     () =>
       [...(versionsQuery.data?.items ?? [])].sort(
@@ -114,6 +118,20 @@ function ContractDetailPage() {
   const [analysisJobId, setAnalysisJobId] =
     useState<string | null>(null);
 
+  const [findingSeverity, setFindingSeverity] =
+    useState("");
+
+  const [findingCategory, setFindingCategory] =
+    useState("");
+
+  const [findingStatus, setFindingStatus] =
+    useState("");
+
+  const [findingPage, setFindingPage] =
+    useState(1);
+
+  const findingPageSize = 5;
+
   const startAnalysisMutation =
     useStartContractAnalysis();
 
@@ -126,8 +144,24 @@ function ContractDetailPage() {
       currentVersion?.id ?? null,
     );
 
-  // Derive "analyzing" from job status instead of resetting state in an effect
-  const jobStatus = analysisJobQuery.data?.status;
+  const riskFindingsQuery =
+    useRiskFindings(
+      contractId ?? "",
+      currentVersion?.id ?? null,
+      {
+        severity:
+          findingSeverity || undefined,
+        category:
+          findingCategory || undefined,
+        status:
+          findingStatus || undefined,
+        page: findingPage,
+        page_size: findingPageSize,
+      },
+    );
+
+  const jobStatus =
+    analysisJobQuery.data?.status;
 
   const isJobFinished =
     jobStatus === "SUCCEEDED" ||
@@ -135,7 +169,59 @@ function ContractDetailPage() {
     jobStatus === "CANCELLED";
 
   const isAnalyzing =
-    Boolean(analysisJobId) && !isJobFinished;
+    Boolean(analysisJobId) &&
+    !isJobFinished;
+
+  const findingCategories = useMemo(() => {
+    const values =
+      analysisQuery.data?.findings
+        .map((finding) => finding.category)
+        .filter(Boolean) ?? [];
+
+    return [...new Set(values)].sort();
+  }, [analysisQuery.data?.findings]);
+
+  const findingStatuses = useMemo(() => {
+    const values =
+      analysisQuery.data?.findings
+        .map((finding) => finding.status)
+        .filter(Boolean) ?? [];
+
+    return [...new Set(values)].sort();
+  }, [analysisQuery.data?.findings]);
+
+  const hasFindingFilters =
+    Boolean(findingSeverity) ||
+    Boolean(findingCategory) ||
+    Boolean(findingStatus);
+
+  const clearFindingFilters = () => {
+    setFindingSeverity("");
+    setFindingCategory("");
+    setFindingStatus("");
+    setFindingPage(1);
+  };
+
+  const handleSeverityChange = (
+    value: string,
+  ) => {
+    setFindingSeverity(value);
+    setFindingPage(1);
+  };
+
+  const handleCategoryChange = (
+    value: string,
+  ) => {
+    setFindingCategory(value);
+    setFindingPage(1);
+  };
+
+  const handleFindingStatusChange = (
+    value: string,
+  ) => {
+    setFindingStatus(value);
+    setFindingPage(1);
+  };
 
   const handleAnalyzeContract = async () => {
     const id = contractQuery.data?.id;
@@ -152,16 +238,19 @@ function ContractDetailPage() {
         });
 
       setAnalysisJobId(result.job_id);
+      setFindingPage(1);
     } catch {
-      // Error is exposed through startAnalysisMutation.error
+      // Error is exposed through startAnalysisMutation.error.
     }
   };
 
-  // Refresh analysis once the job succeeds (syncs with server, no setState)
+  // Refresh analysis and findings once the analysis job succeeds.
   useEffect(() => {
     if (jobStatus === "SUCCEEDED") {
       analysisQuery.refetch();
+      riskFindingsQuery.refetch();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobStatus]);
 
@@ -550,58 +639,189 @@ function ContractDetailPage() {
 
         {/* Risk findings */}
         <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
-          <div className="flex flex-col gap-4 border-b border-[#173052] px-5 py-5 sm:px-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
-                  AI Risk Intelligence
+          <div className="border-b border-[#173052] px-5 py-5 sm:px-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
+                    AI Risk Intelligence
+                  </div>
+
+                  <h2 className="mt-1 text-sm font-semibold text-white">
+                    Risk Findings
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-600">
+                    Identified contract risks from the latest available analysis.
+                  </p>
                 </div>
 
-                <h2 className="mt-1 text-sm font-semibold text-white">
-                  Risk Findings
-                </h2>
+                {analysisQuery.data ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-rose-500/20 bg-rose-500/5 px-3 py-1.5 text-[10px] font-semibold text-rose-300">
+                      {
+                        analysisQuery.data.findings.filter(
+                          (finding) =>
+                            finding.severity === "CRITICAL",
+                        ).length
+                      }{" "}
+                      Critical
+                    </span>
 
-                <p className="mt-1 text-xs text-slate-600">
-                  Identified contract risks from the latest available analysis.
-                </p>
+                    <span className="rounded-full border border-orange-500/20 bg-orange-500/5 px-3 py-1.5 text-[10px] font-semibold text-orange-300">
+                      {
+                        analysisQuery.data.findings.filter(
+                          (finding) =>
+                            finding.severity === "HIGH",
+                        ).length
+                      }{" "}
+                      High
+                    </span>
+
+                    <span className="rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 text-[10px] font-semibold text-amber-300">
+                      {
+                        analysisQuery.data.findings.filter(
+                          (finding) =>
+                            finding.severity === "MEDIUM",
+                        ).length
+                      }{" "}
+                      Medium
+                    </span>
+
+                    <span className="rounded-full border border-indigo-500/20 bg-indigo-500/5 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
+                      {riskFindingsQuery.data?.total ??
+                        analysisQuery.data.findings.length}{" "}
+                      Total
+                    </span>
+                  </div>
+                ) : null}
               </div>
 
+              {/* Filters */}
               {analysisQuery.data ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-rose-500/20 bg-rose-500/5 px-3 py-1.5 text-[10px] font-semibold text-rose-300">
-                    {analysisQuery.data.findings.filter(
-                      (finding) =>
-                        finding.severity === "CRITICAL",
-                    ).length}{" "}
-                    Critical
-                  </span>
+                <div className="rounded-xl border border-[#173052] bg-[#0B1930]/60 p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+                      <Filter size={14} className="text-indigo-400" />
 
-                  <span className="rounded-full border border-orange-500/20 bg-orange-500/5 px-3 py-1.5 text-[10px] font-semibold text-orange-300">
-                    {analysisQuery.data.findings.filter(
-                      (finding) =>
-                        finding.severity === "HIGH",
-                    ).length}{" "}
-                    High
-                  </span>
+                      Filter findings
+                    </div>
 
-                  <span className="rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 text-[10px] font-semibold text-amber-300">
-                    {analysisQuery.data.findings.filter(
-                      (finding) =>
-                        finding.severity === "MEDIUM",
-                    ).length}{" "}
-                    Medium
-                  </span>
+                    {hasFindingFilters ? (
+                      <button
+                        type="button"
+                        onClick={clearFindingFilters}
+                        className="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-500 transition hover:text-slate-300"
+                      >
+                        <X size={12} />
 
-                  <span className="rounded-full border border-indigo-500/20 bg-indigo-500/5 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
-                    {analysisQuery.data.findings.length}{" "}
-                    Total
-                  </span>
+                        Clear filters
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <label className="block">
+                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                        Severity
+                      </span>
+
+                      <select
+                        value={findingSeverity}
+                        onChange={(event) =>
+                          handleSeverityChange(
+                            event.target.value,
+                          )
+                        }
+                        className="h-9 w-full rounded-lg border border-[#173052] bg-[#071426] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                      >
+                        <option value="">
+                          All severities
+                        </option>
+                        <option value="CRITICAL">
+                          Critical
+                        </option>
+                        <option value="HIGH">
+                          High
+                        </option>
+                        <option value="MEDIUM">
+                          Medium
+                        </option>
+                        <option value="LOW">
+                          Low
+                        </option>
+                      </select>
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                        Category
+                      </span>
+
+                      <select
+                        value={findingCategory}
+                        onChange={(event) =>
+                          handleCategoryChange(
+                            event.target.value,
+                          )
+                        }
+                        className="h-9 w-full rounded-lg border border-[#173052] bg-[#071426] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                      >
+                        <option value="">
+                          All categories
+                        </option>
+
+                        {findingCategories.map(
+                          (category) => (
+                            <option
+                              key={category}
+                              value={category}
+                            >
+                              {formatStatus(category)}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                        Status
+                      </span>
+
+                      <select
+                        value={findingStatus}
+                        onChange={(event) =>
+                          handleFindingStatusChange(
+                            event.target.value,
+                          )
+                        }
+                        className="h-9 w-full rounded-lg border border-[#173052] bg-[#071426] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                      >
+                        <option value="">
+                          All statuses
+                        </option>
+
+                        {findingStatuses.map(
+                          (status) => (
+                            <option
+                              key={status}
+                              value={status}
+                            >
+                              {formatStatus(status)}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </label>
+                  </div>
                 </div>
               ) : null}
             </div>
           </div>
 
-          {analysisQuery.isLoading ? (
+          {analysisQuery.isLoading ||
+          riskFindingsQuery.isLoading ? (
             <div className="flex min-h-[220px] items-center justify-center">
               <div className="flex items-center gap-3 text-sm text-slate-500">
                 <LoaderCircle
@@ -632,8 +852,42 @@ function ContractDetailPage() {
                 </div>
               </div>
             </div>
-          ) : !analysisQuery.data ||
-            analysisQuery.data.findings.length === 0 ? (
+          ) : riskFindingsQuery.isError ? (
+            <div className="p-6">
+              <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-5">
+                <div className="flex items-start gap-3">
+                  <AlertCircle
+                    size={18}
+                    className="mt-0.5 text-rose-300"
+                  />
+
+                  <div>
+                    <p className="text-sm font-medium text-rose-200">
+                      Unable to load risk findings
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      The findings service could not return the requested
+                      results.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        riskFindingsQuery.refetch()
+                      }
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+                    >
+                      <RefreshCw size={13} />
+
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : !riskFindingsQuery.data ||
+            riskFindingsQuery.data.items.length === 0 ? (
             <div className="flex min-h-[220px] items-center justify-center px-6 text-center">
               <div>
                 <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[#173052] bg-[#0B1930]">
@@ -644,26 +898,118 @@ function ContractDetailPage() {
                 </div>
 
                 <h3 className="mt-4 text-sm font-semibold text-slate-300">
-                  No risk findings
+                  {hasFindingFilters
+                    ? "No matching findings"
+                    : "No risk findings"}
                 </h3>
 
                 <p className="mt-1 max-w-md text-xs leading-5 text-slate-600">
-                  No risk findings are currently available for the latest
-                  contract version.
+                  {hasFindingFilters
+                    ? "No findings match the selected filters. Try changing or clearing the filters."
+                    : "No risk findings are currently available for the latest contract version."}
                 </p>
+
+                {hasFindingFilters ? (
+                  <button
+                    type="button"
+                    onClick={clearFindingFilters}
+                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+                  >
+                    <X size={13} />
+
+                    Clear filters
+                  </button>
+                ) : null}
               </div>
             </div>
           ) : (
-            <div className="space-y-4 p-5 sm:p-6">
-              {analysisQuery.data.findings.map(
-                (finding) => (
-                  <RiskFindingCard
-                    key={finding.id}
-                    finding={finding}
-                  />
-                ),
-              )}
-            </div>
+            <>
+              <div className="space-y-4 p-5 sm:p-6">
+                {riskFindingsQuery.data.items.map(
+                  (finding) => (
+                    <RiskFindingCard
+                      key={finding.id}
+                      finding={finding}
+                    />
+                  ),
+                )}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex flex-col gap-3 border-t border-[#173052] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="text-[11px] text-slate-600">
+                  Showing{" "}
+                  <span className="font-medium text-slate-400">
+                    {Math.min(
+                      (riskFindingsQuery.data.page - 1) *
+                        riskFindingsQuery.data.page_size +
+                        1,
+                      riskFindingsQuery.data.total,
+                    )}
+                  </span>
+                  {" "}–{" "}
+                  <span className="font-medium text-slate-400">
+                    {Math.min(
+                      riskFindingsQuery.data.page *
+                        riskFindingsQuery.data.page_size,
+                      riskFindingsQuery.data.total,
+                    )}
+                  </span>
+                  {" "}of{" "}
+                  <span className="font-medium text-slate-400">
+                    {riskFindingsQuery.data.total}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={
+                      !riskFindingsQuery.data.has_previous
+                    }
+                    onClick={() =>
+                      setFindingPage(
+                        (page) =>
+                          Math.max(page - 1, 1),
+                      )
+                    }
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-[10px] font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <ChevronLeft size={13} />
+
+                    Previous
+                  </button>
+
+                  <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
+                    Page{" "}
+                    {riskFindingsQuery.data.page}
+                    {" "}of{" "}
+                    {Math.max(
+                      riskFindingsQuery.data.total_pages,
+                      1,
+                    )}
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled={
+                      !riskFindingsQuery.data.has_next
+                    }
+                    onClick={() =>
+                      setFindingPage(
+                        (page) =>
+                          page + 1,
+                      )
+                    }
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-[10px] font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    Next
+
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </section>
 

@@ -1,70 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+} from "react";
 
 import {
-  AlertCircle,
-  ArrowLeft,
-  CalendarDays,
-  CheckCircle2,
-  Clock3,
+  ChevronLeft,
+  ChevronRight,
   FilePlus2,
   FileText,
+  Filter,
   LoaderCircle,
   RefreshCw,
+  Search,
   ShieldAlert,
-  ShieldCheck,
-  Sparkles,
+  X,
 } from "lucide-react";
 
 import {
   useNavigate,
-  useParams,
 } from "react-router-dom";
 
 import {
-  useContractDetail,
-} from "../../features/contracts/useContractDetail";
-
-import {
-  useAnalysisJob,
-  useLatestContractAnalysis,
-  useStartContractAnalysis,
-} from "../../features/contracts/useContractAnalysis";
-
-import RiskFindingCard from "../../components/findings/RiskFindingCard";
-
-import RiskTrendCard from "../../components/contracts/RiskTrendCard";
-
-import {
-  useContractRiskTrend,
-} from "../../features/contracts/useVersionAnalysis";
-
-function formatDate(
-  value: string,
-) {
-  return new Date(value).toLocaleDateString(
-    undefined,
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    },
-  );
-}
-
-function formatDateTime(
-  value: string,
-) {
-  return new Date(value).toLocaleString(
-    undefined,
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  );
-}
+  useContracts,
+} from "../../features/contracts/useContracts";
 
 function formatContractType(
   value: string,
@@ -88,764 +46,730 @@ function formatStatus(
     );
 }
 
-function ContractDetailPage() {
+function getStatusClasses(
+  status: string,
+) {
+  switch (status) {
+    case "APPROVED":
+      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+
+    case "ANALYZED":
+      return "border-indigo-500/20 bg-indigo-500/10 text-indigo-300";
+
+    case "UNDER_REVIEW":
+      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+
+    case "PROCESSING":
+      return "border-violet-500/20 bg-violet-500/10 text-violet-300";
+
+    case "REJECTED":
+      return "border-rose-500/20 bg-rose-500/10 text-rose-300";
+
+    case "ARCHIVED":
+      return "border-slate-500/20 bg-slate-500/10 text-slate-400";
+
+    case "UPLOADED":
+      return "border-cyan-500/20 bg-cyan-500/10 text-cyan-300";
+
+    default:
+      return "border-slate-500/20 bg-slate-500/10 text-slate-400";
+  }
+}
+
+function getRiskClasses(
+  riskLevel: string | null,
+) {
+  switch (riskLevel) {
+    case "CRITICAL":
+      return "border-rose-500/20 bg-rose-500/10 text-rose-300";
+
+    case "HIGH":
+      return "border-orange-500/20 bg-orange-500/10 text-orange-300";
+
+    case "MEDIUM":
+      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+
+    case "LOW":
+      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+
+    default:
+      return "border-slate-500/20 bg-slate-500/10 text-slate-500";
+  }
+}
+
+function formatDate(
+  value: string,
+) {
+  return new Date(value).toLocaleDateString(
+    undefined,
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    },
+  );
+}
+
+function ContractsPage() {
   const navigate = useNavigate();
 
-  const {
-    contractId = "",
-  } = useParams<{
-    contractId: string;
-  }>();
+  const [
+    searchInput,
+    setSearchInput,
+  ] = useState("");
 
-  const {
-    contractQuery,
-    versionsQuery,
-  } = useContractDetail(contractId);
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  // NOTE: All hooks must run before any early return (Rules of Hooks),
-  // so versions/currentVersion and analysis state live up here.
-  const versions = useMemo(
-    () =>
-      [...(versionsQuery.data?.items ?? [])].sort(
-        (a, b) =>
-          b.version_number -
-          a.version_number,
-      ),
-    [versionsQuery.data?.items],
-  );
+  const [
+    status,
+    setStatus,
+  ] = useState("");
 
-  const currentVersion =
-    versions[0] ?? null;
+  const [
+    contractType,
+    setContractType,
+  ] = useState("");
 
-  const riskTrendQuery = useContractRiskTrend(
-    contractId,
-    currentVersion?.id ?? null,
-  );
+  const [
+    riskLevel,
+    setRiskLevel,
+  ] = useState("");
 
-  const [analysisJobId, setAnalysisJobId] =
-    useState<string | null>(null);
+  const [
+    page,
+    setPage,
+  ] = useState(1);
 
-  const startAnalysisMutation =
-    useStartContractAnalysis();
+  const pageSize = 10;
 
-  const analysisJobQuery =
-    useAnalysisJob(analysisJobId);
+  const contractsQuery =
+    useContracts({
+      page,
+      page_size: pageSize,
+      search: search || undefined,
+      status: status || undefined,
+      contract_type:
+        contractType || undefined,
+      risk_level:
+        riskLevel || undefined,
+    });
 
-  const analysisQuery =
-    useLatestContractAnalysis(
-      contractId ?? "",
-      currentVersion?.id ?? null,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const contracts =
+    contractsQuery.data?.items ?? [];
+
+  const total =
+    contractsQuery.data?.total ?? 0;
+
+  const totalPages =
+    contractsQuery.data?.total_pages ??
+    0;
+
+  const hasFilters =
+    Boolean(search) ||
+    Boolean(status) ||
+    Boolean(contractType) ||
+    Boolean(riskLevel);
+
+  const contractTypeOptions =
+    useMemo(() => {
+      const values = contracts
+        .map(
+          (contract) =>
+            contract.contract_type,
+        )
+        .filter(Boolean);
+
+      return [
+        ...new Set(values),
+      ].sort();
+    }, [contracts]);
+
+  const clearFilters = () => {
+    setSearchInput("");
+    setSearch("");
+    setStatus("");
+    setContractType("");
+    setRiskLevel("");
+    setPage(1);
+  };
+
+  const handleSearch = () => {
+    setSearch(
+      searchInput.trim(),
     );
+    setPage(1);
+  };
 
-  // Derive "analyzing" from job status instead of resetting state in an effect
-  const jobStatus = analysisJobQuery.data?.status;
+  const handleStatusChange = (
+    value: string,
+  ) => {
+    setStatus(value);
+    setPage(1);
+  };
 
-  const isJobFinished =
-    jobStatus === "SUCCEEDED" ||
-    jobStatus === "FAILED" ||
-    jobStatus === "CANCELLED";
+  const handleContractTypeChange = (
+    value: string,
+  ) => {
+    setContractType(value);
+    setPage(1);
+  };
 
-  const isAnalyzing =
-    Boolean(analysisJobId) && !isJobFinished;
+  const handleRiskLevelChange = (
+    value: string,
+  ) => {
+    setRiskLevel(value);
+    setPage(1);
+  };
 
-  const handleAnalyzeContract = async () => {
-    const id = contractQuery.data?.id;
-
-    if (!id || !currentVersion?.id) {
-      return;
-    }
-
-    try {
-      const result =
-        await startAnalysisMutation.mutateAsync({
-          contractId: id,
-          versionId: currentVersion.id,
-        });
-
-      setAnalysisJobId(result.job_id);
-    } catch {
-      // Error is exposed through startAnalysisMutation.error
+  const handleSearchKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === "Enter") {
+      handleSearch();
     }
   };
 
-  // Refresh analysis + risk trend once the job succeeds (syncs with server, no setState)
-  useEffect(() => {
-    if (jobStatus === "SUCCEEDED") {
-      analysisQuery.refetch();
-      riskTrendQuery.refetch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobStatus]);
-
-  if (
-    contractQuery.isLoading ||
-    versionsQuery.isLoading
-  ) {
-    return (
-      <div className="flex min-h-full items-center justify-center">
-        <div className="flex items-center gap-3 text-sm text-slate-500">
-          <LoaderCircle
-            size={18}
-            className="animate-spin text-indigo-400"
-          />
-
-          Loading contract...
-        </div>
-      </div>
+  const handleOpenContract = (
+    contractId: string,
+  ) => {
+    navigate(
+      `/contracts/${encodeURIComponent(contractId)}`,
     );
-  }
-
-  if (
-    contractQuery.isError ||
-    !contractQuery.data
-  ) {
-    return (
-      <div className="relative min-h-full overflow-hidden">
-        <div className="relative mx-auto max-w-[1200px] px-4 py-6 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/contracts")
-            }
-            className="mb-8 inline-flex items-center gap-2 text-xs font-medium text-slate-500 transition hover:text-slate-300"
-          >
-            <ArrowLeft size={15} />
-
-            Back to Contracts
-          </button>
-
-          <div className="rounded-xl border border-rose-500/20 bg-[#071426]/80 p-8 text-center">
-            <ShieldAlert
-              size={28}
-              className="mx-auto text-rose-400"
-            />
-
-            <h1 className="mt-4 text-sm font-semibold text-rose-300">
-              Unable to load contract
-            </h1>
-
-            <p className="mt-2 text-xs text-slate-600">
-              {contractQuery.error instanceof Error
-                ? contractQuery.error.message
-                : "The requested contract could not be loaded."}
-            </p>
-
-            <button
-              type="button"
-              onClick={() =>
-                contractQuery.refetch()
-              }
-              className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
-            >
-              <RefreshCw size={14} />
-
-              Try again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const contract =
-    contractQuery.data;
+  };
 
   return (
     <div className="relative min-h-full overflow-hidden">
       <div className="pointer-events-none absolute right-0 top-0 h-[420px] w-[620px] rounded-full bg-indigo-600/[0.05] blur-3xl" />
 
       <div className="relative mx-auto max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
-        {/* Top navigation */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/contracts")
-            }
-            className="inline-flex w-fit items-center gap-2 text-xs font-medium text-slate-500 transition hover:text-slate-300"
-          >
-            <ArrowLeft size={15} />
+        {/* Header */}
+        <section className="mb-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-indigo-400">
+                Contract Intelligence
+              </div>
 
-            Back to Contracts
-          </button>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                Contracts
+              </h1>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={handleAnalyzeContract}
-              disabled={
-                !currentVersion ||
-                startAnalysisMutation.isPending ||
-                isAnalyzing
-              }
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-4 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {startAnalysisMutation.isPending ||
-              isAnalyzing ? (
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-
-              {isAnalyzing
-                ? "Analyzing..."
-                : startAnalysisMutation.isPending
-                  ? "Starting..."
-                  : "Analyze Contract"}
-            </button>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Manage contracts, versions,
+                risk analysis, and compliance
+                intelligence from one workspace.
+              </p>
+            </div>
 
             <button
               type="button"
               onClick={() =>
-                navigate(
-                  `/upload?contractId=${contract.id}`,
-                )
+                navigate("/upload")
               }
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 text-xs font-semibold text-indigo-300 transition hover:border-indigo-400/50 hover:bg-indigo-500/15 hover:text-indigo-200"
+              className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 text-xs font-semibold text-indigo-300 transition hover:border-indigo-400/50 hover:bg-indigo-500/15 hover:text-indigo-200"
             >
               <FilePlus2 size={16} />
 
-              Upload New Version
+              Upload Contract
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Contract header */}
-        <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5 sm:p-6">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex min-w-0 items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                <FileText size={21} />
+        {/* Search + filters */}
+        <section className="mb-5 rounded-xl border border-[#173052] bg-[#071426]/80 p-4 sm:p-5">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 md:flex-row">
+              <div className="relative flex-1">
+                <Search
+                  size={15}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600"
+                />
+
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(event) =>
+                    setSearchInput(
+                      event.target.value,
+                    )
+                  }
+                  onKeyDown={
+                    handleSearchKeyDown
+                  }
+                  placeholder="Search contracts..."
+                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] pl-9 pr-3 text-xs text-slate-300 outline-none transition placeholder:text-slate-700 focus:border-indigo-500/50"
+                />
               </div>
 
-              <div className="min-w-0">
-                <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.16em] text-indigo-400">
-                  Contract Workspace
-                </div>
+              <button
+                type="button"
+                onClick={handleSearch}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-5 text-xs font-semibold text-indigo-300 transition hover:bg-indigo-500/15"
+              >
+                <Search size={14} />
 
-                <h1 className="truncate text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  {contract.title}
-                </h1>
-
-                <p className="mt-1 text-xs text-slate-600">
-                  ID: {contract.id}
-                </p>
-              </div>
+                Search
+              </button>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-300">
-                {formatStatus(
-                  contract.status,
-                )}
-              </span>
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+              <Filter
+                size={14}
+                className="text-indigo-400"
+              />
 
-              {contract.risk_level ? (
-                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-amber-300">
-                  Risk:{" "}
-                  {contract.risk_level}
+              Filters
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                  Status
                 </span>
-              ) : null}
-            </div>
-          </div>
-        </section>
 
-        {/* Metadata */}
-        <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-slate-600">
-              <FileText size={13} />
+                <select
+                  value={status}
+                  onChange={(event) =>
+                    handleStatusChange(
+                      event.target.value,
+                    )
+                  }
+                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                >
+                  <option value="">
+                    All statuses
+                  </option>
 
-              Contract Type
-            </div>
+                  <option value="DRAFT">
+                    Draft
+                  </option>
 
-            <p className="mt-3 text-sm font-medium text-slate-200">
-              {formatContractType(
-                contract.contract_type,
-              )}
-            </p>
-          </div>
+                  <option value="UPLOADED">
+                    Uploaded
+                  </option>
 
-          <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-slate-600">
-              <CalendarDays size={13} />
+                  <option value="PROCESSING">
+                    Processing
+                  </option>
 
-              Created
-            </div>
+                  <option value="ANALYZED">
+                    Analyzed
+                  </option>
 
-            <p className="mt-3 text-sm font-medium text-slate-200">
-              {formatDate(
-                contract.created_at,
-              )}
-            </p>
-          </div>
+                  <option value="UNDER_REVIEW">
+                    Under Review
+                  </option>
 
-          <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-slate-600">
-              <Clock3 size={13} />
+                  <option value="APPROVED">
+                    Approved
+                  </option>
 
-              Last Updated
-            </div>
+                  <option value="REJECTED">
+                    Rejected
+                  </option>
 
-            <p className="mt-3 text-sm font-medium text-slate-200">
-              {formatDate(
-                contract.updated_at,
-              )}
-            </p>
-          </div>
+                  <option value="ARCHIVED">
+                    Archived
+                  </option>
+                </select>
+              </label>
 
-          <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-slate-600">
-              <CheckCircle2 size={13} />
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                  Contract Type
+                </span>
 
-              Current Version
-            </div>
+                <select
+                  value={contractType}
+                  onChange={(event) =>
+                    handleContractTypeChange(
+                      event.target.value,
+                    )
+                  }
+                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                >
+                  <option value="">
+                    All contract types
+                  </option>
 
-            <p className="mt-3 text-sm font-medium text-slate-200">
-              {currentVersion
-                ? `Version ${currentVersion.version_number}`
-                : "No versions"}
-            </p>
-          </div>
-        </section>
+                  {contractTypeOptions.map(
+                    (type) => (
+                      <option
+                        key={type}
+                        value={type}
+                      >
+                        {formatContractType(
+                          type,
+                        )}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </label>
 
-        {/* Risk trend */}
-        <section className="mt-5">
-          {riskTrendQuery.isLoading ? (
-            <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-8">
-              <div className="flex items-center justify-center gap-3 text-xs text-slate-500">
-                <LoaderCircle
-                  size={16}
-                  className="animate-spin text-indigo-400"
-                />
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                  Risk Level
+                </span>
 
-                Loading risk trend...
-              </div>
-            </div>
-          ) : riskTrendQuery.isError ? (
-            <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-6">
-              <div className="flex items-center gap-3">
-                <AlertCircle
-                  size={18}
-                  className="text-rose-400"
-                />
+                <select
+                  value={riskLevel}
+                  onChange={(event) =>
+                    handleRiskLevelChange(
+                      event.target.value,
+                    )
+                  }
+                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                >
+                  <option value="">
+                    All risk levels
+                  </option>
 
-                <div>
-                  <p className="text-xs font-semibold text-rose-300">
-                    Unable to load risk trend
-                  </p>
-
-                  <p className="mt-1 text-[10px] text-slate-600">
-                    {riskTrendQuery.error instanceof Error
-                      ? riskTrendQuery.error.message
-                      : "Risk trend could not be loaded."}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : riskTrendQuery.data ? (
-            <RiskTrendCard
-              trend={riskTrendQuery.data}
-            />
-          ) : null}
-        </section>
-
-        {/* Description */}
-        {contract.description ? (
-          <section className="mt-5 rounded-xl border border-[#173052] bg-[#071426]/80 p-5 sm:p-6">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-slate-600">
-              Description
-            </div>
-
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-400">
-              {contract.description}
-            </p>
-          </section>
-        ) : null}
-
-        {/* Analysis errors */}
-        {startAnalysisMutation.isError && (
-          <section className="mt-5 rounded-2xl border border-red-400/20 bg-red-500/5 p-6">
-            <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-red-500/10 p-3">
-                <AlertCircle className="h-5 w-5 text-red-300" />
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-red-200">
-                  Analysis could not be started
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-400">
-                  Please try again. If the problem continues, check the processing
-                  service and backend logs.
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {analysisJobQuery.data?.status === "FAILED" && (
-          <section className="mt-5 rounded-2xl border border-red-400/20 bg-red-500/5 p-6">
-            <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-red-500/10 p-3">
-                <AlertCircle className="h-5 w-5 text-red-300" />
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-red-200">
-                  Contract analysis failed
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-400">
-                  {analysisJobQuery.data.error_message ??
-                    "The AI analysis job failed. Please try again."}
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Analysis in progress */}
-        {isAnalyzing && (
-          <section className="mt-5 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-6">
-            <div className="flex items-start gap-4">
-              <div className="rounded-xl bg-violet-500/10 p-3">
-                <LoaderCircle className="h-5 w-5 animate-spin text-violet-300" />
-              </div>
-
-              <div>
-                <h2 className="text-lg font-semibold text-white">
-                  AI analysis in progress
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-400">
-                  LexMind is analyzing the latest contract version for risks,
-                  compliance issues, and important clauses.
-                </p>
-
-                <div className="mt-4 flex items-center gap-2 text-xs text-violet-300">
-                  <span className="rounded-full bg-violet-500/10 px-2.5 py-1">
-                    {analysisJobQuery.data?.status ?? "QUEUED"}
-                  </span>
-
-                  <span className="text-slate-500">
-                    This page will update automatically.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* AI analysis result */}
-        {analysisQuery.data && (
-          <section className="mt-5 rounded-2xl border border-white/10 bg-slate-950/50 p-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-violet-300" />
-
-                  <h2 className="text-lg font-semibold text-white">
-                    AI Risk Analysis
-                  </h2>
-                </div>
-
-                <p className="mt-1 text-sm text-slate-400">
-                  Automated analysis of the latest contract version.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-center">
-                  <p className="text-xs uppercase tracking-wider text-slate-500">
-                    Risk Score
-                  </p>
-
-                  <p className="mt-1 text-2xl font-bold text-white">
-                    {analysisQuery.data.overall_risk_score ?? "—"}
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3 text-center">
-                  <p className="text-xs uppercase tracking-wider text-slate-500">
-                    Risk Level
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-violet-200">
-                    {analysisQuery.data.risk_level}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {analysisQuery.data.summary && (
-              <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  AI Summary
-                </p>
-
-                <p className="mt-3 text-sm leading-7 text-slate-300">
-                  {analysisQuery.data.summary}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-6 flex items-center gap-2 text-xs text-slate-500">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-
-              <span>
-                Analysis status: {analysisQuery.data.status}
-              </span>
-            </div>
-          </section>
-        )}
-
-        {/* Risk findings */}
-        <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
-          <div className="flex flex-col gap-4 border-b border-[#173052] px-5 py-5 sm:px-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
-                  AI Risk Intelligence
-                </div>
-
-                <h2 className="mt-1 text-sm font-semibold text-white">
-                  Risk Findings
-                </h2>
-
-                <p className="mt-1 text-xs text-slate-600">
-                  Identified contract risks from the latest available analysis.
-                </p>
-              </div>
-
-              {analysisQuery.data ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-rose-500/20 bg-rose-500/5 px-3 py-1.5 text-[10px] font-semibold text-rose-300">
-                    {analysisQuery.data.findings.filter(
-                      (finding) =>
-                        finding.severity === "CRITICAL",
-                    ).length}{" "}
+                  <option value="CRITICAL">
                     Critical
-                  </span>
+                  </option>
 
-                  <span className="rounded-full border border-orange-500/20 bg-orange-500/5 px-3 py-1.5 text-[10px] font-semibold text-orange-300">
-                    {analysisQuery.data.findings.filter(
-                      (finding) =>
-                        finding.severity === "HIGH",
-                    ).length}{" "}
+                  <option value="HIGH">
                     High
-                  </span>
+                  </option>
 
-                  <span className="rounded-full border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 text-[10px] font-semibold text-amber-300">
-                    {analysisQuery.data.findings.filter(
-                      (finding) =>
-                        finding.severity === "MEDIUM",
-                    ).length}{" "}
+                  <option value="MEDIUM">
                     Medium
-                  </span>
+                  </option>
 
-                  <span className="rounded-full border border-indigo-500/20 bg-indigo-500/5 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
-                    {analysisQuery.data.findings.length}{" "}
-                    Total
-                  </span>
-                </div>
-              ) : null}
+                  <option value="LOW">
+                    Low
+                  </option>
+                </select>
+              </label>
+
+              <div className="flex items-end">
+                {hasFilters ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200"
+                  >
+                    <X size={14} />
+
+                    Clear Filters
+                  </button>
+                ) : (
+                  <div className="hidden h-10 w-full rounded-lg border border-transparent sm:block" />
+                )}
+              </div>
             </div>
           </div>
+        </section>
 
-          {analysisQuery.isLoading ? (
-            <div className="flex min-h-[220px] items-center justify-center">
+        {/* Loading */}
+        {contractsQuery.isLoading ? (
+          <section className="rounded-xl border border-[#173052] bg-[#071426]/80">
+            <div className="flex min-h-[360px] items-center justify-center">
               <div className="flex items-center gap-3 text-sm text-slate-500">
                 <LoaderCircle
                   size={18}
                   className="animate-spin text-indigo-400"
                 />
 
-                Loading risk findings...
+                Loading contracts...
               </div>
             </div>
-          ) : analysisQuery.isError ? (
-            <div className="p-6">
-              <div className="flex items-start gap-3 rounded-lg border border-[#173052] bg-[#0B1930]/60 p-5">
-                <ShieldCheck
-                  size={18}
-                  className="mt-0.5 shrink-0 text-slate-600"
-                />
+          </section>
+        ) : contractsQuery.isError ? (
+          /* Error */
+          <section className="rounded-xl border border-rose-500/20 bg-[#071426]/80 p-8 text-center">
+            <ShieldAlert
+              size={28}
+              className="mx-auto text-rose-400"
+            />
 
-                <div>
-                  <p className="text-sm font-medium text-slate-400">
-                    No completed analysis available
-                  </p>
+            <h2 className="mt-4 text-sm font-semibold text-rose-300">
+              Unable to load contracts
+            </h2>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-600">
-                    Run AI analysis on this contract version to generate
-                    risk findings.
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : !analysisQuery.data ||
-            analysisQuery.data.findings.length === 0 ? (
-            <div className="flex min-h-[220px] items-center justify-center px-6 text-center">
+            <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-slate-600">
+              {contractsQuery.error instanceof Error
+                ? contractsQuery.error.message
+                : "The contracts could not be loaded."}
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                contractsQuery.refetch()
+              }
+              className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+            >
+              <RefreshCw size={14} />
+
+              Try Again
+            </button>
+          </section>
+        ) : contracts.length === 0 ? (
+          /* Empty */
+          <section className="rounded-xl border border-[#173052] bg-[#071426]/80">
+            <div className="flex min-h-[360px] items-center justify-center px-6 text-center">
               <div>
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[#173052] bg-[#0B1930]">
-                  <CheckCircle2
-                    size={18}
-                    className="text-emerald-400"
-                  />
-                </div>
-
-                <h3 className="mt-4 text-sm font-semibold text-slate-300">
-                  No risk findings
-                </h3>
-
-                <p className="mt-1 max-w-md text-xs leading-5 text-slate-600">
-                  No risk findings are currently available for the latest
-                  contract version.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 p-5 sm:p-6">
-              {analysisQuery.data.findings.map(
-                (finding) => (
-                  <RiskFindingCard
-                    key={finding.id}
-                    finding={finding}
-                  />
-                ),
-              )}
-            </div>
-          )}
-        </section>
-
-        {/* Version history */}
-        <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
-          <div className="flex flex-col gap-3 border-b border-[#173052] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <div>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
-                Document Lifecycle
-              </div>
-
-              <h2 className="mt-1 text-sm font-semibold text-white">
-                Version History
-              </h2>
-            </div>
-
-            <span className="text-[11px] text-slate-600">
-              {versions.length}{" "}
-              {versions.length === 1
-                ? "version"
-                : "versions"}
-            </span>
-          </div>
-
-          {versionsQuery.isError ? (
-            <div className="p-6">
-              <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 p-4 text-xs text-rose-300">
-                Unable to load version
-                history.
-              </div>
-            </div>
-          ) : versions.length === 0 ? (
-            <div className="flex min-h-[220px] items-center justify-center px-6 text-center">
-              <div>
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[#173052] bg-[#0B1930]">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#173052] bg-[#0B1930]">
                   <FileText
-                    size={18}
+                    size={20}
                     className="text-slate-600"
                   />
                 </div>
 
-                <h3 className="mt-4 text-sm font-semibold text-slate-300">
-                  No document versions
-                </h3>
+                <h2 className="mt-4 text-sm font-semibold text-slate-300">
+                  {hasFilters
+                    ? "No matching contracts"
+                    : "No contracts yet"}
+                </h2>
 
-                <p className="mt-1 text-xs text-slate-600">
-                  Upload a document to create
-                  the first version.
+                <p className="mt-2 max-w-md text-xs leading-5 text-slate-600">
+                  {hasFilters
+                    ? "No contracts match the current filters. Try changing or clearing your filters."
+                    : "Create or upload a contract to start using the LexMind contract intelligence workspace."}
                 </p>
+
+                {hasFilters ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+                  >
+                    <X size={14} />
+
+                    Clear Filters
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate("/upload")
+                    }
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300 transition hover:bg-indigo-500/15"
+                  >
+                    <FilePlus2 size={14} />
+
+                    Upload Contract
+                  </button>
+                )}
               </div>
             </div>
-          ) : (
-            <div className="divide-y divide-[#102744]">
-              {versions.map(
-                (
-                  version,
-                  index,
-                ) => {
-                  const isCurrent =
-                    index === 0;
+          </section>
+        ) : (
+          <>
+            {/* Results header */}
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-xs text-slate-600">
+                Showing{" "}
+                <span className="font-medium text-slate-400">
+                  {Math.min(
+                    (page - 1) *
+                      pageSize +
+                      1,
+                    total,
+                  )}
+                </span>
+                {" "}–{" "}
+                <span className="font-medium text-slate-400">
+                  {Math.min(
+                    page * pageSize,
+                    total,
+                  )}
+                </span>
+                {" "}of{" "}
+                <span className="font-medium text-slate-400">
+                  {total}
+                </span>{" "}
+                contracts
+              </div>
 
-                  return (
-                    <div
-                      key={version.id}
-                      className={`relative px-5 py-5 transition sm:px-6 ${
-                        isCurrent
-                          ? "bg-indigo-500/[0.025]"
-                          : "hover:bg-white/[0.012]"
-                      }`}
+              {hasFilters ? (
+                <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
+                  Filters applied
+                </div>
+              ) : null}
+            </div>
+
+            {/* Contract cards */}
+            <section className="overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
+              <div className="divide-y divide-[#102744]">
+                {contracts.map(
+                  (contract) => (
+                    <button
+                      key={contract.id}
+                      type="button"
+                      onClick={() =>
+                        handleOpenContract(
+                          contract.id,
+                        )
+                      }
+                      className="group block w-full text-left transition hover:bg-white/[0.015] focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/40"
                     >
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-xs font-bold ${
-                            isCurrent
-                              ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-300"
-                              : "border-[#173052] bg-[#0B1930] text-slate-500"
-                          }`}
-                        >
-                          v
-                          {
-                            version.version_number
-                          }
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-200">
-                                Version{" "}
-                                {
-                                  version.version_number
-                                }
-                              </span>
-
-                              {isCurrent ? (
-                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
-                                  Current
-                                </span>
-                              ) : null}
+                      <div className="px-5 py-5 sm:px-6">
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                          <div className="flex min-w-0 items-start gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 transition group-hover:border-indigo-400/30 group-hover:bg-indigo-500/15">
+                              <FileText size={19} />
                             </div>
 
-                            <span className="text-[10px] text-slate-600">
-                              {formatDateTime(
-                                version.created_at,
-                              )}
-                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h2 className="truncate text-sm font-semibold text-slate-200 transition group-hover:text-white">
+                                  {contract.title}
+                                </h2>
+
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${getStatusClasses(
+                                    contract.status,
+                                  )}`}
+                                >
+                                  {formatStatus(
+                                    contract.status,
+                                  )}
+                                </span>
+                              </div>
+
+                              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-600">
+                                <span>
+                                  {formatContractType(
+                                    contract.contract_type,
+                                  )}
+                                </span>
+
+                                <span>
+                                  Created{" "}
+                                  {formatDate(
+                                    contract.created_at,
+                                  )}
+                                </span>
+
+                                <span className="hidden md:inline">
+                                  Updated{" "}
+                                  {formatDate(
+                                    contract.updated_at,
+                                  )}
+                                </span>
+                              </div>
+                            </div>
                           </div>
 
-                          <p className="mt-2 text-xs leading-5 text-slate-500">
-                            {version.change_summary ||
-                              "No change summary provided."}
-                          </p>
+                          <div className="flex shrink-0 items-center gap-3">
+                            <div className="text-right">
+                              <div className="text-[9px] font-medium uppercase tracking-wider text-slate-700">
+                                Risk
+                              </div>
 
-                          <p className="mt-2 text-[10px] text-slate-700">
-                            Uploaded by{" "}
-                            {version.uploaded_by}
-                          </p>
+                              <div className="mt-1 flex items-center justify-end gap-2">
+                                {contract.risk_level ? (
+                                  <span
+                                    className={`rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide ${getRiskClasses(
+                                      contract.risk_level,
+                                    )}`}
+                                  >
+                                    {contract.risk_level}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-slate-700">
+                                    Not analyzed
+                                  </span>
+                                )}
+
+                                {contract.risk_score !==
+                                null &&
+                                contract.risk_score !==
+                                  undefined ? (
+                                  <span className="text-xs font-semibold text-slate-300">
+                                    {contract.risk_score}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            <div className="hidden h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-700 transition group-hover:border-[#173052] group-hover:bg-[#0B1930] group-hover:text-indigo-300 sm:flex">
+                              <ChevronRight
+                                size={16}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                },
-              )}
-            </div>
-          )}
-        </section>
+                    </button>
+                  ),
+                )}
+              </div>
+            </section>
+
+            {/* Pagination */}
+            {totalPages > 1 ? (
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-[11px] text-slate-600">
+                  Page{" "}
+                  <span className="font-medium text-slate-400">
+                    {page}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-medium text-slate-400">
+                    {totalPages}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() =>
+                      setPage(
+                        (currentPage) =>
+                          Math.max(
+                            currentPage - 1,
+                            1,
+                          ),
+                      )
+                    }
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-[10px] font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <ChevronLeft size={13} />
+
+                    Previous
+                  </button>
+
+                  <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
+                    {page}
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled={
+                      page >= totalPages
+                    }
+                    onClick={() =>
+                      setPage(
+                        (currentPage) =>
+                          Math.min(
+                            currentPage + 1,
+                            totalPages,
+                          ),
+                      )
+                    }
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-[10px] font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    Next
+
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-export default ContractDetailPage;
+export default ContractsPage;

@@ -30,12 +30,14 @@ import {
 
 import {
   useAnalysisJob,
+  useContractRiskTrend,
   useLatestContractAnalysis,
   useRiskFindings,
   useStartContractAnalysis,
 } from "../../features/contracts/useContractAnalysis";
 
 import RiskFindingCard from "../../components/findings/RiskFindingCard";
+import RiskTrendCard from "../../components/contracts/RiskTrendCard";
 
 function formatDate(
   value: string,
@@ -160,6 +162,12 @@ function ContractDetailPage() {
       },
     );
 
+  const riskTrendQuery =
+    useContractRiskTrend(
+      contractId ?? "",
+      currentVersion?.id ?? null,
+    );
+
   const jobStatus =
     analysisJobQuery.data?.status;
 
@@ -244,11 +252,12 @@ function ContractDetailPage() {
     }
   };
 
-  // Refresh analysis and findings once the analysis job succeeds.
+  // Refresh analysis, findings and risk trend once the analysis job succeeds.
   useEffect(() => {
     if (jobStatus === "SUCCEEDED") {
       analysisQuery.refetch();
       riskFindingsQuery.refetch();
+      riskTrendQuery.refetch();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -636,6 +645,59 @@ function ContractDetailPage() {
             </div>
           </section>
         )}
+
+        {/* Risk trend */}
+        {riskTrendQuery.isLoading ? (
+          <section className="mt-5 rounded-xl border border-[#173052] bg-[#071426]/80 p-6">
+            <div className="flex min-h-[180px] items-center justify-center">
+              <div className="flex items-center gap-3 text-sm text-slate-500">
+                <LoaderCircle
+                  size={18}
+                  className="animate-spin text-indigo-400"
+                />
+
+                Loading risk trend...
+              </div>
+            </div>
+          </section>
+        ) : riskTrendQuery.isError ? (
+          <section className="mt-5 rounded-xl border border-[#173052] bg-[#071426]/80 p-6">
+            <div className="flex items-start gap-3">
+              <ShieldAlert
+                size={18}
+                className="mt-0.5 text-slate-600"
+              />
+
+              <div>
+                <p className="text-sm font-medium text-slate-400">
+                  Risk trend unavailable
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-slate-600">
+                  Risk history could not be loaded for this contract version.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    riskTrendQuery.refetch()
+                  }
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+                >
+                  <RefreshCw size={13} />
+
+                  Try again
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : riskTrendQuery.data ? (
+          <div className="mt-5">
+            <RiskTrendCard
+              trend={riskTrendQuery.data}
+            />
+          </div>
+        ) : null}
 
         {/* Risk findings */}
         <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">

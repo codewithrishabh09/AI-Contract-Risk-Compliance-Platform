@@ -11,6 +11,8 @@ import {
   startContractAnalysis,
 } from "../../lib/api/analysisApi";
 
+import { getContractRiskTrend } from "../../lib/api/versionAnalysisApi";
+
 export function useStartContractAnalysis() {
   const queryClient = useQueryClient();
 
@@ -43,6 +45,14 @@ export function useStartContractAnalysis() {
           variables.versionId,
         ],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "contract-risk-trend",
+          variables.contractId,
+          variables.versionId,
+        ],
+      });
     },
   });
 }
@@ -59,7 +69,8 @@ export function useAnalysisJob(
     enabled: Boolean(jobId),
 
     refetchInterval: (query) => {
-      const status = query.state.data?.status;
+      const status =
+        query.state.data?.status;
 
       if (
         status === "SUCCEEDED" ||
@@ -126,5 +137,34 @@ export function useRiskFindings(
     enabled:
       Boolean(contractId) &&
       Boolean(versionId),
+
+    placeholderData: (
+      previousData,
+    ) => previousData,
+  });
+}
+
+export function useContractRiskTrend(
+  contractId: string,
+  versionId: string | null,
+) {
+  return useQuery({
+    queryKey: [
+      "contract-risk-trend",
+      contractId,
+      versionId,
+    ],
+
+    queryFn: () =>
+      getContractRiskTrend(
+        contractId,
+        versionId!,
+      ),
+
+    enabled:
+      Boolean(contractId) &&
+      Boolean(versionId),
+
+    staleTime: 30_000,
   });
 }

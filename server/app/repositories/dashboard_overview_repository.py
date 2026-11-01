@@ -28,9 +28,7 @@ class DashboardOverviewRepository:
             )
         )
 
-        return int(
-            self.db.scalar(statement) or 0
-        )
+        return int(self.db.scalar(statement) or 0)
 
     def count_pending_analysis(
         self,
@@ -60,9 +58,7 @@ class DashboardOverviewRepository:
             )
         )
 
-        return int(
-            self.db.scalar(statement) or 0
-        )
+        return int(self.db.scalar(statement) or 0)
 
     def get_latest_analysis_per_contract(
         self,
@@ -70,24 +66,27 @@ class DashboardOverviewRepository:
     ):
         """
         Return a subquery containing the latest analysis
-        result for every contract in the organization.
+        for every contract in the organization.
 
-        One contract can have:
-            Contract
-              -> Version 1
-              -> Version 2
-              -> Version 3
-                    ↓
-                multiple analyses
+        Contract
+            ├── Version 1
+            │     └── Analysis
+            ├── Version 2
+            │     └── Analysis
+            └── Version 3
+                  └── Latest Analysis
 
-        Dashboard should use only the latest analysis for
-        each contract.
+        Dashboard metrics should use only the latest
+        analysis for each contract.
         """
 
         latest_analysis = (
             select(
                 AnalysisResult.id.label(
                     "analysis_id",
+                ),
+                ContractVersion.contract_id.label(
+                    "contract_id",
                 ),
                 AnalysisResult.contract_version_id.label(
                     "contract_version_id",
@@ -133,6 +132,36 @@ class DashboardOverviewRepository:
 
         return latest_analysis
 
+    def count_high_risk_contracts(
+        self,
+        organization_id: UUID,
+    ) -> int:
+        latest_analysis = (
+            self.get_latest_analysis_per_contract(
+                organization_id,
+            )
+        )
+
+        statement = (
+            select(func.count())
+            .select_from(latest_analysis)
+            .where(
+                latest_analysis.c.row_number == 1,
+                func.upper(
+                    latest_analysis.c.risk_level,
+                ).in_(
+                    [
+                        "HIGH",
+                        "CRITICAL",
+                    ]
+                ),
+            )
+        )
+
+        return int(
+            self.db.scalar(statement) or 0
+        )
+
     def get_risk_distribution(
         self,
         organization_id: UUID,
@@ -176,56 +205,19 @@ class DashboardOverviewRepository:
             ).lower()
 
             if normalized in result:
-                result[normalized] = int(
-                    count,
-                )
+                result[normalized] = int(count)
 
         return result
-
-    def count_high_risk_contracts(
-        self,
-        organization_id: UUID,
-    ) -> int:
-        latest_analysis = (
-            self.get_latest_analysis_per_contract(
-                organization_id,
-            )
-        )
-
-        statement = (
-            select(
-                func.count(),
-            )
-            .select_from(
-                latest_analysis,
-            )
-            .where(
-                latest_analysis.c.row_number == 1,
-                func.upper(
-                    latest_analysis.c.risk_level,
-                ).in_(
-                    [
-                        "HIGH",
-                        "CRITICAL",
-                    ]
-                ),
-            )
-        )
-
-        return int(
-            self.db.scalar(statement) or 0
-        )
 
     def count_critical_findings(
         self,
         organization_id: UUID,
     ) -> int:
         """
-        Count OPEN CRITICAL findings belonging only to
+        Count only OPEN CRITICAL findings belonging to
         the latest analysis of each contract.
 
-        Older contract versions / analyses are intentionally
-        excluded from the organization dashboard metric.
+        Findings from older contract versions are excluded.
         """
 
         latest_analysis = (
@@ -261,11 +253,11 @@ class DashboardOverviewRepository:
         limit: int = 5,
     ):
         """
-        Return recently updated contracts together with their
-        latest analysis without running one analysis query
-        per contract.
+        Return recently updated contracts together with
+        their latest analysis.
 
-        This avoids the previous N+1 query pattern.
+        Uses one database query and avoids the N+1
+        analysis lookup pattern.
         """
 
         latest_analysis = (
@@ -278,35 +270,24 @@ class DashboardOverviewRepository:
         statement = (
             select(
                 Contract,
-                latest_analysis,
+                latest_analysis.c.overall_risk_score,
+                latest_analysis.c.risk_level,
+                latest_analysis.c.analysis_status,
+                latest_analysis.c.analysis_created_at,
             )
             .outerjoin(
                 latest_analysis,
                 (
                     Contract.id
-                    == select(
-                        ContractVersion.contract_id,
-                    )
-                    .where(
-                        ContractVersion.id
-                        == latest_analysis.c.contract_version_id,
-                    )
-                    .correlate(Contract)
-                    .scalar_subquery()
+                    == latest_analysis.c.contract_id
+                )
+                & (
+                    latest_analysis.c.row_number == 1
                 ),
             )
             .where(
                 Contract.organization_id
                 == organization_id,
-            )
-            .where(
-                (
-                    latest_analysis.c.row_number
-                    == 1
-                )
-                | (
-                    latest_analysis.c.row_number.is_(None)
-                )
             )
             .order_by(
                 Contract.updated_at.desc(),
@@ -325,16 +306,17 @@ class DashboardOverviewRepository:
 
             analysis = None
 
-            if row[1] is not None:
-                analysis_row = row[1]
-
-                if (
-                    analysis_row.row_number == 1
-                ):
-                    analysis = self.db.get(
-                        AnalysisResult,
-                        analysis_row.analysis_id,
-                    )
+            # Outer join: contracts without any analysis get NULLs.
+            # analysis_created_at is always set when an analysis exists,
+            # so it is a reliable "has analysis" marker even if the
+            # score or risk level itself is NULL.
+            if row.analysis_created_at is not None:
+                analysis = {
+                    "overall_risk_score": row.overall_risk_score,
+                    "risk_level": row.risk_level,
+                    "analysis_status": row.analysis_status,
+                    "analysis_created_at": row.analysis_created_at,
+                }
 
             results.append(
                 {

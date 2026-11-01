@@ -23,8 +23,10 @@ class DashboardOverviewService:
         self,
         organization_id: UUID,
     ) -> DashboardOverviewResponse:
-        total_contracts = self.repository.count_contracts(
-            organization_id,
+        total_contracts = (
+            self.repository.count_contracts(
+                organization_id,
+            )
         )
 
         high_risk_contracts = (
@@ -51,13 +53,17 @@ class DashboardOverviewService:
             )
         )
 
-        trend_rows = self.repository.get_risk_trend(
-            organization_id,
+        trend_rows = (
+            self.repository.get_risk_trend(
+                organization_id,
+            )
         )
 
-        recent_rows = self.repository.get_recent_contracts(
-            organization_id,
-            limit=5,
+        recent_rows = (
+            self.repository.get_recent_contracts(
+                organization_id,
+                limit=5,
+            )
         )
 
         recent_contracts = []
@@ -73,15 +79,20 @@ class DashboardOverviewService:
                     contract_type=str(
                         contract.contract_type,
                     ),
-                    status=str(contract.status),
+                    status=str(
+                        contract.status,
+                    ),
                     risk_score=(
-                        analysis.overall_risk_score
+                        analysis["overall_risk_score"]
                         if analysis
                         else None
                     ),
                     risk_level=(
-                        str(analysis.risk_level)
+                        str(
+                            analysis["risk_level"],
+                        )
                         if analysis
+                        and analysis["risk_level"] is not None
                         else None
                     ),
                     updated_at=contract.updated_at,

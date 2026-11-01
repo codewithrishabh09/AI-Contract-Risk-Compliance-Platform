@@ -37,6 +37,7 @@ import {
 } from "../../features/contracts/useContractAnalysis";
 
 import RiskFindingCard from "../../components/findings/RiskFindingCard";
+import ContractQaPanel from "../../components/qa/ContractQaPanel";
 import RiskTrendCard from "../../components/contracts/RiskTrendCard";
 
 function formatDate(
@@ -1074,6 +1075,16 @@ function ContractDetailPage() {
             </>
           )}
         </section>
+
+        {/* Contract Q&A */}
+        {currentVersion ? (
+          <div className="mt-5">
+            <ContractQaPanel
+              contractId={contract.id}
+              versionId={currentVersion.id}
+            />
+          </div>
+        ) : null}
 
         {/* Version history */}
         <section className="mt-5 overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">

@@ -16,3 +16,16 @@ export interface RAGAnswer {
   model_provider: string;
   model_name: string;
 }
+
+export type RAGMessageRole =
+  | "user"
+  | "assistant";
+
+export interface RAGConversationMessage {
+  id: string;
+  role: RAGMessageRole;
+  content: string;
+  citations?: RAGCitation[];
+  model_provider?: string;
+  model_name?: string;
+}

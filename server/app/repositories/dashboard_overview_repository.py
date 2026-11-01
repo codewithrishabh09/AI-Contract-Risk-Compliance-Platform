@@ -21,11 +21,16 @@ class DashboardOverviewRepository:
         self,
         organization_id: UUID,
     ) -> int:
-        statement = select(func.count(Contract.id)).where(
-            Contract.organization_id == organization_id,
+        statement = (
+            select(func.count(Contract.id))
+            .where(
+                Contract.organization_id == organization_id,
+            )
         )
 
-        return int(self.db.scalar(statement) or 0)
+        return int(
+            self.db.scalar(statement) or 0
+        )
 
     def count_pending_analysis(
         self,
@@ -40,35 +45,74 @@ class DashboardOverviewRepository:
             )
             .join(
                 Contract,
-                ContractVersion.contract_id == Contract.id,
+                ContractVersion.contract_id
+                == Contract.id,
             )
             .where(
-                Contract.organization_id == organization_id,
+                Contract.organization_id
+                == organization_id,
                 ProcessingJob.status.in_(
-                    ["QUEUED", "RUNNING"],
+                    [
+                        "QUEUED",
+                        "RUNNING",
+                    ]
                 ),
             )
         )
 
-        return int(self.db.scalar(statement) or 0)
+        return int(
+            self.db.scalar(statement) or 0
+        )
 
     def get_latest_analysis_per_contract(
         self,
         organization_id: UUID,
     ):
+        """
+        Return a subquery containing the latest analysis
+        result for every contract in the organization.
+
+        One contract can have:
+            Contract
+              -> Version 1
+              -> Version 2
+              -> Version 3
+                    ↓
+                multiple analyses
+
+        Dashboard should use only the latest analysis for
+        each contract.
+        """
+
         latest_analysis = (
             select(
-                AnalysisResult.id.label("analysis_id"),
-                AnalysisResult.contract_version_id,
-                AnalysisResult.overall_risk_score,
-                AnalysisResult.risk_level,
-                AnalysisResult.created_at,
-                func.row_number()
-                .over(
+                AnalysisResult.id.label(
+                    "analysis_id",
+                ),
+                AnalysisResult.contract_version_id.label(
+                    "contract_version_id",
+                ),
+                AnalysisResult.overall_risk_score.label(
+                    "overall_risk_score",
+                ),
+                AnalysisResult.risk_level.label(
+                    "risk_level",
+                ),
+                AnalysisResult.status.label(
+                    "analysis_status",
+                ),
+                AnalysisResult.created_at.label(
+                    "analysis_created_at",
+                ),
+                func.row_number().over(
                     partition_by=ContractVersion.contract_id,
-                    order_by=AnalysisResult.created_at.desc(),
-                )
-                .label("row_number"),
+                    order_by=(
+                        AnalysisResult.created_at.desc(),
+                        AnalysisResult.id.desc(),
+                    ),
+                ).label(
+                    "row_number",
+                ),
             )
             .join(
                 ContractVersion,
@@ -77,10 +121,12 @@ class DashboardOverviewRepository:
             )
             .join(
                 Contract,
-                ContractVersion.contract_id == Contract.id,
+                ContractVersion.contract_id
+                == Contract.id,
             )
             .where(
-                Contract.organization_id == organization_id,
+                Contract.organization_id
+                == organization_id,
             )
             .subquery()
         )
@@ -91,8 +137,10 @@ class DashboardOverviewRepository:
         self,
         organization_id: UUID,
     ) -> dict[str, int]:
-        latest_analysis = self.get_latest_analysis_per_contract(
-            organization_id,
+        latest_analysis = (
+            self.get_latest_analysis_per_contract(
+                organization_id,
+            )
         )
 
         statement = (
@@ -108,7 +156,9 @@ class DashboardOverviewRepository:
             )
         )
 
-        rows = self.db.execute(statement).all()
+        rows = self.db.execute(
+            statement,
+        ).all()
 
         result = {
             "low": 0,
@@ -121,10 +171,14 @@ class DashboardOverviewRepository:
             if risk_level is None:
                 continue
 
-            normalized = str(risk_level).lower()
+            normalized = str(
+                risk_level,
+            ).lower()
 
             if normalized in result:
-                result[normalized] = int(count)
+                result[normalized] = int(
+                    count,
+                )
 
         return result
 
@@ -132,59 +186,127 @@ class DashboardOverviewRepository:
         self,
         organization_id: UUID,
     ) -> int:
-        latest_analysis = self.get_latest_analysis_per_contract(
-            organization_id,
+        latest_analysis = (
+            self.get_latest_analysis_per_contract(
+                organization_id,
+            )
         )
 
-        statement = select(
-            func.count(),
-        ).where(
-            latest_analysis.c.row_number == 1,
-            latest_analysis.c.risk_level.in_(
-                ["HIGH", "CRITICAL"],
-            ),
+        statement = (
+            select(
+                func.count(),
+            )
+            .select_from(
+                latest_analysis,
+            )
+            .where(
+                latest_analysis.c.row_number == 1,
+                func.upper(
+                    latest_analysis.c.risk_level,
+                ).in_(
+                    [
+                        "HIGH",
+                        "CRITICAL",
+                    ]
+                ),
+            )
         )
 
-        return int(self.db.scalar(statement) or 0)
+        return int(
+            self.db.scalar(statement) or 0
+        )
 
     def count_critical_findings(
         self,
         organization_id: UUID,
     ) -> int:
+        """
+        Count OPEN CRITICAL findings belonging only to
+        the latest analysis of each contract.
+
+        Older contract versions / analyses are intentionally
+        excluded from the organization dashboard metric.
+        """
+
+        latest_analysis = (
+            self.get_latest_analysis_per_contract(
+                organization_id,
+            )
+        )
+
         statement = (
-            select(func.count(RiskFinding.id))
+            select(
+                func.count(RiskFinding.id),
+            )
+            .select_from(RiskFinding)
             .join(
-                AnalysisResult,
+                latest_analysis,
                 RiskFinding.analysis_result_id
-                == AnalysisResult.id,
-            )
-            .join(
-                ContractVersion,
-                AnalysisResult.contract_version_id
-                == ContractVersion.id,
-            )
-            .join(
-                Contract,
-                ContractVersion.contract_id == Contract.id,
+                == latest_analysis.c.analysis_id,
             )
             .where(
-                Contract.organization_id == organization_id,
+                latest_analysis.c.row_number == 1,
                 RiskFinding.severity == "CRITICAL",
                 RiskFinding.status == "OPEN",
             )
         )
 
-        return int(self.db.scalar(statement) or 0)
+        return int(
+            self.db.scalar(statement) or 0
+        )
 
     def get_recent_contracts(
         self,
         organization_id: UUID,
         limit: int = 5,
     ):
-        contracts_statement = (
-            select(Contract)
+        """
+        Return recently updated contracts together with their
+        latest analysis without running one analysis query
+        per contract.
+
+        This avoids the previous N+1 query pattern.
+        """
+
+        latest_analysis = (
+            self.get_latest_analysis_per_contract(
+                organization_id,
+            )
+            .alias("latest_analysis")
+        )
+
+        statement = (
+            select(
+                Contract,
+                latest_analysis,
+            )
+            .outerjoin(
+                latest_analysis,
+                (
+                    Contract.id
+                    == select(
+                        ContractVersion.contract_id,
+                    )
+                    .where(
+                        ContractVersion.id
+                        == latest_analysis.c.contract_version_id,
+                    )
+                    .correlate(Contract)
+                    .scalar_subquery()
+                ),
+            )
             .where(
-                Contract.organization_id == organization_id,
+                Contract.organization_id
+                == organization_id,
+            )
+            .where(
+                (
+                    latest_analysis.c.row_number
+                    == 1
+                )
+                | (
+                    latest_analysis.c.row_number.is_(None)
+                )
             )
             .order_by(
                 Contract.updated_at.desc(),
@@ -192,35 +314,27 @@ class DashboardOverviewRepository:
             .limit(limit)
         )
 
-        contracts = list(
-            self.db.scalars(
-                contracts_statement,
-            ).all()
-        )
+        rows = self.db.execute(
+            statement,
+        ).all()
 
         results = []
 
-        for contract in contracts:
-            latest_analysis_statement = (
-                select(AnalysisResult)
-                .join(
-                    ContractVersion,
-                    AnalysisResult.contract_version_id
-                    == ContractVersion.id,
-                )
-                .where(
-                    ContractVersion.contract_id
-                    == contract.id,
-                )
-                .order_by(
-                    AnalysisResult.created_at.desc(),
-                )
-                .limit(1)
-            )
+        for row in rows:
+            contract = row[0]
 
-            analysis = self.db.scalar(
-                latest_analysis_statement,
-            )
+            analysis = None
+
+            if row[1] is not None:
+                analysis_row = row[1]
+
+                if (
+                    analysis_row.row_number == 1
+                ):
+                    analysis = self.db.get(
+                        AnalysisResult,
+                        analysis_row.analysis_id,
+                    )
 
             results.append(
                 {
@@ -236,15 +350,16 @@ class DashboardOverviewRepository:
         organization_id: UUID,
         days: int = 30,
     ):
-        since = datetime.now(timezone.utc) - timedelta(
-            days=days,
+        since = (
+            datetime.now(timezone.utc)
+            - timedelta(days=days)
         )
 
         statement = (
             select(
-                func.date(AnalysisResult.created_at).label(
-                    "date",
-                ),
+                func.date(
+                    AnalysisResult.created_at,
+                ).label("date"),
                 func.avg(
                     AnalysisResult.overall_risk_score,
                 ).label("risk_score"),
@@ -256,26 +371,37 @@ class DashboardOverviewRepository:
             )
             .join(
                 Contract,
-                ContractVersion.contract_id == Contract.id,
+                ContractVersion.contract_id
+                == Contract.id,
             )
             .where(
-                Contract.organization_id == organization_id,
+                Contract.organization_id
+                == organization_id,
                 AnalysisResult.created_at >= since,
+                AnalysisResult.overall_risk_score.is_not(None),
             )
             .group_by(
-                func.date(AnalysisResult.created_at),
+                func.date(
+                    AnalysisResult.created_at,
+                ),
             )
             .order_by(
-                func.date(AnalysisResult.created_at),
+                func.date(
+                    AnalysisResult.created_at,
+                ),
             )
         )
 
-        rows = self.db.execute(statement).all()
+        rows = self.db.execute(
+            statement,
+        ).all()
 
         return [
             {
                 "date": str(row.date),
-                "risk_score": float(row.risk_score),
+                "risk_score": float(
+                    row.risk_score,
+                ),
             }
             for row in rows
         ]

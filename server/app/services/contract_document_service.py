@@ -17,9 +17,9 @@ from app.repositories.document_repository import DocumentRepository
 from app.repositories.processing_job_repository import (
     ProcessingJobRepository,
 )
-from app.worker.celery_app import celery_app
 from app.storage.base import StorageError
 from app.storage.local import LocalStorage
+from app.worker.celery_app import celery_app
 
 
 MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
@@ -117,8 +117,10 @@ class ContractDocumentService:
             )
         )
 
-        contract_version = ContractVersionRepository.create(
-            session,
+        # Create the ContractVersion model first.
+        # ContractVersionRepository.create() expects the
+        # complete model object rather than individual fields.
+        contract_version = ContractVersion(
             contract_id=contract.id,
             version_number=version_number,
             uploaded_by=user_id,
@@ -127,6 +129,11 @@ class ContractDocumentService:
                 if change_summary
                 else None
             ),
+        )
+
+        ContractVersionRepository.create(
+            session,
+            contract_version=contract_version,
         )
 
         storage_key = (
@@ -184,8 +191,8 @@ class ContractDocumentService:
                 )
 
             except Exception:
-                # the Upload is already saved. The job stays QUEUED
-                # and can be re-sent later.
+                # The upload is already saved.
+                # The job stays QUEUED and can be re-sent later.
                 pass
 
             return (

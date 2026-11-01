@@ -32,20 +32,19 @@ from app.schemas.contract_document import (
     ContractUploadResponse,
     ContractVersionResponse,
 )
+from app.services.audit_service import AuditService
 from app.services.contract_document_service import (
     ContractDocumentService,
-    ContractDocumentServiceError,
     ContractNotFoundForUploadError,
     InvalidDocumentError,
 )
-
-from app.services.audit_service import AuditService
 from app.services.contract_service import (
     ContractNotFoundError,
     ContractService,
     InvalidContractDataError,
 )
 from app.storage.local import LocalStorage
+
 
 router = APIRouter(
     prefix="/contracts",
@@ -58,21 +57,34 @@ DatabaseSession = Annotated[
     Depends(get_db),
 ]
 
-# Permission-protected current user dependencies.
-# Each one runs: JWT -> CurrentUser -> role -> ROLE_PERMISSIONS -> check
+
 ContractReader = Annotated[
     User,
-    Depends(require_permissions(Permission.CONTRACT_READ)),
+    Depends(
+        require_permissions(
+            Permission.CONTRACT_READ,
+        )
+    ),
 ]
+
 
 ContractCreator = Annotated[
     User,
-    Depends(require_permissions(Permission.CONTRACT_CREATE)),
+    Depends(
+        require_permissions(
+            Permission.CONTRACT_CREATE,
+        )
+    ),
 ]
+
 
 ContractUploader = Annotated[
     User,
-    Depends(require_permissions(Permission.CONTRACT_UPLOAD)),
+    Depends(
+        require_permissions(
+            Permission.CONTRACT_UPLOAD,
+        )
+    ),
 ]
 
 
@@ -107,15 +119,157 @@ def create_contract(
             resource_id=contract.id,
             description="Contract created.",
         )
+
         session.commit()
 
         return ContractResponse.model_validate(contract)
 
     except InvalidContractDataError as exc:
+        session.rollback()
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+
+@router.post(
+    "/upload",
+    response_model=ContractUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Contract Upload"],
+)
+def create_contract_with_document(
+    current_user: ContractUploader,
+    session: DatabaseSession,
+    title: str = Form(
+        ...,
+        min_length=1,
+        max_length=255,
+    ),
+    contract_type: str = Form(
+        ...,
+        min_length=1,
+        max_length=100,
+    ),
+    description: str | None = Form(
+        default=None,
+        max_length=5000,
+    ),
+    change_summary: str | None = Form(
+        default=None,
+        max_length=2000,
+    ),
+    file: UploadFile = File(...),
+) -> ContractUploadResponse:
+    """
+    Create a brand-new contract and upload its first document version
+    in one database transaction.
+    """
+
+    content = file.file.read()
+
+    storage = LocalStorage("storage")
+
+    try:
+        contract = ContractService.create_contract(
+            session,
+            organization_id=current_user.organization_id,
+            created_by=current_user.id,
+            title=title.strip(),
+            contract_type=contract_type.strip(),
+            description=(
+                description.strip()
+                if description
+                else None
+            ),
+        )
+
+        (
+            contract,
+            contract_version,
+            document,
+            processing_job,
+        ) = ContractDocumentService.upload_document(
+            session,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id,
+            contract_id=contract.id,
+            original_filename=file.filename or "",
+            content_type=file.content_type,
+            content=content,
+            change_summary=change_summary,
+            storage=storage,
+        )
+
+        AuditService.log(
+            session,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id,
+            contract_id=contract.id,
+            action="CONTRACT_CREATED",
+            resource_type="CONTRACT",
+            resource_id=contract.id,
+            description=(
+                "Contract created with initial document version."
+            ),
+        )
+
+        AuditService.log(
+            session,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id,
+            contract_id=contract.id,
+            contract_version_id=contract_version.id,
+            action="CONTRACT_VERSION_UPLOADED",
+            resource_type="CONTRACT_VERSION",
+            resource_id=contract_version.id,
+            description=(
+                "Initial contract document uploaded."
+            ),
+            metadata={
+                "filename": document.original_filename,
+                "file_size_bytes": (
+                    document.file_size_bytes
+                ),
+            },
+        )
+
+        session.commit()
+
+        return ContractUploadResponse(
+            contract_version=contract_version,
+            document=document,
+            processing_job=processing_job,
+        )
+
+    except InvalidContractDataError as exc:
+        session.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    except InvalidDocumentError as exc:
+        session.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    except ContractNotFoundForUploadError as exc:
+        session.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    except Exception:
+        session.rollback()
+        raise
 
 
 @router.get(
@@ -210,7 +364,9 @@ def list_contract_versions(
 
         return ContractVersionListResponse(
             items=[
-                ContractVersionResponse.model_validate(version)
+                ContractVersionResponse.model_validate(
+                    version
+                )
                 for version in versions
             ],
         )
@@ -238,7 +394,7 @@ def upload_contract_document(
         max_length=2000,
     ),
 ) -> ContractUploadResponse:
-    """Upload a new document version for a contract."""
+    """Upload a new document version for an existing contract."""
 
     content = file.file.read()
 
@@ -274,9 +430,12 @@ def upload_contract_document(
             description="Contract version uploaded.",
             metadata={
                 "filename": document.original_filename,
-                "file_size_bytes": document.file_size_bytes,
+                "file_size_bytes": (
+                    document.file_size_bytes
+                ),
             },
         )
+
         session.commit()
 
         return ContractUploadResponse(
@@ -286,13 +445,21 @@ def upload_contract_document(
         )
 
     except ContractNotFoundForUploadError as exc:
+        session.rollback()
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),
         ) from exc
 
     except InvalidDocumentError as exc:
+        session.rollback()
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+    except Exception:
+        session.rollback()
+        raise

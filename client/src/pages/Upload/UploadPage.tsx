@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import {
+  type FormEvent,
   useMemo,
   useState,
 } from "react";
@@ -21,16 +22,22 @@ import {
 
 import {
   useContractUpload,
+  useNewContractUpload,
   useProcessingJob,
 } from "../../features/contracts/useContractUpload";
 
-function formatFileSize(bytes: number) {
+
+function formatFileSize(
+  bytes: number,
+) {
   if (bytes < 1024) {
     return `${bytes} B`;
   }
 
   if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(
+      bytes / 1024
+    ).toFixed(1)} KB`;
   }
 
   return `${(
@@ -39,21 +46,38 @@ function formatFileSize(bytes: number) {
   ).toFixed(1)} MB`;
 }
 
+
 function UploadPage() {
   const [searchParams] =
     useSearchParams();
 
   const contractIdFromUrl =
-    searchParams.get("contractId");
+    searchParams.get(
+      "contractId",
+    );
 
-  const [contractId, setContractId] =
-    useState(contractIdFromUrl ?? "");
+  const isNewContract =
+    !contractIdFromUrl;
 
-  const [file, setFile] =
-    useState<File | null>(null);
+  const [contractId] =
+    useState(
+      contractIdFromUrl ?? "",
+    );
+
+  const [title, setTitle] =
+    useState("");
+
+  const [contractType, setContractType] =
+    useState("");
+
+  const [description, setDescription] =
+    useState("");
 
   const [changeSummary, setChangeSummary] =
     useState("");
+
+  const [file, setFile] =
+    useState<File | null>(null);
 
   const [dragActive, setDragActive] =
     useState(false);
@@ -73,11 +97,33 @@ function UploadPage() {
   const uploadMutation =
     useContractUpload();
 
+  const newContractMutation =
+    useNewContractUpload();
+
   const jobQuery =
     useProcessingJob(jobId);
 
+  const selectedContract =
+    useMemo(
+      () =>
+        contractsQuery.data?.items.find(
+          (contract) =>
+            contract.id ===
+            contractId,
+        ),
+      [
+        contractsQuery.data,
+        contractId,
+      ],
+    );
+
+  const activeMutation =
+    isNewContract
+      ? newContractMutation
+      : uploadMutation;
+
   const isProcessing =
-    uploadMutation.isPending ||
+    activeMutation.isPending ||
     (
       Boolean(jobId) &&
       jobQuery.data?.status !==
@@ -88,18 +134,6 @@ function UploadPage() {
         "CANCELLED"
     );
 
-  const selectedContract =
-    useMemo(
-      () =>
-        contractsQuery.data?.items.find(
-          (contract) =>
-            contract.id === contractId,
-        ),
-      [
-        contractsQuery.data,
-        contractId,
-      ],
-    );
 
   function validateFile(
     selectedFile: File,
@@ -123,17 +157,19 @@ function UploadPage() {
       ) ||
       allowedExtensions.some(
         (extension) =>
-          lowerName.endsWith(extension),
+          lowerName.endsWith(
+            extension,
+          ),
       );
 
     if (!validType) {
       return "Only PDF and DOCX files are supported.";
     }
 
-    const maxSize =
-      25 * 1024 * 1024;
-
-    if (selectedFile.size > maxSize) {
+    if (
+      selectedFile.size >
+      25 * 1024 * 1024
+    ) {
       return "File size must be 25 MB or smaller.";
     }
 
@@ -144,6 +180,7 @@ function UploadPage() {
     return null;
   }
 
+
   function handleFile(
     selectedFile: File | null,
   ) {
@@ -152,26 +189,57 @@ function UploadPage() {
     }
 
     const error =
-      validateFile(selectedFile);
+      validateFile(
+        selectedFile,
+      );
 
-    setValidationError(error);
+    setValidationError(
+      error,
+    );
 
     if (!error) {
-      setFile(selectedFile);
+      setFile(
+        selectedFile,
+      );
+
       setJobId(null);
     }
   }
 
+
   async function handleSubmit(
-    event: React.FormEvent,
+    event: FormEvent,
   ) {
     event.preventDefault();
 
     setValidationError(null);
 
-    if (!contractId) {
+    if (
+      isNewContract &&
+      !title.trim()
+    ) {
       setValidationError(
-        "Select a contract first.",
+        "Enter a contract title.",
+      );
+      return;
+    }
+
+    if (
+      isNewContract &&
+      !contractType
+    ) {
+      setValidationError(
+        "Select a contract type.",
+      );
+      return;
+    }
+
+    if (
+      !isNewContract &&
+      !contractId
+    ) {
+      setValidationError(
+        "Contract ID is missing.",
       );
       return;
     }
@@ -183,122 +251,249 @@ function UploadPage() {
       return;
     }
 
-    const error =
+    const fileError =
       validateFile(file);
 
-    if (error) {
-      setValidationError(error);
+    if (fileError) {
+      setValidationError(
+        fileError,
+      );
       return;
     }
 
     try {
       const response =
-        await uploadMutation.mutateAsync({
-          contractId,
-          file,
-          changeSummary,
-        });
+        isNewContract
+          ? await newContractMutation.mutateAsync(
+              {
+                title:
+                  title.trim(),
+                contractType,
+                description,
+                file,
+                changeSummary,
+              },
+            )
+          : await uploadMutation.mutateAsync(
+              {
+                contractId,
+                file,
+                changeSummary,
+              },
+            );
 
       setJobId(
         response.processing_job.id,
       );
+
+      setFile(null);
+      setChangeSummary("");
+
     } catch {
-      // Error is exposed through
-      // uploadMutation.error.
+      // Mutation error is rendered below.
     }
   }
+
 
   const jobStatus =
     jobQuery.data?.status;
 
+
   return (
     <div className="relative min-h-full overflow-hidden">
-      <div className="pointer-events-none absolute right-0 top-0 h-[380px] w-[520px] rounded-full bg-indigo-600/[0.05] blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-0 h-[420px] w-[600px] rounded-full bg-indigo-600/[0.05] blur-3xl" />
 
       <div className="relative mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8">
+
         <div className="mb-7">
           <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-indigo-400">
             Contract Workspace
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-white">
-            Upload Contract
+            {isNewContract
+              ? "Upload New Contract"
+              : "Upload New Version"}
           </h1>
 
           <p className="mt-1.5 text-sm text-slate-500">
-            Upload a new version of an existing contract and start document processing.
+            {isNewContract
+              ? "Create a contract, upload its first document version, and start processing."
+              : "Upload a new document version and continue the contract lifecycle."}
           </p>
         </div>
 
+
         <form
-          onSubmit={handleSubmit}
+          onSubmit={
+            handleSubmit
+          }
           className="space-y-5"
         >
-          {/* Contract */}
-          <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-slate-200">
-                1. Select contract
-              </h2>
 
-              <p className="mt-1 text-[11px] text-slate-600">
-                The uploaded document will become a new version of this contract.
-              </p>
-            </div>
+          {isNewContract ? (
+            <>
+              <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
+                <div className="mb-5">
+                  <h2 className="text-sm font-semibold text-slate-200">
+                    1. Contract information
+                  </h2>
 
-            <select
-              value={contractId}
-              onChange={(event) =>
-                setContractId(
-                  event.target.value,
-                )
-              }
-              disabled={
-                contractsQuery.isLoading ||
-                isProcessing
-              }
-              className="h-11 w-full rounded-lg border border-[#173052] bg-[#050E1D] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
-            >
-              <option value="">
-                Select a contract...
-              </option>
+                  <p className="mt-1 text-[11px] text-slate-600">
+                    Basic metadata for the new contract.
+                  </p>
+                </div>
 
-              {contractsQuery.data?.items.map(
-                (contract) => (
-                  <option
-                    key={contract.id}
-                    value={contract.id}
-                  >
-                    {contract.title}
-                  </option>
-                ),
-              )}
-            </select>
+                <div className="grid gap-4 md:grid-cols-2">
 
-            {selectedContract ? (
-              <div className="mt-3 rounded-lg border border-[#173052] bg-[#050E1D]/70 px-3 py-2.5">
-                <div className="text-xs font-medium text-slate-300">
-                  {selectedContract.title}
+                  <div>
+                    <label className="mb-2 block text-[11px] font-medium text-slate-500">
+                      Contract title
+                    </label>
+
+                    <input
+                      value={title}
+                      onChange={(event) =>
+                        setTitle(
+                          event.target.value,
+                        )
+                      }
+                      disabled={
+                        isProcessing
+                      }
+                      placeholder="Software Services Agreement"
+                      className="h-11 w-full rounded-lg border border-[#173052] bg-[#050E1D] px-3 text-xs text-slate-300 outline-none placeholder:text-slate-700 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
+                    />
+                  </div>
+
+
+                  <div>
+                    <label className="mb-2 block text-[11px] font-medium text-slate-500">
+                      Contract type
+                    </label>
+
+                    <select
+                      value={
+                        contractType
+                      }
+                      onChange={(event) =>
+                        setContractType(
+                          event.target.value,
+                        )
+                      }
+                      disabled={
+                        isProcessing
+                      }
+                      className="h-11 w-full rounded-lg border border-[#173052] bg-[#050E1D] px-3 text-xs text-slate-300 outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
+                    >
+                      <option value="">
+                        Select contract type...
+                      </option>
+
+                      <option value="SERVICE_AGREEMENT">
+                        Service Agreement
+                      </option>
+
+                      <option value="MASTER_SERVICE_AGREEMENT">
+                        Master Service Agreement
+                      </option>
+
+                      <option value="NDA">
+                        Non-Disclosure Agreement
+                      </option>
+
+                      <option value="EMPLOYMENT_AGREEMENT">
+                        Employment Agreement
+                      </option>
+
+                      <option value="VENDOR_AGREEMENT">
+                        Vendor Agreement
+                      </option>
+
+                      <option value="LICENSE_AGREEMENT">
+                        License Agreement
+                      </option>
+
+                      <option value="DATA_PROCESSING_AGREEMENT">
+                        Data Processing Agreement
+                      </option>
+
+                      <option value="OTHER">
+                        Other
+                      </option>
+                    </select>
+                  </div>
+
+                </div>
+
+
+                <div className="mt-4">
+                  <label className="mb-2 block text-[11px] font-medium text-slate-500">
+                    Description
+                  </label>
+
+                  <textarea
+                    value={
+                      description
+                    }
+                    onChange={(event) =>
+                      setDescription(
+                        event.target.value,
+                      )
+                    }
+                    disabled={
+                      isProcessing
+                    }
+                    rows={3}
+                    maxLength={5000}
+                    placeholder="Short description of the agreement..."
+                    className="w-full resize-none rounded-lg border border-[#173052] bg-[#050E1D] px-3 py-3 text-xs text-slate-300 outline-none placeholder:text-slate-700 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
+                  />
+                </div>
+              </section>
+            </>
+          ) : (
+            <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
+
+              <div className="mb-4">
+                <h2 className="text-sm font-semibold text-slate-200">
+                  1. Existing contract
+                </h2>
+
+                <p className="mt-1 text-[11px] text-slate-600">
+                  This document will become a new version of the selected contract.
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-[#173052] bg-[#050E1D] px-4 py-3">
+                <div className="text-xs font-semibold text-slate-300">
+                  {selectedContract?.title ??
+                    "Loading contract..."}
                 </div>
 
                 <div className="mt-1 text-[10px] text-slate-600">
-                  {selectedContract.contract_type}
+                  {selectedContract?.contract_type ??
+                    contractId}
                 </div>
               </div>
-            ) : null}
-          </section>
+            </section>
+          )}
 
-          {/* File */}
+
           <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
+
             <div className="mb-4">
               <h2 className="text-sm font-semibold text-slate-200">
-                2. Contract document
+                {isNewContract
+                  ? "2. Contract document"
+                  : "2. New document version"}
               </h2>
 
               <p className="mt-1 text-[11px] text-slate-600">
                 PDF and DOCX files up to 25 MB are supported.
               </p>
             </div>
+
 
             <label
               onDragEnter={(event) => {
@@ -328,11 +523,14 @@ function UploadPage() {
                   : "border-[#24446C] bg-[#050E1D]/50 hover:border-indigo-500/40 hover:bg-indigo-500/[0.03]"
               }`}
             >
+
               <input
                 type="file"
                 accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 className="hidden"
-                disabled={isProcessing}
+                disabled={
+                  isProcessing
+                }
                 onChange={(event) => {
                   handleFile(
                     event.target.files?.[0] ??
@@ -362,13 +560,19 @@ function UploadPage() {
               <div className="mt-3 text-[10px] text-slate-700">
                 PDF / DOCX · Maximum 25 MB
               </div>
+
             </label>
+
 
             {file ? (
               <div className="mt-4 flex items-center justify-between rounded-lg border border-[#173052] bg-[#050E1D] px-4 py-3">
+
                 <div className="flex min-w-0 items-center gap-3">
+
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
-                    <FileText size={16} />
+                    <FileText
+                      size={16}
+                    />
                   </div>
 
                   <div className="min-w-0">
@@ -382,54 +586,68 @@ function UploadPage() {
                       )}
                     </div>
                   </div>
+
                 </div>
 
                 {!isProcessing ? (
                   <button
                     type="button"
                     onClick={() =>
-                      setFile(null)
+                      setFile(
+                        null,
+                      )
                     }
                     className="text-[10px] text-slate-600 transition hover:text-rose-300"
                   >
                     Remove
                   </button>
                 ) : null}
+
               </div>
             ) : null}
+
           </section>
 
-          {/* Change summary */}
+
           <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
+
             <div className="mb-4">
               <h2 className="text-sm font-semibold text-slate-200">
-                3. Version details
+                {isNewContract
+                  ? "3. Version details"
+                  : "3. Change summary"}
               </h2>
 
               <p className="mt-1 text-[11px] text-slate-600">
-                Optional context for this contract version.
+                Optional context for this document version.
               </p>
             </div>
 
             <textarea
-              value={changeSummary}
+              value={
+                changeSummary
+              }
               onChange={(event) =>
                 setChangeSummary(
                   event.target.value,
                 )
               }
               maxLength={2000}
-              disabled={isProcessing}
+              disabled={
+                isProcessing
+              }
               rows={4}
               placeholder="Example: Updated indemnification and limitation of liability clauses."
-              className="w-full resize-none rounded-lg border border-[#173052] bg-[#050E1D] px-3 py-3 text-xs text-slate-300 outline-none placeholder:text-slate-700 transition focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
+              className="w-full resize-none rounded-lg border border-[#173052] bg-[#050E1D] px-3 py-3 text-xs text-slate-300 outline-none placeholder:text-slate-700 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
             />
+
           </section>
 
-          {/* Error */}
+
           {validationError ||
-          uploadMutation.isError ? (
+          activeMutation.isError ? (
             <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-3">
+
               <XCircle
                 size={17}
                 className="mt-0.5 shrink-0 text-rose-400"
@@ -437,17 +655,23 @@ function UploadPage() {
 
               <div className="text-xs text-rose-300">
                 {validationError ??
-                  (uploadMutation.error instanceof Error
-                    ? uploadMutation.error.message
-                    : "Unable to upload the contract.")}
+                  (
+                    activeMutation.error instanceof
+                    Error
+                      ? activeMutation.error.message
+                      : "Unable to upload the contract."
+                  )}
               </div>
+
             </div>
           ) : null}
 
-          {/* Processing */}
+
           {jobQuery.data ? (
             <div className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5">
+
               <div className="flex items-center gap-3">
+
                 {jobStatus ===
                 "SUCCEEDED" ? (
                   <CheckCircle2
@@ -455,9 +679,9 @@ function UploadPage() {
                     className="text-emerald-400"
                   />
                 ) : jobStatus ===
-                    "FAILED" ||
-                  jobStatus ===
-                    "CANCELLED" ? (
+                      "FAILED" ||
+                    jobStatus ===
+                      "CANCELLED" ? (
                   <XCircle
                     size={19}
                     className="text-rose-400"
@@ -478,27 +702,40 @@ function UploadPage() {
                     {jobStatus}
                   </div>
                 </div>
+
               </div>
 
               {jobQuery.data.error_message ? (
                 <p className="mt-3 text-xs text-rose-300">
-                  {jobQuery.data.error_message}
+                  {
+                    jobQuery.data
+                      .error_message
+                  }
                 </p>
               ) : null}
+
             </div>
           ) : null}
 
-          {/* Submit */}
+
           <div className="flex justify-end">
+
             <button
               type="submit"
               disabled={
                 isProcessing ||
-                !contractId ||
-                !file
+                !file ||
+                (
+                  isNewContract &&
+                  (
+                    !title.trim() ||
+                    !contractType
+                  )
+                )
               }
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-5 text-xs font-semibold text-indigo-200 transition hover:bg-indigo-500/15 disabled:cursor-not-allowed disabled:opacity-40"
             >
+
               {isProcessing ? (
                 <>
                   <LoaderCircle
@@ -514,15 +751,21 @@ function UploadPage() {
                     size={16}
                   />
 
-                  Upload Contract
+                  {isNewContract
+                    ? "Create & Upload Contract"
+                    : "Upload New Version"}
                 </>
               )}
+
             </button>
+
           </div>
+
         </form>
       </div>
     </div>
   );
 }
+
 
 export default UploadPage;

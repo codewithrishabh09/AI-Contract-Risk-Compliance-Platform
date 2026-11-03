@@ -121,7 +121,8 @@ export async function apiRequest<T>(
   const contentType =
     response.headers.get("content-type") || "";
 
-  let responseData: unknown;
+  // eslint-disable-next-line no-useless-assignment
+  let responseData: unknown = null;
 
   if (contentType.includes("application/json")) {
     responseData = await response.json();

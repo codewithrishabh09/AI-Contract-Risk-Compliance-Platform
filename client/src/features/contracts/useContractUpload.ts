@@ -1,4 +1,9 @@
 import {
+  useEffect,
+  useRef,
+} from "react";
+
+import {
   useMutation,
   useQuery,
   useQueryClient,
@@ -11,6 +16,7 @@ import {
 } from "../../lib/api/contractUploadApi";
 
 import { DASHBOARD_QUERY_KEY } from "../dashboard/useDashboard";
+
 
 export function useContractUpload() {
   const queryClient = useQueryClient();
@@ -36,22 +42,18 @@ export function useContractUpload() {
         response.contract_version.contract_id;
 
       await Promise.all([
-        // Refresh all-contracts data.
         queryClient.invalidateQueries({
           queryKey: ["contracts"],
         }),
 
-        // Refresh organization dashboard.
         queryClient.invalidateQueries({
           queryKey: DASHBOARD_QUERY_KEY,
         }),
 
-        // Refresh selected contract.
         queryClient.invalidateQueries({
           queryKey: ["contract", contractId],
         }),
 
-        // Refresh contract versions.
         queryClient.invalidateQueries({
           queryKey: [
             "contract-versions",
@@ -59,7 +61,6 @@ export function useContractUpload() {
           ],
         }),
 
-        // Refresh processing jobs.
         queryClient.invalidateQueries({
           queryKey: ["processing-jobs"],
         }),
@@ -99,23 +100,18 @@ export function useNewContractUpload() {
         response.contract_version.contract_id;
 
       await Promise.all([
-        // New contract changes total contract count.
         queryClient.invalidateQueries({
           queryKey: ["contracts"],
         }),
 
-        // New contract must immediately appear
-        // in dashboard metrics/recent contracts.
         queryClient.invalidateQueries({
           queryKey: DASHBOARD_QUERY_KEY,
         }),
 
-        // Refresh the newly created contract.
         queryClient.invalidateQueries({
           queryKey: ["contract", contractId],
         }),
 
-        // Refresh its versions.
         queryClient.invalidateQueries({
           queryKey: [
             "contract-versions",
@@ -123,7 +119,6 @@ export function useNewContractUpload() {
           ],
         }),
 
-        // Refresh processing jobs.
         queryClient.invalidateQueries({
           queryKey: ["processing-jobs"],
         }),
@@ -136,7 +131,13 @@ export function useNewContractUpload() {
 export function useProcessingJob(
   jobId: string | null,
 ) {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const lastInvalidatedStatus = useRef<
+    string | null
+  >(null);
+
+  const query = useQuery({
     queryKey: ["processing-job", jobId],
 
     queryFn: () =>
@@ -159,4 +160,44 @@ export function useProcessingJob(
       return 2_000;
     },
   });
+
+  useEffect(() => {
+    const status = query.data?.status;
+
+    const isTerminal =
+      status === "SUCCEEDED" ||
+      status === "FAILED" ||
+      status === "CANCELLED";
+
+    if (!isTerminal) {
+      return;
+    }
+
+    if (
+      lastInvalidatedStatus.current === status
+    ) {
+      return;
+    }
+
+    lastInvalidatedStatus.current = status;
+
+    void Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: DASHBOARD_QUERY_KEY,
+      }),
+
+      queryClient.invalidateQueries({
+        queryKey: ["contracts"],
+      }),
+
+      queryClient.invalidateQueries({
+        queryKey: ["processing-jobs"],
+      }),
+    ]);
+  }, [
+    query.data?.status,
+    queryClient,
+  ]);
+
+  return query;
 }

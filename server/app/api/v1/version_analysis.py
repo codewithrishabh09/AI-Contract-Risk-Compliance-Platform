@@ -22,6 +22,7 @@ router = APIRouter(
     tags=["Contract Versions"],
 )
 
+
 RiskTrendViewer = Annotated[
     User,
     Depends(
@@ -32,28 +33,35 @@ RiskTrendViewer = Annotated[
     ),
 ]
 
+
 @router.get(
-    "/{contract_id}/versions/{version_id}/risk-trend", 
+    "/{contract_id}/versions/{version_id}/risk-trend",
     response_model=ContractRiskTrendResponse,
 )
 def get_contract_risk_trend(
     contract_id: uuid.UUID,
-    version_id: uuid.UUID, 
+    version_id: uuid.UUID,
     current_user: RiskTrendViewer,
     session: Session = Depends(get_db),
 ):
-    
+    # The risk trend is calculated at the contract level
+    # across its versions. The service therefore does not
+    # require version_id.
+    #
+    # version_id remains part of the route for compatibility
+    # with the existing frontend/API contract.
+    _ = version_id
+
     result = VersionAnalysisService.get_risk_trend(
         session,
         organization_id=current_user.organization_id,
         contract_id=contract_id,
-        version_id=version_id, 
     )
 
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Contract or Version not found.",
+            detail="Contract not found.",
         )
 
     return result

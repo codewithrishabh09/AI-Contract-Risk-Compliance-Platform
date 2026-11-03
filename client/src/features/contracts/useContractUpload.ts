@@ -10,9 +10,10 @@ import {
   uploadNewContract,
 } from "../../lib/api/contractUploadApi";
 
+import { DASHBOARD_QUERY_KEY } from "../dashboard/useDashboard";
+
 export function useContractUpload() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -30,32 +31,35 @@ export function useContractUpload() {
         changeSummary,
       ),
 
-    onSuccess: async (
-      response,
-    ) => {
+    onSuccess: async (response) => {
+      const contractId =
+        response.contract_version.contract_id;
+
       await Promise.all([
+        // Refresh all-contracts data.
         queryClient.invalidateQueries({
           queryKey: ["contracts"],
         }),
 
+        // Refresh organization dashboard.
         queryClient.invalidateQueries({
-          queryKey: ["dashboard"],
+          queryKey: DASHBOARD_QUERY_KEY,
         }),
 
+        // Refresh selected contract.
         queryClient.invalidateQueries({
-          queryKey: [
-            "contract",
-            response.contract_version.contract_id,
-          ],
+          queryKey: ["contract", contractId],
         }),
 
+        // Refresh contract versions.
         queryClient.invalidateQueries({
           queryKey: [
             "contract-versions",
-            response.contract_version.contract_id,
+            contractId,
           ],
         }),
 
+        // Refresh processing jobs.
         queryClient.invalidateQueries({
           queryKey: ["processing-jobs"],
         }),
@@ -66,8 +70,7 @@ export function useContractUpload() {
 
 
 export function useNewContractUpload() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -91,34 +94,38 @@ export function useNewContractUpload() {
         changeSummary,
       ),
 
-    onSuccess: async (
-      response,
-    ) => {
+    onSuccess: async (response) => {
       const contractId =
         response.contract_version.contract_id;
 
       await Promise.all([
+        // New contract changes total contract count.
         queryClient.invalidateQueries({
           queryKey: ["contracts"],
         }),
 
+        // New contract must immediately appear
+        // in dashboard metrics/recent contracts.
         queryClient.invalidateQueries({
-          queryKey: ["dashboard"],
+          queryKey: DASHBOARD_QUERY_KEY,
         }),
 
-        queryClient.invalidateQueries({
-          queryKey: ["processing-jobs"],
-        }),
-
+        // Refresh the newly created contract.
         queryClient.invalidateQueries({
           queryKey: ["contract", contractId],
         }),
 
+        // Refresh its versions.
         queryClient.invalidateQueries({
           queryKey: [
             "contract-versions",
             contractId,
           ],
+        }),
+
+        // Refresh processing jobs.
+        queryClient.invalidateQueries({
+          queryKey: ["processing-jobs"],
         }),
       ]);
     },
@@ -130,21 +137,14 @@ export function useProcessingJob(
   jobId: string | null,
 ) {
   return useQuery({
-    queryKey: [
-      "processing-job",
-      jobId,
-    ],
+    queryKey: ["processing-job", jobId],
 
     queryFn: () =>
-      getProcessingJobStatus(
-        jobId!,
-      ),
+      getProcessingJobStatus(jobId!),
 
     enabled: Boolean(jobId),
 
-    refetchInterval: (
-      query,
-    ) => {
+    refetchInterval: (query) => {
       const status =
         query.state.data?.status;
 
@@ -156,7 +156,7 @@ export function useProcessingJob(
         return false;
       }
 
-      return 2000;
+      return 2_000;
     },
   });
 }

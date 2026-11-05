@@ -18,6 +18,7 @@ import ContractDetailPage from "../pages/Contracts/ContractDetailPage";
 
 import UploadPage from "../pages/Upload/UploadPage";
 import AnalysisPage from "../pages/Analysis/AnalysisPage";
+import FindingsPage from "../pages/Findings/FindingsPage";
 
 export default function AppRoutes() {
   return (
@@ -27,8 +28,15 @@ export default function AppRoutes() {
         <Route path="/" element={<HomePage />} />
 
         <Route element={<PublicOnlyRoute />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/login"
+            element={<LoginPage />}
+          />
+
+          <Route
+            path="/register"
+            element={<RegisterPage />}
+          />
         </Route>
       </Route>
 
@@ -60,22 +68,17 @@ export default function AppRoutes() {
             element={<UploadPage />}
           />
 
-          {/* AI Analysis Workspace */}
           <Route
             path="/analysis"
             element={<AnalysisPage />}
           />
 
-          {/* Remaining workspaces */}
           <Route
             path="/findings"
-            element={
-              <div className="p-8 text-slate-300">
-                Risk Findings
-              </div>
-            }
+            element={<FindingsPage />}
           />
 
+          {/* Remaining workspaces */}
           <Route
             path="/risk-trends"
             element={

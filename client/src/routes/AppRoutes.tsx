@@ -1,14 +1,10 @@
-import {
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import PublicLayout from "../layouts/PublicLayout";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import PublicOnlyRoute from "../components/auth/PublicOnlyRoute";
-
-import DashboardLayout from "../layouts/DashboardLayout";
-import PublicLayout from "../layouts/PublicLayout";
 
 import HomePage from "../pages/Home/HomePage";
 import LoginPage from "../pages/Auth/LoginPage";
@@ -16,31 +12,23 @@ import RegisterPage from "../pages/Auth/RegisterPage";
 
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
+
 import ContractsPage from "../pages/Contracts/ContractsPage";
 import ContractDetailPage from "../pages/Contracts/ContractDetailPage";
-import UploadPage from "../pages/Upload/UploadPage";
 
-function AppRoutes() {
+import UploadPage from "../pages/Upload/UploadPage";
+import AnalysisPage from "../pages/Analysis/AnalysisPage";
+
+export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public website */}
+      {/* Public routes */}
       <Route element={<PublicLayout />}>
-        <Route
-          path="/"
-          element={<HomePage />}
-        />
+        <Route path="/" element={<HomePage />} />
 
-        {/* Login / Register only for logged-out users */}
         <Route element={<PublicOnlyRoute />}>
-          <Route
-            path="/login"
-            element={<LoginPage />}
-          />
-
-          <Route
-            path="/register"
-            element={<RegisterPage />}
-          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Route>
       </Route>
 
@@ -72,15 +60,13 @@ function AppRoutes() {
             element={<UploadPage />}
           />
 
+          {/* AI Analysis Workspace */}
           <Route
             path="/analysis"
-            element={
-              <div className="p-8 text-slate-300">
-                AI Analysis
-              </div>
-            }
+            element={<AnalysisPage />}
           />
 
+          {/* Remaining workspaces */}
           <Route
             path="/findings"
             element={
@@ -140,15 +126,8 @@ function AppRoutes() {
       {/* Fallback */}
       <Route
         path="*"
-        element={
-          <Navigate
-            to="/"
-            replace
-          />
-        }
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   );
 }
-
-export default AppRoutes;

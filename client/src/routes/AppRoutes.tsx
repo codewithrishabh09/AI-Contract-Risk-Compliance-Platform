@@ -15,6 +15,7 @@ import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 
 import DashboardPage from "../pages/Dashboard/DashboardPage";
+import ProfilePage from "../pages/Profile/ProfilePage";
 import ContractsPage from "../pages/Contracts/ContractsPage";
 import ContractDetailPage from "../pages/Contracts/ContractDetailPage";
 import UploadPage from "../pages/Upload/UploadPage";
@@ -49,6 +50,11 @@ function AppRoutes() {
           <Route
             path="/dashboard"
             element={<DashboardPage />}
+          />
+
+          <Route
+            path="/profile"
+            element={<ProfilePage />}
           />
 
           <Route

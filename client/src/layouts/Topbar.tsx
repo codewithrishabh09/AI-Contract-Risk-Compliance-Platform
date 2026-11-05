@@ -1,11 +1,17 @@
 import {
   Bell,
   Command,
+  Home,
+  LogOut,
   Menu,
   Search,
   ShieldCheck,
   Sun,
+  UserRound,
 } from "lucide-react";
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -42,7 +48,11 @@ function formatRole(role: string): string {
 }
 
 function Topbar({ onMenuClick }: TopbarProps) {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const [profileMenuOpen, setProfileMenuOpen] =
+    useState(false);
 
   const fullName = user?.full_name?.trim() || "User";
 
@@ -130,24 +140,100 @@ function Topbar({ onMenuClick }: TopbarProps) {
         </button>
 
         {/* Authenticated User */}
-        <button
-          type="button"
-          className="hidden items-center gap-2.5 rounded-lg p-1.5 pr-2 transition hover:bg-white/5 sm:flex"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-[11px] font-bold text-white">
-            {initials}
-          </div>
-
-          <div className="hidden text-left lg:block">
-            <div className="max-w-[160px] truncate text-[11px] font-semibold text-slate-200">
-              {fullName}
+        <div className="relative hidden sm:block">
+          <button
+            type="button"
+            onClick={() =>
+              setProfileMenuOpen(
+                (current) => !current,
+              )
+            }
+            className="flex items-center gap-2.5 rounded-lg p-1.5 pr-2 transition hover:bg-white/5"
+            aria-expanded={profileMenuOpen}
+            aria-haspopup="menu"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-[11px] font-bold text-white">
+              {initials}
             </div>
 
-            <div className="text-[10px] text-slate-500">
-              {role}
+            <div className="hidden text-left lg:block">
+              <div className="max-w-[160px] truncate text-[11px] font-semibold text-slate-200">
+                {fullName}
+              </div>
+
+              <div className="text-[10px] text-slate-500">
+                {role}
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+
+          {profileMenuOpen ? (
+            <div
+              role="menu"
+              className="absolute right-0 top-[calc(100%+10px)] z-50 w-[250px] overflow-hidden rounded-xl border border-[#173052] bg-[#071426] shadow-2xl shadow-black/40"
+            >
+              {/* User identity */}
+              <div className="border-b border-[#173052] px-4 py-3">
+                <p className="truncate text-xs font-semibold text-slate-200">
+                  {fullName}
+                </p>
+
+                <p className="mt-1 truncate text-[10px] text-slate-600">
+                  {user?.email}
+                </p>
+              </div>
+
+              <div className="p-1.5">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate("/profile");
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs text-slate-400 transition hover:bg-white/5 hover:text-white"
+                >
+                  <UserRound size={15} />
+
+                  Profile
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate("/");
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs text-slate-400 transition hover:bg-white/5 hover:text-white"
+                >
+                  <Home size={15} />
+
+                  Homepage
+                </button>
+              </div>
+
+              <div className="border-t border-[#173052] p-1.5">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    logout();
+                    navigate("/", {
+                      replace: true,
+                    });
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300"
+                >
+                  <LogOut size={15} />
+
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
     </header>
   );

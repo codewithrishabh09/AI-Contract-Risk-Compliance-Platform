@@ -19,13 +19,17 @@ import ContractDetailPage from "../pages/Contracts/ContractDetailPage";
 import UploadPage from "../pages/Upload/UploadPage";
 import AnalysisPage from "../pages/Analysis/AnalysisPage";
 import FindingsPage from "../pages/Findings/FindingsPage";
+import RiskTrendsPage from "../pages/RiskTrends/RiskTrendsPage";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Public routes */}
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={<HomePage />}
+        />
 
         <Route element={<PublicOnlyRoute />}>
           <Route
@@ -78,16 +82,12 @@ export default function AppRoutes() {
             element={<FindingsPage />}
           />
 
-          {/* Remaining workspaces */}
           <Route
             path="/risk-trends"
-            element={
-              <div className="p-8 text-slate-300">
-                Risk Trends
-              </div>
-            }
+            element={<RiskTrendsPage />}
           />
 
+          {/* Remaining workspaces */}
           <Route
             path="/compliance"
             element={
@@ -129,7 +129,12 @@ export default function AppRoutes() {
       {/* Fallback */}
       <Route
         path="*"
-        element={<Navigate to="/" replace />}
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
       />
     </Routes>
   );

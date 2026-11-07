@@ -21,6 +21,7 @@ export interface ContractListResponse {
 }
 
 export interface ContractDetail {
+  versions: any[];
   id: string;
   organization_id: string;
   created_by: string;

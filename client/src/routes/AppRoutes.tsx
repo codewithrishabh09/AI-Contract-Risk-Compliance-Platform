@@ -20,6 +20,7 @@ import UploadPage from "../pages/Upload/UploadPage";
 import AnalysisPage from "../pages/Analysis/AnalysisPage";
 import FindingsPage from "../pages/Findings/FindingsPage";
 import RiskTrendsPage from "../pages/RiskTrends/RiskTrendsPage";
+import CompliancePage from "../pages/Compliance/CompliancePage";
 
 export default function AppRoutes() {
   return (
@@ -87,16 +88,12 @@ export default function AppRoutes() {
             element={<RiskTrendsPage />}
           />
 
-          {/* Remaining workspaces */}
           <Route
             path="/compliance"
-            element={
-              <div className="p-8 text-slate-300">
-                Compliance
-              </div>
-            }
+            element={<CompliancePage />}
           />
 
+          {/* Remaining workspaces */}
           <Route
             path="/audit"
             element={

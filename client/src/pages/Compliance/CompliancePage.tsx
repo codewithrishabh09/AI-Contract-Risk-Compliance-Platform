@@ -1,158 +1,406 @@
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+  type ChangeEvent,
+} from "react";
 
 import { useContracts } from "../../features/contracts/useContracts";
 import { useContractDetail } from "../../features/contracts/useContractDetail";
-import { useContractCompliance } from "../../features/contracts/useContractCompliance";
+import { useComplianceOverview } from "../../features/compliance/useCompliance";
+import { useRiskFindings } from "../../features/contracts/useContractAnalysis";
 
-function formatCategory(category: string) {
-  return category
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (character) => character.toUpperCase());
+import type { RiskFinding } from "../../types/analysis";
+import type { ComplianceCategory } from "../../types/compliance";
+
+import "./CompliancePage.css";
+
+function formatLabel(value: string | null | undefined) {
+  if (!value) {
+    return "—";
+  }
+
+  return value
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function getHealthLabel(
-  riskLevel: string | null,
-  analysisStatus: string | null,
+function formatScore(score: number | null) {
+  if (score === null) {
+    return "—";
+  }
+
+  return Number(score).toFixed(1);
+}
+
+function getSeverityClass(
+  severity: string | null | undefined,
 ) {
-  if (!analysisStatus) {
-    return {
-      label: "Not Analyzed",
-      description: "Run an analysis to evaluate compliance health.",
-    };
-  }
-
-  if (analysisStatus !== "COMPLETED") {
-    return {
-      label: "Analysis Pending",
-      description: "Compliance health is not available yet.",
-    };
-  }
-
-  switch (riskLevel) {
+  switch (severity?.toUpperCase()) {
     case "CRITICAL":
-      return {
-        label: "At Risk",
-        description: "Critical compliance issues require immediate attention.",
-      };
+      return "compliance-severity-critical";
 
     case "HIGH":
-      return {
-        label: "Needs Review",
-        description: "High-risk findings require legal or compliance review.",
-      };
+      return "compliance-severity-high";
 
     case "MEDIUM":
-      return {
-        label: "Needs Review",
-        description: "Some compliance issues should be reviewed.",
-      };
+      return "compliance-severity-medium";
 
     case "LOW":
-      return {
-        label: "Healthy",
-        description: "No major risk indicators were detected.",
-      };
+      return "compliance-severity-low";
 
     default:
-      return {
-        label: "Review Required",
-        description: "Review the available findings.",
-      };
+      return "compliance-severity-neutral";
   }
+}
+
+function getStatusClass(status: string) {
+  switch (status.toUpperCase()) {
+    case "OPEN":
+      return "compliance-status-open";
+
+    case "ACCEPTED":
+      return "compliance-status-accepted";
+
+    case "MITIGATED":
+      return "compliance-status-mitigated";
+
+    case "DISMISSED":
+      return "compliance-status-dismissed";
+
+    default:
+      return "compliance-status-neutral";
+  }
+}
+
+function OverviewCard({
+  label,
+  value,
+  description,
+  danger = false,
+}: {
+  label: string;
+  value: string | number;
+  description: string;
+  danger?: boolean;
+}) {
+  return (
+    <div
+      className={`compliance-overview-card ${
+        danger ? "compliance-overview-card-danger" : ""
+      }`}
+    >
+      <div className="compliance-card-label">
+        {label}
+      </div>
+
+      <div className="compliance-card-value">
+        {value}
+      </div>
+
+      <div className="compliance-card-description">
+        {description}
+      </div>
+    </div>
+  );
+}
+
+function SeverityBadge({
+  severity,
+}: {
+  severity: string;
+}) {
+  return (
+    <span
+      className={`compliance-severity-badge ${getSeverityClass(
+        severity,
+      )}`}
+    >
+      {severity}
+    </span>
+  );
+}
+
+function StatusBadge({
+  status,
+}: {
+  status: string;
+}) {
+  return (
+    <span
+      className={`compliance-status-badge ${getStatusClass(
+        status,
+      )}`}
+    >
+      {formatLabel(status)}
+    </span>
+  );
+}
+
+function CategoryTable({
+  categories,
+}: {
+  categories: ComplianceCategory[];
+}) {
+  if (categories.length === 0) {
+    return (
+      <div className="compliance-empty-state">
+        No compliance category data is available for this
+        version.
+      </div>
+    );
+  }
+
+  return (
+    <div className="compliance-table-container">
+      <table className="compliance-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Total</th>
+            <th>Critical</th>
+            <th>High</th>
+            <th>Medium</th>
+            <th>Low</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {categories.map((category) => (
+            <tr key={category.category}>
+              <td>
+                <span className="compliance-category-name">
+                  {formatLabel(category.category)}
+                </span>
+              </td>
+
+              <td>
+                <span className="compliance-total-count">
+                  {category.total}
+                </span>
+              </td>
+
+              <td>
+                <span className="compliance-count-critical">
+                  {category.critical}
+                </span>
+              </td>
+
+              <td>
+                <span className="compliance-count-high">
+                  {category.high}
+                </span>
+              </td>
+
+              <td>
+                <span className="compliance-count-medium">
+                  {category.medium}
+                </span>
+              </td>
+
+              <td>
+                <span className="compliance-count-low">
+                  {category.low}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function FindingsTable({
+  findings,
+}: {
+  findings: RiskFinding[];
+}) {
+  if (findings.length === 0) {
+    return (
+      <div className="compliance-empty-state">
+        No compliance findings were found for this version.
+      </div>
+    );
+  }
+
+  return (
+    <div className="compliance-table-container">
+      <table className="compliance-table compliance-findings-table">
+        <thead>
+          <tr>
+            <th>Finding</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Recommendation</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {findings.map((finding) => (
+            <tr key={finding.id}>
+              <td>
+                <div className="compliance-finding-title">
+                  {finding.title}
+                </div>
+
+                <div className="compliance-finding-description">
+                  {finding.description}
+                </div>
+
+                <div className="compliance-finding-category">
+                  {formatLabel(finding.category)}
+                </div>
+              </td>
+
+              <td>
+                <SeverityBadge
+                  severity={finding.severity}
+                />
+              </td>
+
+              <td>
+                <StatusBadge status={finding.status} />
+              </td>
+
+              <td>
+                <div className="compliance-recommendation">
+                  {finding.recommendation ||
+                    "No recommendation provided."}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default function CompliancePage() {
-  const [selectedContractId, setSelectedContractId] = useState("");
-  const [selectedVersionId, setSelectedVersionId] = useState("");
-
   const contractsQuery = useContracts({
     page: 1,
     page_size: 100,
   });
 
-  const { contractQuery } = useContractDetail(selectedContractId);
-
-  const complianceQuery = useContractCompliance(
-    selectedContractId,
-    selectedVersionId || null,
-  );
-
   const contracts = contractsQuery.data?.items ?? [];
 
-  const contractDetail = contractQuery.data;
+  const [selectedContractId, setSelectedContractId] =
+    useState("");
 
-  const versions = useMemo(
-    () => contractDetail?.versions ?? [],
-    [contractDetail],
+  const effectiveContractId =
+    selectedContractId || contracts[0]?.id || "";
+
+  const { versionsQuery } =
+    useContractDetail(effectiveContractId);
+
+  const versions = versionsQuery.data?.items ?? [];
+
+  const [selectedVersionId, setSelectedVersionId] =
+    useState("");
+
+  const effectiveVersionId =
+    selectedVersionId || versions[0]?.id || null;
+
+  const complianceQuery = useComplianceOverview(
+    effectiveContractId,
+    effectiveVersionId,
   );
 
-  const selectedVersion = useMemo(
-    () =>
-      versions.find(
-        (version) => version.id === selectedVersionId,
-      ) ?? null,
-    [versions, selectedVersionId],
+  const findingsQuery = useRiskFindings(
+    effectiveContractId,
+    effectiveVersionId,
   );
 
-  const dashboard = complianceQuery.data;
-
-  const health = getHealthLabel(
-    dashboard?.risk_level ?? null,
-    dashboard?.analysis_status ?? null,
+  const findings = useMemo(
+    () => findingsQuery.data?.items ?? [],
+    [findingsQuery.data],
   );
 
-  const handleContractChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const contractId = event.target.value;
+  const compliance = complianceQuery.data;
 
-    setSelectedContractId(contractId);
+  function handleContractChange(
+    event: ChangeEvent<HTMLSelectElement>,
+  ) {
+    setSelectedContractId(event.target.value);
     setSelectedVersionId("");
-  };
+  }
 
-  const handleVersionChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  function handleVersionChange(
+    event: ChangeEvent<HTMLSelectElement>,
+  ) {
     setSelectedVersionId(event.target.value);
-  };
+  }
+
+  if (contractsQuery.isLoading) {
+    return (
+      <div className="compliance-page">
+        <div className="compliance-state">
+          Loading compliance workspace...
+        </div>
+      </div>
+    );
+  }
+
+  if (contractsQuery.isError) {
+    return (
+      <div className="compliance-page">
+        <div className="compliance-state compliance-state-error">
+          Unable to load contracts. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  if (contracts.length === 0) {
+    return (
+      <div className="compliance-page">
+        <div className="compliance-header">
+          <div>
+            <div className="compliance-eyebrow">
+              COMPLIANCE
+            </div>
+
+            <h1>Compliance Workspace</h1>
+
+            <p>
+              Review contract compliance posture, risk
+              categories, and outstanding findings.
+            </p>
+          </div>
+        </div>
+
+        <div className="compliance-state">
+          No contracts are available for compliance review.
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
-          Compliance
-        </p>
+    <div className="compliance-page">
+      <header className="compliance-header">
+        <div className="compliance-header-content">
+          <div className="compliance-eyebrow">
+            COMPLIANCE
+          </div>
 
-        <h1 className="mt-2 text-3xl font-semibold text-white">
-          Compliance Workspace
-        </h1>
+          <h1>Compliance Workspace</h1>
 
-        <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Review contract compliance health, risk indicators, and
-          finding distribution across the selected contract version.
-        </p>
-      </div>
+          <p>
+            Review contractual risk, compliance categories,
+            and unresolved findings.
+          </p>
+        </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-xl">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="compliance-contract"
-              className="mb-2 block text-sm font-medium text-slate-300"
-            >
-              Contract
-            </label>
+        <div className="compliance-selectors">
+          <label className="compliance-selector">
+            <span>Contract</span>
 
             <select
-              id="compliance-contract"
-              value={selectedContractId}
+              value={effectiveContractId}
               onChange={handleContractChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-slate-500"
             >
-              <option value="">
-                Select a contract
-              </option>
-
               {contracts.map((contract) => (
                 <option
                   key={contract.id}
@@ -162,30 +410,16 @@ export default function CompliancePage() {
                 </option>
               ))}
             </select>
-          </div>
+          </label>
 
-          <div>
-            <label
-              htmlFor="compliance-version"
-              className="mb-2 block text-sm font-medium text-slate-300"
-            >
-              Version
-            </label>
+          <label className="compliance-selector">
+            <span>Version</span>
 
             <select
-              id="compliance-version"
-              value={selectedVersionId}
+              value={effectiveVersionId ?? ""}
               onChange={handleVersionChange}
-              disabled={
-                !selectedContractId ||
-                contractQuery.isLoading
-              }
-              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={versionsQuery.isLoading}
             >
-              <option value="">
-                Select a version
-              </option>
-
               {versions.map((version) => (
                 <option
                   key={version.id}
@@ -195,318 +429,168 @@ export default function CompliancePage() {
                 </option>
               ))}
             </select>
-          </div>
+          </label>
         </div>
-      </div>
+      </header>
 
-      {contractsQuery.isLoading && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-8 text-sm text-slate-400">
-          Loading contracts...
-        </div>
-      )}
-
-      {contractsQuery.isError && (
-        <div className="rounded-2xl border border-red-900/50 bg-red-950/20 p-6 text-sm text-red-300">
-          Unable to load contracts.
+      {versionsQuery.isLoading && (
+        <div className="compliance-state">
+          Loading contract versions...
         </div>
       )}
 
-      {selectedContractId &&
-        contractQuery.isError && (
-          <div className="rounded-2xl border border-red-900/50 bg-red-950/20 p-6 text-sm text-red-300">
-            Unable to load contract versions.
+      {!versionsQuery.isLoading &&
+        versions.length === 0 && (
+          <div className="compliance-state">
+            No versions are available for this contract.
           </div>
         )}
 
-      {selectedVersionId &&
-        complianceQuery.isLoading && (
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-8 text-sm text-slate-400">
-            Loading compliance data...
+      {complianceQuery.isLoading &&
+        effectiveVersionId && (
+          <div className="compliance-state">
+            Loading compliance analysis...
           </div>
         )}
 
-      {selectedVersionId &&
-        complianceQuery.isError && (
-          <div className="rounded-2xl border border-red-900/50 bg-red-950/20 p-6 text-sm text-red-300">
-            Unable to load compliance data for this contract
-            version.
-          </div>
-        )}
+      {complianceQuery.isError && (
+        <div className="compliance-state compliance-state-error">
+          Unable to load compliance data for this contract
+          version.
+        </div>
+      )}
 
-      {selectedVersionId && dashboard && (
+      {compliance && (
         <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-              <p className="text-sm text-slate-500">
-                Compliance Health
-              </p>
-
-              <p className="mt-3 text-2xl font-semibold text-white">
-                {health.label}
-              </p>
-
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                {health.description}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-              <p className="text-sm text-slate-500">
-                Overall Risk Score
-              </p>
-
-              <p className="mt-3 text-3xl font-semibold text-white">
-                {dashboard.overall_risk_score ?? "—"}
-              </p>
-
-              <p className="mt-2 text-xs text-slate-500">
-                Risk level:{" "}
-                {dashboard.risk_level ?? "Not available"}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-              <p className="text-sm text-slate-500">
-                Open Findings
-              </p>
-
-              <p className="mt-3 text-3xl font-semibold text-white">
-                {dashboard.open_findings}
-              </p>
-
-              <p className="mt-2 text-xs text-slate-500">
-                Total findings: {dashboard.total_findings}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-              <p className="text-sm text-slate-500">
-                High / Critical
-              </p>
-
-              <p className="mt-3 text-3xl font-semibold text-white">
-                {dashboard.high_risk_findings +
-                  dashboard.critical_findings}
-              </p>
-
-              <p className="mt-2 text-xs text-slate-500">
-                Requires closer review
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-xl">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <section className="compliance-section">
+            <div className="compliance-section-header">
               <div>
-                <p className="text-sm uppercase tracking-[0.16em] text-slate-500">
-                  Assessment
-                </p>
+                <div className="compliance-section-eyebrow">
+                  OVERVIEW
+                </div>
 
-                <h2 className="mt-2 text-xl font-semibold text-white">
-                  {dashboard.contract_title}
-                </h2>
+                <h2>Compliance Overview</h2>
               </div>
 
-              <div className="text-sm text-slate-500">
-                {selectedVersion
-                  ? `Version ${selectedVersion.version_number}`
-                  : "Selected version"}
-              </div>
-            </div>
+              <div className="compliance-context">
+                <strong>
+                  {compliance.contract_title}
+                </strong>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Contract Type
-                </p>
-                <p className="mt-2 text-sm font-medium text-white">
-                  {dashboard.contract_type}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Contract Status
-                </p>
-                <p className="mt-2 text-sm font-medium text-white">
-                  {dashboard.contract_status}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Analysis Status
-                </p>
-                <p className="mt-2 text-sm font-medium text-white">
-                  {dashboard.analysis_status ?? "Not analyzed"}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Critical Findings
-                </p>
-                <p className="mt-2 text-sm font-medium text-red-400">
-                  {dashboard.critical_findings}
-                </p>
+                <span>
+                  {formatLabel(compliance.contract_type)}
+                </span>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-xl">
-            <div>
-              <p className="text-sm uppercase tracking-[0.16em] text-slate-500">
-                Risk Distribution
-              </p>
+            <div className="compliance-overview-grid">
+              <OverviewCard
+                label="Compliance Score"
+                value={formatScore(
+                  compliance.overall_risk_score,
+                )}
+                description="Overall contract risk score"
+              />
 
-              <h2 className="mt-2 text-xl font-semibold text-white">
-                Compliance Categories
-              </h2>
+              <div className="compliance-overview-card">
+                <div className="compliance-card-label">
+                  Overall Status
+                </div>
 
-              <p className="mt-2 text-sm text-slate-500">
-                Finding distribution across the analyzed contract.
-              </p>
+                <div className="compliance-status-value">
+                  <span
+                    className={`compliance-severity-badge ${getSeverityClass(
+                      compliance.risk_level,
+                    )}`}
+                  >
+                    {compliance.risk_level ||
+                      "UNASSESSED"}
+                  </span>
+                </div>
+
+                <div className="compliance-card-description">
+                  Analysis:{" "}
+                  {formatLabel(
+                    compliance.analysis_status,
+                  )}
+                </div>
+              </div>
+
+              <OverviewCard
+                label="Open Findings"
+                value={compliance.open_findings}
+                description="Findings requiring attention"
+                danger={compliance.open_findings > 0}
+              />
+
+              <OverviewCard
+                label="Critical Findings"
+                value={compliance.critical_findings}
+                description="Critical compliance risks"
+                danger={
+                  compliance.critical_findings > 0
+                }
+              />
+
+              <OverviewCard
+                label="High Findings"
+                value={compliance.high_risk_findings}
+                description="High severity risks"
+                danger={
+                  compliance.high_risk_findings > 0
+                }
+              />
+            </div>
+          </section>
+
+          <section className="compliance-section">
+            <div className="compliance-section-header">
+              <div>
+                <div className="compliance-section-eyebrow">
+                  RISK DISTRIBUTION
+                </div>
+
+                <h2>Compliance Categories</h2>
+              </div>
+
+              <span className="compliance-section-meta">
+                {compliance.total_findings} total findings
+              </span>
             </div>
 
-            {dashboard.categories.length === 0 ? (
-              <div className="mt-6 rounded-xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-500">
-                No compliance findings are available for this
-                version.
+            <CategoryTable
+              categories={compliance.categories}
+            />
+          </section>
+
+          <section className="compliance-section">
+            <div className="compliance-section-header">
+              <div>
+                <div className="compliance-section-eyebrow">
+                  REVIEW QUEUE
+                </div>
+
+                <h2>Compliance Findings</h2>
+              </div>
+
+              <span className="compliance-section-meta">
+                {findings.length} findings loaded
+              </span>
+            </div>
+
+            {findingsQuery.isLoading ? (
+              <div className="compliance-state">
+                Loading findings...
+              </div>
+            ) : findingsQuery.isError ? (
+              <div className="compliance-state compliance-state-error">
+                Unable to load compliance findings.
               </div>
             ) : (
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full min-w-[720px] text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
-                      <th className="px-4 py-3">
-                        Category
-                      </th>
-
-                      <th className="px-4 py-3">
-                        Total
-                      </th>
-
-                      <th className="px-4 py-3 text-emerald-400">
-                        Low
-                      </th>
-
-                      <th className="px-4 py-3 text-yellow-400">
-                        Medium
-                      </th>
-
-                      <th className="px-4 py-3 text-orange-400">
-                        High
-                      </th>
-
-                      <th className="px-4 py-3 text-red-400">
-                        Critical
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {dashboard.categories.map(
-                      (category) => (
-                        <tr
-                          key={category.category}
-                          className="border-b border-slate-900 last:border-0"
-                        >
-                          <td className="px-4 py-4 font-medium text-white">
-                            {formatCategory(
-                              category.category,
-                            )}
-                          </td>
-
-                          <td className="px-4 py-4 text-slate-300">
-                            {category.total}
-                          </td>
-
-                          <td className="px-4 py-4 text-emerald-400">
-                            {category.low}
-                          </td>
-
-                          <td className="px-4 py-4 text-yellow-400">
-                            {category.medium}
-                          </td>
-
-                          <td className="px-4 py-4 text-orange-400">
-                            {category.high}
-                          </td>
-
-                          <td className="px-4 py-4 text-red-400">
-                            {category.critical}
-                          </td>
-                        </tr>
-                      ),
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <FindingsTable findings={findings} />
             )}
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-xl">
-            <div>
-              <p className="text-sm uppercase tracking-[0.16em] text-slate-500">
-                Findings
-              </p>
-
-              <h2 className="mt-2 text-xl font-semibold text-white">
-                Compliance Findings
-              </h2>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Detailed finding information is available in the
-                Risk Findings workspace.
-              </p>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Total
-                </p>
-
-                <p className="mt-2 text-2xl font-semibold text-white">
-                  {dashboard.total_findings}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Open
-                </p>
-
-                <p className="mt-2 text-2xl font-semibold text-yellow-400">
-                  {dashboard.open_findings}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs text-slate-500">
-                  Critical
-                </p>
-
-                <p className="mt-2 text-2xl font-semibold text-red-400">
-                  {dashboard.critical_findings}
-                </p>
-              </div>
-            </div>
-          </div>
+          </section>
         </>
-      )}
-
-      {!selectedContractId && (
-        <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 p-12 text-center">
-          <p className="text-lg font-medium text-slate-300">
-            Select a contract to begin
-          </p>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Choose a contract and version to review its compliance
-            health and risk distribution.
-          </p>
-        </div>
       )}
     </div>
   );

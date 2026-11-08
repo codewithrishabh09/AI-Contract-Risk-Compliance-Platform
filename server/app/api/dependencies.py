@@ -14,7 +14,7 @@ from app.core.permissions import (
     ROLE_PERMISSIONS,
 )
 from app.core.redis import redis_client
-from app.core.security.jwt import decode_access_token
+from app.core.security.jwt_handler import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository

@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.security.jwt import create_access_token
+from app.core.security.jwt_handler import create_access_token
 from app.core.security.password import hash_password, verify_password
 from app.repositories.user_repository import UserRepository
 

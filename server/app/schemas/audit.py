@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AuditLogResponse(BaseModel):
@@ -21,4 +21,33 @@ class AuditLogResponse(BaseModel):
 
     metadata_json: dict | None
 
+    ip_address: str | None
+
+    user_agent: str | None
+
     created_at: datetime
+
+
+class AuditSummaryResponse(BaseModel):
+    total_events: int
+    authentication_events: int
+    contract_events: int
+    analysis_events: int
+    security_events: int
+
+
+class AuditLogListResponse(BaseModel):
+    items: list[AuditLogResponse] = Field(
+        default_factory=list,
+    )
+
+    page: int
+    page_size: int
+
+    total: int
+    total_pages: int
+
+    has_next: bool
+    has_previous: bool
+
+    summary: AuditSummaryResponse

@@ -39,8 +39,8 @@ The technology stack and architecture are being finalized and implemented during
 **Rishabh Dwivedi**
 Backend Developer | AI Engineer
 
-* GitHub: https://github.com/codewithrishabh09
-* LinkedIn: https://linkedin.com/in/rishabh-dwivedi-855857374/
+* GitHub: <https://github.com/codewithrishabh09>
+* LinkedIn: <https://linkedin.com/in/rishabh-dwivedi-855857374/>
 
 ---
 

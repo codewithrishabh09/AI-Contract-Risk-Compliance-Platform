@@ -21,6 +21,7 @@ import AnalysisPage from "../pages/Analysis/AnalysisPage";
 import FindingsPage from "../pages/Findings/FindingsPage";
 import RiskTrendsPage from "../pages/RiskTrends/RiskTrendsPage";
 import CompliancePage from "../pages/Compliance/CompliancePage";
+import AuditPage from "../pages/Audit/AuditPage";
 
 export default function AppRoutes() {
   return (
@@ -93,14 +94,9 @@ export default function AppRoutes() {
             element={<CompliancePage />}
           />
 
-          {/* Remaining workspaces */}
           <Route
             path="/audit"
-            element={
-              <div className="p-8 text-slate-300">
-                Audit Logs
-              </div>
-            }
+            element={<AuditPage />}
           />
 
           <Route

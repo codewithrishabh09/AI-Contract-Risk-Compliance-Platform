@@ -63,7 +63,7 @@ function RiskTrendChart({
 
     return sortedData.map((point, index) => {
       const x =
-        data.length === 1
+        sortedData.length === 1
           ? PADDING.left + CHART_WIDTH / 2
           : PADDING.left +
             (index / (sortedData.length - 1)) *
@@ -138,13 +138,20 @@ function RiskTrendChart({
 
   if (data.length === 0) {
     return (
-      <div className="flex h-60 items-center justify-center rounded-lg border border-dashed border-[#173052] bg-[#050E1D]/40">
+      <div
+        className="
+          flex h-60 items-center justify-center
+          rounded-[14px]
+          border border-dashed border-[#d8d9d0]
+          bg-[#f8f7f2]
+        "
+      >
         <div className="text-center">
-          <p className="text-xs font-medium text-slate-500">
+          <p className="text-xs font-semibold text-[#687268]">
             No risk trend data available
           </p>
 
-          <p className="mt-1 text-[11px] text-slate-700">
+          <p className="mt-1 text-[11px] leading-5 text-[#8a9188]">
             Risk activity will appear here after contracts are analyzed.
           </p>
         </div>
@@ -154,7 +161,14 @@ function RiskTrendChart({
 
   return (
     <div className="relative">
-      <div className="relative h-60 w-full overflow-hidden rounded-lg border border-[#173052] bg-[#050E1D]/40">
+      <div
+        className="
+          relative h-60 w-full overflow-hidden
+          rounded-[14px]
+          border border-[#e2e1d8]
+          bg-[#faf9f5]
+        "
+      >
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           preserveAspectRatio="none"
@@ -172,12 +186,12 @@ function RiskTrendChart({
             >
               <stop
                 offset="0%"
-                stopColor="rgba(99, 102, 241, 0.28)"
+                stopColor="rgba(113, 128, 96, 0.20)"
               />
 
               <stop
                 offset="100%"
-                stopColor="rgba(99, 102, 241, 0)"
+                stopColor="rgba(113, 128, 96, 0)"
               />
             </linearGradient>
           </defs>
@@ -196,7 +210,7 @@ function RiskTrendChart({
                   x2={WIDTH - PADDING.right}
                   y1={y}
                   y2={y}
-                  stroke="rgba(36, 68, 108, 0.55)"
+                  stroke="rgba(36, 48, 39, 0.08)"
                   strokeDasharray="3 5"
                 />
 
@@ -204,7 +218,7 @@ function RiskTrendChart({
                   x={PADDING.left - 10}
                   y={y + 3}
                   textAnchor="end"
-                  fill="#475569"
+                  fill="#8a9188"
                   fontSize="9"
                 >
                   {value}
@@ -214,24 +228,24 @@ function RiskTrendChart({
           })}
 
           {/* Area */}
-          {areaPath && (
+          {areaPath ? (
             <path
               d={areaPath}
               fill="url(#risk-area-gradient)"
             />
-          )}
+          ) : null}
 
           {/* Trend line */}
-          {linePath && (
+          {linePath ? (
             <path
               d={linePath}
               fill="none"
-              stroke="#818cf8"
+              stroke="#718060"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          )}
+          ) : null}
 
           {/* Points */}
           {chartPoints.map((point, index) => (
@@ -254,8 +268,8 @@ function RiskTrendChart({
                 cx={point.x}
                 cy={point.y}
                 r="3.5"
-                fill="#818cf8"
-                stroke="#0B1930"
+                fill="#718060"
+                stroke="#faf9f5"
                 strokeWidth="2"
                 className="pointer-events-none"
               />
@@ -281,7 +295,7 @@ function RiskTrendChart({
                 x={point.x}
                 y={HEIGHT - 10}
                 textAnchor="middle"
-                fill="#475569"
+                fill="#8a9188"
                 fontSize="9"
               >
                 {formatDate(point.date)}
@@ -291,36 +305,43 @@ function RiskTrendChart({
         </svg>
 
         {/* Tooltip */}
-        {activePoint && (
+        {activePoint ? (
           <div
-            className="pointer-events-none absolute z-10 rounded-lg border border-[#29466C] bg-[#071426]/95 px-3 py-2 shadow-xl backdrop-blur-md"
+            className="
+              pointer-events-none absolute z-10
+              rounded-[10px]
+              border border-[#d7d9d0]
+              bg-[#fffefa]
+              px-3 py-2
+              shadow-[0_12px_30px_rgba(36,48,39,0.12)]
+            "
             style={{
               left: `${(activePoint.x / WIDTH) * 100}%`,
               top: `${(activePoint.y / HEIGHT) * 100}%`,
               transform: "translate(-50%, -115%)",
             }}
           >
-            <div className="text-[10px] font-medium text-slate-500">
+            <div className="text-[10px] font-medium text-[#7a8379]">
               {formatDate(activePoint.date)}
             </div>
 
-            <div className="mt-0.5 text-sm font-semibold text-white">
+            <div className="mt-0.5 text-sm font-semibold text-[#243027]">
               Risk score: {activePoint.value}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="mt-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.65)]" />
+          <span className="h-2 w-2 rounded-full bg-[#718060]" />
 
-          <span className="text-[10px] text-slate-600">
+          <span className="text-[10px] text-[#7a8379]">
             Average risk score
           </span>
         </div>
 
-        <span className="text-[10px] text-slate-600">
+        <span className="text-[10px] text-[#8a9188]">
           Scale: 0–100
         </span>
       </div>

@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 
 import { useAuditLogs } from "../../features/audit/useAudit";
 
-import "./AuditPage.css";
-
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-IN", {

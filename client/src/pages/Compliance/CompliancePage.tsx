@@ -12,8 +12,6 @@ import { useRiskFindings } from "../../features/contracts/useContractAnalysis";
 import type { RiskFinding } from "../../types/analysis";
 import type { ComplianceCategory } from "../../types/compliance";
 
-import "./CompliancePage.css";
-
 function formatLabel(value: string | null | undefined) {
   if (!value) {
     return "—";

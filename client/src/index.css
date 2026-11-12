@@ -1,17 +1,25 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap");
 
 @import "tailwindcss";
 
 :root {
   font-family: "DM Sans", Inter, system-ui, sans-serif;
-
-  color: #f8fafc;
-  background: #05070d;
-
+  color: #243027;
+  background: #f7f5ef;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --lex-sage: #9caf88;
+  --lex-sage-dark: #718060;
+  --lex-sage-soft: #e5eadf;
+  --lex-off-white: #f7f5ef;
+  --lex-tomato: #e8412c;
+  --lex-ink: #243027;
+  --lex-muted: #687268;
+  --lex-border: #dddcd3;
+  --lex-card: #fffefa;
 }
 
 * {
@@ -20,29 +28,37 @@
 
 html {
   scroll-behavior: smooth;
-  background: #05070d;
+  background: var(--lex-off-white);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #05070d;
+  background: var(--lex-off-white);
+  color: var(--lex-ink);
 }
 
 button,
-a {
+a,
+input,
+textarea,
+select {
   -webkit-tap-highlight-color: transparent;
 }
 
-::selection {
-  background: rgba(139, 92, 246, 0.28);
-  color: #ffffff;
+button {
+  font-family: inherit;
 }
 
-/* =========================================================
-   LexMind Motion System
-   ========================================================= */
+::selection {
+  background: rgba(156, 175, 136, 0.35);
+  color: #243027;
+}
+
+/* --------------------------------------------------
+   LexMind global motion
+-------------------------------------------------- */
 
 .lexmind-float {
   animation: lexmind-float 7s ease-in-out infinite;
@@ -60,11 +76,8 @@ a {
   }
 }
 
-/* Risk progress animation */
-
 .lexmind-risk-bar {
-  animation: lexmind-risk-progress 1.6s cubic-bezier(0.22, 1, 0.36, 1)
-    both;
+  animation: lexmind-risk-progress 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   transform-origin: left center;
 }
 
@@ -77,8 +90,6 @@ a {
     transform: scaleX(1);
   }
 }
-
-/* Document scanning line */
 
 .lexmind-scan-line {
   top: -5%;
@@ -114,8 +125,6 @@ a {
   }
 }
 
-/* Floating insight card */
-
 .lexmind-insight {
   animation: lexmind-insight 6s ease-in-out infinite;
 }
@@ -131,16 +140,12 @@ a {
   }
 }
 
-/* =========================================================
-   Purple wave system
-   ========================================================= */
-
 .lexmind-wave {
   position: absolute;
   left: -10%;
   width: 120%;
   height: 110px;
-  border-top: 1px solid rgba(168, 85, 247, 0.24);
+  border-top: 1px solid rgba(156, 175, 136, 0.28);
   border-radius: 50%;
   filter: blur(0.2px);
 }
@@ -149,25 +154,22 @@ a {
   bottom: 10px;
   transform: rotate(-4deg);
   box-shadow:
-    0 -10px 35px rgba(139, 92, 246, 0.10),
-    inset 0 10px 35px rgba(139, 92, 246, 0.025);
-
+    0 -10px 35px rgba(156, 175, 136, 0.12),
+    inset 0 10px 35px rgba(156, 175, 136, 0.03);
   animation: lexmind-wave-one 9s ease-in-out infinite;
 }
 
 .lexmind-wave-two {
   bottom: -15px;
   transform: rotate(3deg);
-  border-top-color: rgba(168, 85, 247, 0.15);
-
+  border-top-color: rgba(156, 175, 136, 0.18);
   animation: lexmind-wave-two 11s ease-in-out infinite reverse;
 }
 
 .lexmind-wave-three {
   bottom: -42px;
   transform: rotate(-2deg);
-  border-top-color: rgba(124, 58, 237, 0.11);
-
+  border-top-color: rgba(113, 128, 96, 0.14);
   animation: lexmind-wave-three 13s ease-in-out infinite;
 }
 
@@ -204,9 +206,50 @@ a {
   }
 }
 
-/* Accessibility */
+/* --------------------------------------------------
+   Shared UI helpers
+-------------------------------------------------- */
+
+.lexmind-page {
+  min-height: 100vh;
+  background: var(--lex-off-white);
+  color: var(--lex-ink);
+}
+
+.lexmind-card {
+  border: 1px solid var(--lex-border);
+  border-radius: 24px;
+  background: rgba(255, 254, 250, 0.92);
+  box-shadow: 0 18px 45px rgba(36, 48, 39, 0.06);
+}
+
+.lexmind-soft-grid {
+  background-image:
+    linear-gradient(
+      rgba(36, 48, 39, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(36, 48, 39, 0.035) 1px,
+      transparent 1px
+    );
+  background-size: 42px 42px;
+}
+
+.lexmind-display {
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+/* --------------------------------------------------
+   Accessibility / reduced motion
+-------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .lexmind-float,
   .lexmind-risk-bar,
   .lexmind-scan-line,

@@ -1,455 +1,335 @@
 import {
-  ArrowRight,
+  Building2,
+  Check,
   Eye,
   EyeOff,
-  LoaderCircle,
   LockKeyhole,
   Mail,
-  Scale,
   UserRound,
 } from "lucide-react";
-import {
-  useState,
-} from "react";
-import type { FormEvent } from "react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { FormEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { ApiError } from "../../lib/api/api";
+import LexMindLogo from "../../components/brand/LexMindLogo";
 import { useAuth } from "../../context/AuthContext";
 
 function RegisterPage() {
   const navigate = useNavigate();
-
   const { register } = useAuth();
 
-  const [fullName, setFullName] =
-    useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [organizationId, setOrganizationId] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const [email, setEmail] =
-    useState("");
-
-  const [organizationId, setOrganizationId] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [showPassword, setShowPassword] =
-    useState(false);
-
-  const [acceptedTerms, setAcceptedTerms] =
-    useState(false);
-
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     setError("");
 
-    const normalizedName =
-      fullName.trim();
+    const normalizedName = fullName.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedOrganizationId = organizationId.trim();
 
-    const normalizedEmail =
-      email.trim().toLowerCase();
-
-    const normalizedOrganizationId =
-      organizationId.trim();
-
-    if (!normalizedName) {
-      setError(
-        "Please enter your full name.",
-      );
-      return;
-    }
-
-    if (!normalizedEmail) {
-      setError(
-        "Please enter your work email.",
-      );
-      return;
-    }
-
-    if (!normalizedOrganizationId) {
-      setError(
-        "Please enter your organization ID.",
-      );
+    if (
+      !normalizedName ||
+      !normalizedEmail ||
+      !normalizedOrganizationId ||
+      !password
+    ) {
+      setError("Please complete all required fields.");
       return;
     }
 
     if (password.length < 8) {
-      setError(
-        "Password must contain at least 8 characters.",
-      );
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
     if (!acceptedTerms) {
-      setError(
-        "Please accept the workspace terms to continue.",
-      );
+      setError("Please accept the terms to continue.");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const user =
-        await register({
-          full_name:
-            normalizedName,
-          email: normalizedEmail,
-          organization_id:
-            normalizedOrganizationId,
-          password,
-        });
-
-      /*
-       * If backend returns a JWT during registration,
-       * AuthProvider automatically creates the session.
-       */
-      if (user) {
-        navigate(
-          "/dashboard",
-          { replace: true },
-        );
-        return;
-      }
-
-      /*
-       * If backend registration succeeds without
-       * returning a token, send the user to login.
-       */
-      navigate("/login", {
-        replace: true,
-        state: {
-          registered: true,
-          email: normalizedEmail,
-        },
+      const user = await register({
+        full_name: normalizedName,
+        email: normalizedEmail,
+        organization_id: normalizedOrganizationId,
+        password,
       });
+
+      if (user) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/login", {
+          replace: true,
+          state: {
+            registered: true,
+            email: normalizedEmail,
+          },
+        });
+      }
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError(
-          "Unable to create your workspace. Please check your connection and try again.",
-        );
+        setError("Unable to create your account. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-[#05070d] text-slate-100">
-      <div className="grid min-h-screen lg:grid-cols-2">
-        {/* Form */}
-        <section className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-16">
-          <div className="w-full max-w-[430px]">
-            <Link
-              to="/"
-              className="mb-9 inline-flex items-center gap-2 text-xs text-slate-500 transition hover:text-white"
-            >
-              ← Back to LexMind
-            </Link>
-
-            <div className="mb-7 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-violet-400/30 bg-violet-500/10">
-                <Scale
-                  size={20}
-                  strokeWidth={1.8}
-                  className="text-violet-300"
-                />
-              </div>
-
-              <div>
-                <div className="text-[16px] font-semibold text-white">
-                  LexMind
-                </div>
-
-                <div className="text-[8px] uppercase tracking-[0.18em] text-slate-600">
-                  Contract Intelligence
-                </div>
-              </div>
+    <main className="min-h-screen bg-[#f7f5ef]">
+      <div className="mx-auto flex min-h-screen max-w-[1440px]">
+        {/* Form panel */}
+        <section className="flex flex-1 items-center justify-center px-5 py-8 sm:px-8 lg:px-12">
+          <div className="w-full max-w-[540px]">
+            <div className="mb-8 lg:hidden">
+              <LexMindLogo />
             </div>
 
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
-              Create your workspace
-            </p>
+            <div className="rounded-[28px] border border-[#dddcd3] bg-[#fffefa] p-6 shadow-[0_24px_70px_rgba(36,48,39,0.08)] sm:p-9">
+              <div className="mb-7">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#718060]">
+                  Get started
+                </p>
 
-            <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
-              Start with a smarter review workflow.
-            </h1>
+                <h1 className="font-['Playfair_Display'] text-4xl font-medium tracking-[-0.03em] text-[#243027]">
+                  Create your workspace
+                </h1>
 
-            <p className="mt-3 text-sm leading-6 text-slate-500">
-              Create your organization workspace and start turning contracts into decisions.
-            </p>
-
-            {error && (
-              <div className="mt-6 rounded-lg border border-rose-400/20 bg-rose-400/[0.06] px-4 py-3 text-xs leading-5 text-rose-300">
-                {error}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleSubmit}
-              className="mt-7 space-y-4"
-            >
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="mb-2 block text-[11px] font-medium text-slate-400"
-                >
-                  Full name
-                </label>
-
-                <div className="relative">
-                  <UserRound
-                    size={15}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
-                  />
-
-                  <input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(event) =>
-                      setFullName(
-                        event.target.value,
-                      )
-                    }
-                    placeholder="Rishabh Dwivedi"
-                    autoComplete="name"
-                    disabled={isSubmitting}
-                    className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-[11px] font-medium text-slate-400"
-                >
-                  Work email
-                </label>
-
-                <div className="relative">
-                  <Mail
-                    size={15}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
-                  />
-
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(event) =>
-                      setEmail(
-                        event.target.value,
-                      )
-                    }
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                    disabled={isSubmitting}
-                    className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="organizationId"
-                  className="mb-2 block text-[11px] font-medium text-slate-400"
-                >
-                  Organization ID
-                </label>
-
-                <input
-                  id="organizationId"
-                  type="text"
-                  value={organizationId}
-                  onChange={(event) =>
-                    setOrganizationId(
-                      event.target.value,
-                    )
-                  }
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                  autoComplete="off"
-                  disabled={isSubmitting}
-                  className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] px-4 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-[11px] font-medium text-slate-400"
-                >
-                  Password
-                </label>
-
-                <div className="relative">
-                  <LockKeyhole
-                    size={15}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
-                  />
-
-                  <input
-                    id="password"
-                    type={
-                      showPassword
-                        ? "text"
-                        : "password"
-                    }
-                    value={password}
-                    onChange={(event) =>
-                      setPassword(
-                        event.target.value,
-                      )
-                    }
-                    placeholder="Create a secure password"
-                    autoComplete="new-password"
-                    disabled={isSubmitting}
-                    className="h-11 w-full rounded-lg border border-white/[0.10] bg-[#080d18] pl-10 pr-11 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-2 focus:ring-violet-500/10 disabled:opacity-60"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowPassword(
-                        (value) => !value,
-                      )
-                    }
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 transition hover:text-slate-300"
-                  >
-                    {showPassword ? (
-                      <EyeOff size={16} />
-                    ) : (
-                      <Eye size={16} />
-                    )}
-                  </button>
-                </div>
-
-                <p className="mt-2 text-[10px] text-slate-600">
-                  Use at least 8 characters.
+                <p className="mt-3 text-sm leading-6 text-[#687268]">
+                  Set up your LexMind account and start managing contract risk
+                  with clarity.
                 </p>
               </div>
 
-              <label className="flex items-start gap-3 pt-1">
-                <input
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(event) =>
-                    setAcceptedTerms(
-                      event.target.checked,
-                    )
-                  }
+              {error && (
+                <div className="mb-6 rounded-2xl border border-[#e8412c]/20 bg-[#e8412c]/8 px-4 py-3 text-sm leading-5 text-[#b93223]">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="mb-2 block text-sm font-semibold text-[#354136]"
+                  >
+                    Full name
+                  </label>
+
+                  <div className="relative">
+                    <UserRound
+                      size={17}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9288]"
+                    />
+
+                    <input
+                      id="fullName"
+                      type="text"
+                      autoComplete="name"
+                      value={fullName}
+                      onChange={(event) => setFullName(event.target.value)}
+                      placeholder="Your full name"
+                      className="h-12 w-full rounded-xl border border-[#d9dad1] bg-[#f9f8f3] pl-11 pr-4 text-sm text-[#243027] outline-none transition placeholder:text-[#9ba19a] focus:border-[#9caf88] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/12"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-2 block text-sm font-semibold text-[#354136]"
+                  >
+                    Work email
+                  </label>
+
+                  <div className="relative">
+                    <Mail
+                      size={17}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9288]"
+                    />
+
+                    <input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="you@company.com"
+                      className="h-12 w-full rounded-xl border border-[#d9dad1] bg-[#f9f8f3] pl-11 pr-4 text-sm text-[#243027] outline-none transition placeholder:text-[#9ba19a] focus:border-[#9caf88] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/12"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="organizationId"
+                    className="mb-2 block text-sm font-semibold text-[#354136]"
+                  >
+                    Organization ID
+                  </label>
+
+                  <div className="relative">
+                    <Building2
+                      size={17}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9288]"
+                    />
+
+                    <input
+                      id="organizationId"
+                      type="text"
+                      value={organizationId}
+                      onChange={(event) =>
+                        setOrganizationId(event.target.value)
+                      }
+                      placeholder="Your organization ID"
+                      className="h-12 w-full rounded-xl border border-[#d9dad1] bg-[#f9f8f3] pl-11 pr-4 text-sm text-[#243027] outline-none transition placeholder:text-[#9ba19a] focus:border-[#9caf88] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/12"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block text-sm font-semibold text-[#354136]"
+                  >
+                    Password
+                  </label>
+
+                  <div className="relative">
+                    <LockKeyhole
+                      size={17}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9288]"
+                    />
+
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="At least 8 characters"
+                      className="h-12 w-full rounded-xl border border-[#d9dad1] bg-[#f9f8f3] pl-11 pr-12 text-sm text-[#243027] outline-none transition placeholder:text-[#9ba19a] focus:border-[#9caf88] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/12"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((value) => !value)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#7b847a] transition hover:bg-[#e5eadf] hover:text-[#526047]"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOff size={17} />
+                      ) : (
+                        <Eye size={17} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#e5e3da] bg-[#faf9f5] p-3.5">
+                  <span className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(event) =>
+                        setAcceptedTerms(event.target.checked)
+                      }
+                      className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-[#cfd2c9] bg-white checked:border-[#718060] checked:bg-[#9caf88] focus:outline-none focus:ring-4 focus:ring-[#9caf88]/15"
+                    />
+
+                    <Check
+                      size={13}
+                      strokeWidth={3}
+                      className="pointer-events-none absolute hidden text-white peer-checked:block"
+                    />
+                  </span>
+
+                  <span className="text-xs leading-5 text-[#687268]">
+                    I agree to the LexMind terms of service and understand that
+                    contract data will be processed within my organization
+                    workspace.
+                  </span>
+                </label>
+
+                <button
+                  type="submit"
                   disabled={isSubmitting}
-                  className="mt-0.5 h-4 w-4 accent-violet-500"
-                />
+                  className="mt-2 flex h-12 w-full items-center justify-center rounded-xl bg-[#243027] px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(36,48,39,0.14)] transition hover:bg-[#354638] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? "Creating account..." : "Create account"}
+                </button>
+              </form>
 
-                <span className="text-[10px] leading-5 text-slate-600">
-                  I agree to the workspace terms
-                  and understand that contract
-                  data is processed within my
-                  organization&apos;s workspace.
-                </span>
-              </label>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="group flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-violet-500 text-sm font-semibold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? (
-                  <>
-                    <LoaderCircle
-                      size={16}
-                      className="animate-spin"
-                    />
-                    Creating workspace...
-                  </>
-                ) : (
-                  <>
-                    Create workspace
-                    <ArrowRight
-                      size={15}
-                      className="transition-transform group-hover:translate-x-0.5"
-                    />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <p className="mt-6 text-center text-xs text-slate-600">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-violet-300 transition hover:text-violet-200"
-              >
-                Sign in
-              </Link>
-            </p>
+              <p className="mt-7 text-center text-sm text-[#687268]">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-semibold text-[#526047] transition hover:text-[#e8412c]"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
           </div>
         </section>
 
         {/* Brand panel */}
-        <section className="relative hidden overflow-hidden border-l border-white/[0.07] bg-[#03050b] lg:flex lg:items-center lg:px-16">
-          <div className="absolute right-[-100px] top-[-100px] h-[460px] w-[460px] rounded-full bg-violet-600/[0.07] blur-[130px]" />
+        <section className="relative hidden w-[44%] overflow-hidden bg-[#dfe6d7] px-12 py-10 lg:flex lg:flex-col">
+          <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-white/55 blur-3xl" />
+          <div className="absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-[#9caf88]/35 blur-3xl" />
 
-          <div className="relative max-w-[560px]">
-            <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-xl border border-violet-400/25 bg-violet-500/[0.08]">
-              <Scale
-                size={20}
-                strokeWidth={1.8}
-                className="text-violet-300"
-              />
+          <div className="relative z-10">
+            <LexMindLogo href="" />
+          </div>
+
+          <div className="relative z-10 my-auto">
+            <div className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-[#718060]">
+              Built for contract teams
             </div>
 
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-300">
-              Built for high-stakes decisions
-            </p>
-
-            <h2 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-white xl:text-5xl">
-              One workspace for contracts, risk and compliance.
+            <h2 className="max-w-lg font-['Playfair_Display'] text-5xl font-medium leading-[1.08] tracking-[-0.035em] text-[#243027] xl:text-6xl">
+              From complex language
+              <span className="text-[#718060]"> to clear decisions.</span>
             </h2>
 
-            <p className="mt-6 max-w-[500px] text-sm leading-7 text-slate-500">
-              Give legal and compliance teams the intelligence they need without losing control over the underlying evidence.
-            </p>
-
-            <div className="mt-8 space-y-4">
+            <div className="mt-10 space-y-4">
               {[
-                "Analyze contracts with contextual AI",
-                "Track risks across contract versions",
-                "Maintain an auditable review history",
+                "AI-powered contract analysis",
+                "Structured risk and compliance findings",
+                "Centralized audit-ready intelligence",
               ].map((item) => (
                 <div
                   key={item}
-                  className="flex items-center gap-3 text-xs text-slate-400"
+                  className="flex items-center gap-3 text-sm font-medium text-[#4f5c4d]"
                 >
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-400/[0.05] text-emerald-400">
-                    ✓
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-[#718060]">
+                    <Check size={15} strokeWidth={2.5} />
                   </span>
-
                   {item}
                 </div>
               ))}
             </div>
           </div>
+
+          <p className="relative z-10 text-xs text-[#718060]">
+            LexMind · Intelligent contract risk & compliance.
+          </p>
         </section>
       </div>
-    </div>
+    </main>
   );
 }
 

@@ -1,9 +1,19 @@
-import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import LexMindLogo from "../../components/brand/LexMindLogo";
 import { useAuth } from "../../context/AuthContext";
+
+const legalImage =
+  "https://images.unsplash.com/photo-1649653084130-06638e40ca25?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=82&w=1600";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -52,77 +62,119 @@ function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f5ef]">
-      <div className="mx-auto flex min-h-screen max-w-[1440px]">
-        {/* Brand panel */}
-        <section className="relative hidden w-[46%] overflow-hidden bg-[#dfe6d7] px-12 py-10 lg:flex lg:flex-col">
-          <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[#9caf88]/35 blur-3xl" />
-          <div className="absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-white/60 blur-3xl" />
+    <main className="min-h-screen bg-[#f7f5ef] p-0 sm:p-4 lg:p-6">
+      <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] max-w-[1500px] overflow-hidden border border-[#e0dfd5] bg-[#eef1e5] shadow-[0_25px_80px_rgba(36,48,39,0.08)]">
+        {/* ─────────────────────────────────────────────
+            LEFT VISUAL PANEL
+        ───────────────────────────────────────────── */}
+        <section className="relative hidden min-h-full w-[52%] overflow-hidden lg:block">
+          {/* Base image */}
+          <img
+            src={legalImage}
+            alt="Lady Justice"
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
 
-          <div className="relative z-10">
-            <LexMindLogo />
+          {/* Soft legal-tech wash */}
+          <div className="absolute inset-0 bg-[#dce7d2]/78 mix-blend-screen" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#eef3e5]/80 via-transparent to-[#8ea47d]/60" />
+
+          {/* Decorative diagonal layers */}
+          <div className="absolute -right-32 -top-28 h-[620px] w-[620px] rotate-[28deg] rounded-[40%] border border-white/45 bg-[#f4f5e9]/35" />
+
+          <div className="absolute -right-56 top-20 h-[700px] w-[700px] rotate-[28deg] rounded-[42%] border border-[#9caf88]/35 bg-[#9caf88]/15" />
+
+          <div className="absolute -left-40 bottom-[-170px] h-[470px] w-[950px] rotate-[-10deg] rounded-[50%] bg-[#718060]/35" />
+
+          <div className="absolute -left-40 bottom-[-205px] h-[110px] w-[900px] rotate-[7deg] bg-[#e8412c] shadow-[0_-8px_25px_rgba(232,65,44,0.16)]" />
+
+          {/* Top logo */}
+          <div className="absolute left-10 top-9 z-20">
+            <div className="rounded-full bg-white/50 p-1.5 backdrop-blur-sm">
+              <LexMindLogo />
+            </div>
           </div>
 
-          <div className="relative z-10 my-auto max-w-xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#718060]/25 bg-white/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#526047]">
+          {/* Main copy */}
+          <div className="absolute inset-x-12 top-[26%] z-20 max-w-[570px]">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#718060]/30 bg-white/65 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#526047] backdrop-blur-sm">
               <ShieldCheck size={14} />
               Contract Intelligence
             </div>
 
-            <h1 className="max-w-lg font-['Playfair_Display'] text-5xl font-medium leading-[1.08] tracking-[-0.035em] text-[#243027] xl:text-6xl">
-              Understand every contract
-              <span className="text-[#718060]"> with confidence.</span>
+            <h1 className="font-['Playfair_Display'] text-[52px] font-medium leading-[1.02] tracking-[-0.045em] text-[#20362a] xl:text-[64px]">
+              Understand every
+              <br />
+              contract{" "}
+              <span className="text-[#718060]">
+                with
+                <br />
+                confidence.
+              </span>
             </h1>
 
-            <p className="mt-6 max-w-md text-[16px] leading-7 text-[#5f695f]">
+            <p className="mt-7 max-w-[500px] text-[16px] leading-7 text-[#506052]">
               Review obligations, identify risk, and turn complex legal
               language into clear, actionable intelligence.
             </p>
 
-            <div className="mt-10 grid max-w-md grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-[#718060]/20 bg-white/55 p-4">
-                <div className="text-2xl font-semibold text-[#243027]">
+            <div className="mt-9 flex gap-3">
+              <div className="rounded-2xl border border-white/70 bg-white/65 px-5 py-4 backdrop-blur-sm">
+                <div className="text-[24px] font-semibold tracking-[-0.03em] text-[#243027]">
                   AI
                 </div>
-                <p className="mt-1 text-xs leading-5 text-[#687268]">
+                <p className="mt-1 text-[11px] text-[#687268]">
                   Intelligent contract analysis
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[#718060]/20 bg-white/55 p-4">
-                <div className="text-2xl font-semibold text-[#243027]">
+              <div className="rounded-2xl border border-white/70 bg-white/65 px-5 py-4 backdrop-blur-sm">
+                <div className="text-[24px] font-semibold tracking-[-0.03em] text-[#243027]">
                   360°
                 </div>
-                <p className="mt-1 text-xs leading-5 text-[#687268]">
+                <p className="mt-1 text-[11px] text-[#687268]">
                   Risk & compliance visibility
                 </p>
               </div>
             </div>
           </div>
 
-          <p className="relative z-10 text-xs text-[#718060]">
+          <div className="absolute bottom-9 left-10 z-20 text-xs font-medium text-[#60735a]">
             Secure workspace for modern contract teams.
-          </p>
+          </div>
         </section>
 
-        {/* Form panel */}
-        <section className="flex flex-1 items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
-          <div className="w-full max-w-[470px]">
-            <div className="mb-10 lg:hidden">
+        {/* ─────────────────────────────────────────────
+            RIGHT AUTH PANEL
+        ───────────────────────────────────────────── */}
+        <section className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-[#f8f7f1] px-5 py-10 sm:px-8 lg:min-h-full lg:px-12">
+          {/* Mobile background decoration */}
+          <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#dfe8d7]" />
+          <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#e5eadf]" />
+
+          <div className="relative z-10 w-full max-w-[475px]">
+            {/* Mobile logo */}
+            <div className="mb-8 lg:hidden">
               <LexMindLogo />
             </div>
 
-            <div className="rounded-[28px] border border-[#dddcd3] bg-[#fffefa] p-6 shadow-[0_24px_70px_rgba(36,48,39,0.08)] sm:p-9">
+            <div className="rounded-[26px] border border-[#dddcd3] bg-[#fffefa]/95 p-6 shadow-[0_25px_70px_rgba(36,48,39,0.10)] backdrop-blur-sm sm:p-9">
+              {/* Heading */}
               <div className="mb-8">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#718060]">
-                  Welcome back
-                </p>
+                <div className="mb-4 flex items-center gap-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5f7a53]">
+                    Welcome back
+                  </p>
 
-                <h2 className="font-['Playfair_Display'] text-4xl font-medium tracking-[-0.03em] text-[#243027]">
-                  Sign in to LexMind
+                  <div className="h-px flex-1 bg-[#dfe1d8]" />
+                </div>
+
+                <h2 className="font-['Playfair_Display'] text-[38px] font-medium leading-[1.05] tracking-[-0.04em] text-[#243027]">
+                  Sign in to{" "}
+                  <span className="text-[#e8412c]">LexMind</span>
                 </h2>
 
-                <p className="mt-3 text-sm leading-6 text-[#687268]">
+                <p className="mt-4 max-w-[390px] text-sm leading-6 text-[#687268]">
                   Access your contracts, analysis, findings, and compliance
                   workspace.
                 </p>
@@ -135,10 +187,11 @@ function LoginPage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Email */}
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-2 block text-sm font-semibold text-[#354136]"
+                    className="mb-2 block text-[13px] font-semibold text-[#354136]"
                   >
                     Email address
                   </label>
@@ -146,7 +199,7 @@ function LoginPage() {
                   <div className="relative">
                     <Mail
                       size={17}
-                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9288]"
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#879186]"
                     />
 
                     <input
@@ -156,25 +209,24 @@ function LoginPage() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder="you@company.com"
-                      className="h-12 w-full rounded-xl border border-[#d9dad1] bg-[#f9f8f3] pl-11 pr-4 text-sm text-[#243027] outline-none transition placeholder:text-[#9ba19a] focus:border-[#9caf88] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/12"
+                      className="h-[50px] w-full rounded-xl border border-[#d9dad1] bg-[#faf9f4] pl-11 pr-4 text-sm text-[#243027] outline-none transition-all placeholder:text-[#a0a59e] hover:border-[#bfc7b9] focus:border-[#8fa37f] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/10"
                     />
                   </div>
                 </div>
 
+                {/* Password */}
                 <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-semibold text-[#354136]"
-                    >
-                      Password
-                    </label>
-                  </div>
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block text-[13px] font-semibold text-[#354136]"
+                  >
+                    Password
+                  </label>
 
                   <div className="relative">
                     <LockKeyhole
                       size={17}
-                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9288]"
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#879186]"
                     />
 
                     <input
@@ -184,7 +236,7 @@ function LoginPage() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder="Enter your password"
-                      className="h-12 w-full rounded-xl border border-[#d9dad1] bg-[#f9f8f3] pl-11 pr-12 text-sm text-[#243027] outline-none transition placeholder:text-[#9ba19a] focus:border-[#9caf88] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/12"
+                      className="h-[50px] w-full rounded-xl border border-[#d9dad1] bg-[#faf9f4] pl-11 pr-12 text-sm text-[#243027] outline-none transition-all placeholder:text-[#a0a59e] hover:border-[#bfc7b9] focus:border-[#8fa37f] focus:bg-white focus:ring-4 focus:ring-[#9caf88]/10"
                     />
 
                     <button
@@ -204,18 +256,29 @@ function LoginPage() {
                   </div>
                 </div>
 
+                {/* Submit */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-2 flex h-12 w-full items-center justify-center rounded-xl bg-[#243027] px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(36,48,39,0.14)] transition hover:bg-[#354638] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group mt-2 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-[#294334] px-5 text-sm font-semibold text-white shadow-[0_12px_25px_rgba(41,67,52,0.16)] transition-all hover:bg-[#20372b] hover:shadow-[0_16px_30px_rgba(41,67,52,0.20)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? "Signing in..." : "Sign in"}
+
+                  {!isSubmitting && (
+                    <ArrowRight
+                      size={17}
+                      className="transition-transform group-hover:translate-x-1"
+                    />
+                  )}
                 </button>
               </form>
 
+              {/* Divider */}
               <div className="my-7 flex items-center gap-4">
                 <div className="h-px flex-1 bg-[#e5e3da]" />
-                <span className="text-xs text-[#9a9f98]">OR</span>
+                <span className="text-[11px] font-medium text-[#9a9f98]">
+                  OR
+                </span>
                 <div className="h-px flex-1 bg-[#e5e3da]" />
               </div>
 
@@ -223,14 +286,15 @@ function LoginPage() {
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="font-semibold text-[#526047] transition hover:text-[#e8412c]"
+                  className="font-semibold text-[#e8412c] transition hover:text-[#c83224]"
                 >
                   Create account
                 </Link>
               </p>
             </div>
 
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#8a9188]">
+            {/* Security note */}
+            <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-[#8a9188]">
               <ShieldCheck size={14} />
               Your workspace is protected by secure authentication.
             </div>

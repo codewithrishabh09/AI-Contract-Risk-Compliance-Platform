@@ -1,5 +1,6 @@
 import {
   Bell,
+  Command,
   Home,
   LogOut,
   Menu,
@@ -60,40 +61,59 @@ function Topbar({ onMenuClick }: TopbarProps) {
   const initials = getInitials(fullName);
 
   return (
-    <header className="sticky top-0 z-30 flex h-[76px] items-center border-b border-[#e1dfd5] bg-[#f8f7f1]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-9">
+    <header
+      className="
+        sticky top-0 z-30 flex h-[72px] items-center
+        border-b border-[#dddcd3]
+        bg-[#f7f5ef]/95
+        px-4 backdrop-blur-xl
+        sm:px-6 lg:px-8
+      "
+    >
       {/* Mobile menu */}
       <button
         type="button"
         onClick={onMenuClick}
         aria-label="Open navigation"
-        className="mr-3 rounded-xl p-2 text-[#687268] transition hover:bg-[#e5eadf] hover:text-[#243027] lg:hidden"
+        className="
+          mr-3 rounded-xl p-2
+          text-[#687268]
+          transition
+          hover:bg-[#e5eadf]
+          hover:text-[#243027]
+          lg:hidden
+        "
       >
-        <Menu size={21} />
+        <Menu size={20} />
       </button>
 
       {/* Search */}
-      <div className="relative w-full max-w-[670px]">
+      <div className="relative w-full max-w-[635px]">
         <Search
-          size={19}
+          size={18}
           strokeWidth={1.8}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#53614f]"
+          className="
+            pointer-events-none absolute
+            left-4 top-1/2
+            -translate-y-1/2
+            text-[#718060]
+          "
         />
 
         <input
           type="text"
           placeholder="Search contracts, clauses, or findings..."
           className="
-            h-[46px] w-full rounded-xl
-            border border-[#d9d7cc]
-            bg-[#faf9f4]
+            h-11 w-full
+            rounded-xl
+            border border-[#d9d8cf]
+            bg-[#fffefa]
             pl-11 pr-20
             text-sm text-[#243027]
             outline-none
-            placeholder:text-[#8d948c]
-            transition-all
-            hover:border-[#c5c9bd]
+            placeholder:text-[#929a90]
+            transition
             focus:border-[#9caf88]
-            focus:bg-white
             focus:ring-4
             focus:ring-[#9caf88]/10
           "
@@ -101,34 +121,38 @@ function Topbar({ onMenuClick }: TopbarProps) {
 
         <div
           className="
-            absolute right-3 top-1/2
-            flex -translate-y-1/2 items-center gap-1.5
-            rounded-lg border border-[#dddcd3]
-            bg-[#f3f2eb] px-2 py-1.5
-            text-[10px] font-medium text-[#8a9188]
+            absolute right-2.5 top-1/2
+            flex -translate-y-1/2
+            items-center gap-1
+            rounded-lg
+            border border-[#e1dfd6]
+            bg-[#f7f5ef]
+            px-2 py-1
+            text-[10px]
+            font-medium
+            text-[#8a9288]
           "
         >
-          <span>Ctrl</span>
-          <span>+</span>
+          <Command size={10} />
           <span>K</span>
         </div>
       </div>
 
-      {/* Right actions */}
+      {/* Right side */}
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
         {/* Notifications */}
         <button
           type="button"
           className="
             relative rounded-xl p-2.5
-            text-[#596557]
+            text-[#687268]
             transition
             hover:bg-[#e5eadf]
             hover:text-[#243027]
           "
           aria-label="Notifications"
         >
-          <Bell size={20} strokeWidth={1.8} />
+          <Bell size={19} strokeWidth={1.8} />
         </button>
 
         {/* User */}
@@ -141,8 +165,9 @@ function Topbar({ onMenuClick }: TopbarProps) {
               )
             }
             className="
-              flex items-center gap-2.5
-              rounded-full p-1
+              flex items-center gap-3
+              rounded-xl
+              px-1.5 py-1
               transition
               hover:bg-[#e5eadf]
             "
@@ -153,22 +178,23 @@ function Topbar({ onMenuClick }: TopbarProps) {
               className="
                 flex h-10 w-10 items-center justify-center
                 rounded-full
-                border border-[#d7d8ce]
-                bg-[#718060]
-                text-xs font-semibold
+                border border-[#d3d8cd]
+                bg-[#718763]
+                text-[11px]
+                font-bold
                 text-white
-                shadow-[0_4px_12px_rgba(36,48,39,0.10)]
+                shadow-[0_5px_15px_rgba(36,48,39,0.12)]
               "
             >
               {initials}
             </div>
 
-            <div className="hidden text-left lg:block">
-              <div className="max-w-[150px] truncate text-xs font-semibold text-[#243027]">
+            <div className="hidden text-left md:block">
+              <div className="max-w-[170px] truncate text-[12px] font-semibold text-[#354136]">
                 {fullName}
               </div>
 
-              <div className="mt-0.5 text-[10px] text-[#7a8379]">
+              <div className="mt-0.5 text-[10px] text-[#8a9288]">
                 {role}
               </div>
             </div>
@@ -178,42 +204,27 @@ function Topbar({ onMenuClick }: TopbarProps) {
             <div
               role="menu"
               className="
-                absolute right-0 top-[calc(100%+10px)] z-50
-                w-[250px] overflow-hidden
+                absolute right-0
+                top-[calc(100%+10px)]
+                z-50 w-[250px]
+                overflow-hidden
                 rounded-2xl
                 border border-[#dddcd3]
                 bg-[#fffefa]
-                shadow-[0_20px_55px_rgba(36,48,39,0.14)]
+                shadow-[0_20px_50px_rgba(36,48,39,0.12)]
               "
             >
               {/* User identity */}
-              <div className="border-b border-[#e5e3da] px-4 py-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="
-                      flex h-10 w-10 shrink-0 items-center justify-center
-                      rounded-full
-                      bg-[#718060]
-                      text-xs font-semibold
-                      text-white
-                    "
-                  >
-                    {initials}
-                  </div>
+              <div className="border-b border-[#e8e6de] px-4 py-4">
+                <p className="truncate text-sm font-semibold text-[#243027]">
+                  {fullName}
+                </p>
 
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-semibold text-[#243027]">
-                      {fullName}
-                    </p>
-
-                    <p className="mt-1 truncate text-[10px] text-[#8a9188]">
-                      {user?.email}
-                    </p>
-                  </div>
-                </div>
+                <p className="mt-1 truncate text-[11px] text-[#8a9288]">
+                  {user?.email}
+                </p>
               </div>
 
-              {/* Menu */}
               <div className="p-2">
                 <button
                   type="button"
@@ -232,7 +243,7 @@ function Topbar({ onMenuClick }: TopbarProps) {
                     hover:text-[#243027]
                   "
                 >
-                  <UserRound size={15} />
+                  <UserRound size={16} />
 
                   Profile
                 </button>
@@ -254,14 +265,13 @@ function Topbar({ onMenuClick }: TopbarProps) {
                     hover:text-[#243027]
                   "
                 >
-                  <Home size={15} />
+                  <Home size={16} />
 
                   Homepage
                 </button>
               </div>
 
-              {/* Logout */}
-              <div className="border-t border-[#e5e3da] p-2">
+              <div className="border-t border-[#e8e6de] p-2">
                 <button
                   type="button"
                   role="menuitem"
@@ -276,13 +286,12 @@ function Topbar({ onMenuClick }: TopbarProps) {
                     flex w-full items-center gap-3
                     rounded-xl px-3 py-2.5
                     text-left text-xs
-                    text-[#c63a2a]
+                    text-[#e8412c]
                     transition
                     hover:bg-[#e8412c]/8
-                    hover:text-[#b93223]
                   "
                 >
-                  <LogOut size={15} />
+                  <LogOut size={16} />
 
                   Logout
                 </button>

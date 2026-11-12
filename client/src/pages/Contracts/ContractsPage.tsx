@@ -51,28 +51,28 @@ function getStatusClasses(
 ) {
   switch (status) {
     case "APPROVED":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+      return "border-[#9caf88] bg-[#e5eadf] text-[#526047]";
 
     case "ANALYZED":
-      return "border-indigo-500/20 bg-indigo-500/10 text-indigo-300";
+      return "border-[#9caf88]/70 bg-[#e5eadf]/70 text-[#526047]";
 
     case "UNDER_REVIEW":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+      return "border-amber-300 bg-amber-50 text-amber-700";
 
     case "PROCESSING":
-      return "border-violet-500/20 bg-violet-500/10 text-violet-300";
+      return "border-[#c8d3be] bg-[#eef2ea] text-[#66745c]";
 
     case "REJECTED":
-      return "border-rose-500/20 bg-rose-500/10 text-rose-300";
+      return "border-[#e8412c]/25 bg-[#e8412c]/10 text-[#c93625]";
 
     case "ARCHIVED":
-      return "border-slate-500/20 bg-slate-500/10 text-slate-400";
+      return "border-[#dddcd3] bg-[#f0eee8] text-[#7a8179]";
 
     case "UPLOADED":
-      return "border-cyan-500/20 bg-cyan-500/10 text-cyan-300";
+      return "border-[#c8d3be] bg-[#eef2ea] text-[#66745c]";
 
     default:
-      return "border-slate-500/20 bg-slate-500/10 text-slate-400";
+      return "border-[#dddcd3] bg-[#f0eee8] text-[#7a8179]";
   }
 }
 
@@ -81,19 +81,19 @@ function getRiskClasses(
 ) {
   switch (riskLevel) {
     case "CRITICAL":
-      return "border-rose-500/20 bg-rose-500/10 text-rose-300";
+      return "border-[#e8412c]/25 bg-[#e8412c]/10 text-[#c93625]";
 
     case "HIGH":
-      return "border-orange-500/20 bg-orange-500/10 text-orange-300";
+      return "border-orange-300 bg-orange-50 text-orange-700";
 
     case "MEDIUM":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+      return "border-amber-300 bg-amber-50 text-amber-700";
 
     case "LOW":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+      return "border-[#9caf88] bg-[#e5eadf] text-[#526047]";
 
     default:
-      return "border-slate-500/20 bg-slate-500/10 text-slate-500";
+      return "border-[#dddcd3] bg-[#f0eee8] text-[#7a8179]";
   }
 }
 
@@ -242,23 +242,23 @@ function ContractsPage() {
   };
 
   return (
-    <div className="relative min-h-full overflow-hidden">
-      <div className="pointer-events-none absolute right-0 top-0 h-[420px] w-[620px] rounded-full bg-indigo-600/[0.05] blur-3xl" />
+    <div className="relative min-h-full overflow-hidden bg-[#f7f5ef]">
+      <div className="pointer-events-none absolute right-0 top-0 h-[420px] w-[620px] rounded-full bg-[#9caf88]/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-[1400px] px-4 py-7 sm:px-6 lg:px-8">
         {/* Header */}
-        <section className="mb-6">
+        <section className="mb-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-indigo-400">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#718060]">
                 Contract Intelligence
               </div>
 
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              <h1 className="lexmind-display mt-2 text-3xl font-medium tracking-[-0.025em] text-[#243027] sm:text-4xl">
                 Contracts
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#687268]">
                 Manage contracts, versions,
                 risk analysis, and compliance
                 intelligence from one workspace.
@@ -270,7 +270,7 @@ function ContractsPage() {
               onClick={() =>
                 navigate("/upload")
               }
-              className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 text-xs font-semibold text-indigo-300 transition hover:border-indigo-400/50 hover:bg-indigo-500/15 hover:text-indigo-200"
+              className="inline-flex h-11 w-fit items-center justify-center gap-2 rounded-xl bg-[#e8412c] px-5 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(232,65,44,0.16)] transition hover:bg-[#d83a27] hover:shadow-[0_12px_28px_rgba(232,65,44,0.2)]"
             >
               <FilePlus2 size={16} />
 
@@ -280,13 +280,13 @@ function ContractsPage() {
         </section>
 
         {/* Search + filters */}
-        <section className="mb-5 rounded-xl border border-[#173052] bg-[#071426]/80 p-4 sm:p-5">
-          <div className="flex flex-col gap-4">
+        <section className="mb-6 rounded-2xl border border-[#dddcd3] bg-[#fffefa] p-4 shadow-[0_14px_36px_rgba(36,48,39,0.045)] sm:p-5">
+          <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-3 md:flex-row">
               <div className="relative flex-1">
                 <Search
                   size={15}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa198]"
                 />
 
                 <input
@@ -301,14 +301,14 @@ function ContractsPage() {
                     handleSearchKeyDown
                   }
                   placeholder="Search contracts..."
-                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] pl-9 pr-3 text-xs text-slate-300 outline-none transition placeholder:text-slate-700 focus:border-indigo-500/50"
+                  className="h-11 w-full rounded-xl border border-[#dddcd3] bg-[#f7f5ef] pl-9 pr-3 text-xs text-[#243027] outline-none transition placeholder:text-[#9aa198] focus:border-[#9caf88] focus:bg-white focus:ring-2 focus:ring-[#9caf88]/15"
                 />
               </div>
 
               <button
                 type="button"
                 onClick={handleSearch}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-5 text-xs font-semibold text-indigo-300 transition hover:bg-indigo-500/15"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#243027] px-5 text-xs font-semibold text-white transition hover:bg-[#344238]"
               >
                 <Search size={14} />
 
@@ -316,10 +316,9 @@ function ContractsPage() {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#526047]">
               <Filter
                 size={14}
-                className="text-indigo-400"
               />
 
               Filters
@@ -327,7 +326,7 @@ function ContractsPage() {
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <label className="block">
-                <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[#8a9189]">
                   Status
                 </span>
 
@@ -338,7 +337,7 @@ function ContractsPage() {
                       event.target.value,
                     )
                   }
-                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                  className="h-10 w-full rounded-xl border border-[#dddcd3] bg-[#f7f5ef] px-3 text-xs text-[#243027] outline-none transition focus:border-[#9caf88] focus:ring-2 focus:ring-[#9caf88]/15"
                 >
                   <option value="">
                     All statuses
@@ -379,7 +378,7 @@ function ContractsPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[#8a9189]">
                   Contract Type
                 </span>
 
@@ -390,7 +389,7 @@ function ContractsPage() {
                       event.target.value,
                     )
                   }
-                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                  className="h-10 w-full rounded-xl border border-[#dddcd3] bg-[#f7f5ef] px-3 text-xs text-[#243027] outline-none transition focus:border-[#9caf88] focus:ring-2 focus:ring-[#9caf88]/15"
                 >
                   <option value="">
                     All contract types
@@ -412,7 +411,7 @@ function ContractsPage() {
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[#8a9189]">
                   Risk Level
                 </span>
 
@@ -423,7 +422,7 @@ function ContractsPage() {
                       event.target.value,
                     )
                   }
-                  className="h-10 w-full rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs text-slate-300 outline-none transition focus:border-indigo-500/50"
+                  className="h-10 w-full rounded-xl border border-[#dddcd3] bg-[#f7f5ef] px-3 text-xs text-[#243027] outline-none transition focus:border-[#9caf88] focus:ring-2 focus:ring-[#9caf88]/15"
                 >
                   <option value="">
                     All risk levels
@@ -452,14 +451,14 @@ function ContractsPage() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-xs font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200"
+                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#dddcd3] bg-[#f7f5ef] px-3 text-xs font-semibold text-[#687268] transition hover:border-[#9caf88] hover:bg-[#e5eadf] hover:text-[#526047]"
                   >
                     <X size={14} />
 
                     Clear Filters
                   </button>
                 ) : (
-                  <div className="hidden h-10 w-full rounded-lg border border-transparent sm:block" />
+                  <div className="hidden h-10 w-full rounded-xl border border-transparent sm:block" />
                 )}
               </div>
             </div>
@@ -468,12 +467,12 @@ function ContractsPage() {
 
         {/* Loading */}
         {contractsQuery.isLoading ? (
-          <section className="rounded-xl border border-[#173052] bg-[#071426]/80">
+          <section className="rounded-2xl border border-[#dddcd3] bg-[#fffefa] shadow-[0_14px_36px_rgba(36,48,39,0.045)]">
             <div className="flex min-h-[360px] items-center justify-center">
-              <div className="flex items-center gap-3 text-sm text-slate-500">
+              <div className="flex items-center gap-3 text-sm text-[#687268]">
                 <LoaderCircle
                   size={18}
-                  className="animate-spin text-indigo-400"
+                  className="animate-spin text-[#718060]"
                 />
 
                 Loading contracts...
@@ -482,17 +481,19 @@ function ContractsPage() {
           </section>
         ) : contractsQuery.isError ? (
           /* Error */
-          <section className="rounded-xl border border-rose-500/20 bg-[#071426]/80 p-8 text-center">
-            <ShieldAlert
-              size={28}
-              className="mx-auto text-rose-400"
-            />
+          <section className="rounded-2xl border border-[#e8412c]/20 bg-[#fffefa] p-8 text-center shadow-[0_14px_36px_rgba(36,48,39,0.045)]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8412c]/10">
+              <ShieldAlert
+                size={25}
+                className="text-[#e8412c]"
+              />
+            </div>
 
-            <h2 className="mt-4 text-sm font-semibold text-rose-300">
+            <h2 className="mt-4 text-sm font-semibold text-[#c93625]">
               Unable to load contracts
             </h2>
 
-            <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-slate-600">
+            <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-[#687268]">
               {contractsQuery.error instanceof Error
                 ? contractsQuery.error.message
                 : "The contracts could not be loaded."}
@@ -503,7 +504,7 @@ function ContractsPage() {
               onClick={() =>
                 contractsQuery.refetch()
               }
-              className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#dddcd3] bg-[#f7f5ef] px-4 py-2.5 text-xs font-semibold text-[#526047] transition hover:border-[#9caf88] hover:bg-[#e5eadf]"
             >
               <RefreshCw size={14} />
 
@@ -512,23 +513,23 @@ function ContractsPage() {
           </section>
         ) : contracts.length === 0 ? (
           /* Empty */
-          <section className="rounded-xl border border-[#173052] bg-[#071426]/80">
+          <section className="rounded-2xl border border-[#dddcd3] bg-[#fffefa] shadow-[0_14px_36px_rgba(36,48,39,0.045)]">
             <div className="flex min-h-[360px] items-center justify-center px-6 text-center">
               <div>
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#173052] bg-[#0B1930]">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#dddcd3] bg-[#e5eadf]">
                   <FileText
                     size={20}
-                    className="text-slate-600"
+                    className="text-[#526047]"
                   />
                 </div>
 
-                <h2 className="mt-4 text-sm font-semibold text-slate-300">
+                <h2 className="mt-4 text-sm font-semibold text-[#243027]">
                   {hasFilters
                     ? "No matching contracts"
                     : "No contracts yet"}
                 </h2>
 
-                <p className="mt-2 max-w-md text-xs leading-5 text-slate-600">
+                <p className="mt-2 max-w-md text-xs leading-5 text-[#687268]">
                   {hasFilters
                     ? "No contracts match the current filters. Try changing or clearing your filters."
                     : "Create or upload a contract to start using the LexMind contract intelligence workspace."}
@@ -538,7 +539,7 @@ function ContractsPage() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#173052] bg-[#0B1930] px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#dddcd3] bg-[#f7f5ef] px-4 py-2.5 text-xs font-semibold text-[#526047] transition hover:border-[#9caf88] hover:bg-[#e5eadf]"
                   >
                     <X size={14} />
 
@@ -550,7 +551,7 @@ function ContractsPage() {
                     onClick={() =>
                       navigate("/upload")
                     }
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300 transition hover:bg-indigo-500/15"
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#e8412c] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#d83a27]"
                   >
                     <FilePlus2 size={14} />
 
@@ -564,9 +565,9 @@ function ContractsPage() {
           <>
             {/* Results header */}
             <div className="mb-3 flex items-center justify-between">
-              <div className="text-xs text-slate-600">
+              <div className="text-xs text-[#8a9189]">
                 Showing{" "}
-                <span className="font-medium text-slate-400">
+                <span className="font-semibold text-[#526047]">
                   {Math.min(
                     (page - 1) *
                       pageSize +
@@ -575,29 +576,29 @@ function ContractsPage() {
                   )}
                 </span>
                 {" "}–{" "}
-                <span className="font-medium text-slate-400">
+                <span className="font-semibold text-[#526047]">
                   {Math.min(
                     page * pageSize,
                     total,
                   )}
                 </span>
                 {" "}of{" "}
-                <span className="font-medium text-slate-400">
+                <span className="font-semibold text-[#526047]">
                   {total}
                 </span>{" "}
                 contracts
               </div>
 
               {hasFilters ? (
-                <div className="text-[10px] font-medium uppercase tracking-wider text-indigo-400">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#718060]">
                   Filters applied
                 </div>
               ) : null}
             </div>
 
             {/* Contract cards */}
-            <section className="overflow-hidden rounded-xl border border-[#173052] bg-[#071426]/80">
-              <div className="divide-y divide-[#102744]">
+            <section className="overflow-hidden rounded-2xl border border-[#dddcd3] bg-[#fffefa] shadow-[0_14px_36px_rgba(36,48,39,0.045)]">
+              <div className="divide-y divide-[#ebe9e1]">
                 {contracts.map(
                   (contract) => (
                     <button
@@ -608,18 +609,18 @@ function ContractsPage() {
                           contract.id,
                         )
                       }
-                      className="group block w-full text-left transition hover:bg-white/[0.015] focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/40"
+                      className="group block w-full text-left transition hover:bg-[#f7f5ef]/70 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-[#9caf88]"
                     >
                       <div className="px-5 py-5 sm:px-6">
                         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                           <div className="flex min-w-0 items-start gap-4">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 transition group-hover:border-indigo-400/30 group-hover:bg-indigo-500/15">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#c8d3be] bg-[#e5eadf] text-[#526047] transition group-hover:bg-[#dce5d3]">
                               <FileText size={19} />
                             </div>
 
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <h2 className="truncate text-sm font-semibold text-slate-200 transition group-hover:text-white">
+                                <h2 className="truncate text-sm font-semibold text-[#243027] transition group-hover:text-[#526047]">
                                   {contract.title}
                                 </h2>
 
@@ -634,7 +635,7 @@ function ContractsPage() {
                                 </span>
                               </div>
 
-                              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-600">
+                              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-[#8a9189]">
                                 <span>
                                   {formatContractType(
                                     contract.contract_type,
@@ -660,7 +661,7 @@ function ContractsPage() {
 
                           <div className="flex shrink-0 items-center gap-3">
                             <div className="text-right">
-                              <div className="text-[9px] font-medium uppercase tracking-wider text-slate-700">
+                              <div className="text-[9px] font-semibold uppercase tracking-wider text-[#9aa198]">
                                 Risk
                               </div>
 
@@ -674,7 +675,7 @@ function ContractsPage() {
                                     {contract.risk_level}
                                   </span>
                                 ) : (
-                                  <span className="text-xs text-slate-700">
+                                  <span className="text-xs text-[#9aa198]">
                                     Not analyzed
                                   </span>
                                 )}
@@ -683,14 +684,14 @@ function ContractsPage() {
                                 null &&
                                 contract.risk_score !==
                                   undefined ? (
-                                  <span className="text-xs font-semibold text-slate-300">
+                                  <span className="text-xs font-semibold text-[#243027]">
                                     {contract.risk_score}
                                   </span>
                                 ) : null}
                               </div>
                             </div>
 
-                            <div className="hidden h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-700 transition group-hover:border-[#173052] group-hover:bg-[#0B1930] group-hover:text-indigo-300 sm:flex">
+                            <div className="hidden h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[#9aa198] transition group-hover:border-[#dddcd3] group-hover:bg-[#f7f5ef] group-hover:text-[#526047] sm:flex">
                               <ChevronRight
                                 size={16}
                               />
@@ -707,13 +708,13 @@ function ContractsPage() {
             {/* Pagination */}
             {totalPages > 1 ? (
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-[11px] text-slate-600">
+                <div className="text-[11px] text-[#8a9189]">
                   Page{" "}
-                  <span className="font-medium text-slate-400">
+                  <span className="font-semibold text-[#526047]">
                     {page}
                   </span>{" "}
                   of{" "}
-                  <span className="font-medium text-slate-400">
+                  <span className="font-semibold text-[#526047]">
                     {totalPages}
                   </span>
                 </div>
@@ -731,14 +732,14 @@ function ContractsPage() {
                           ),
                       )
                     }
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-[10px] font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[#dddcd3] bg-[#fffefa] px-3 text-[10px] font-semibold text-[#687268] transition hover:border-[#9caf88] hover:bg-[#e5eadf] hover:text-[#526047] disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <ChevronLeft size={13} />
 
                     Previous
                   </button>
 
-                  <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-semibold text-indigo-300">
+                  <span className="rounded-xl bg-[#243027] px-3 py-1.5 text-[10px] font-semibold text-white">
                     {page}
                   </span>
 
@@ -756,7 +757,7 @@ function ContractsPage() {
                           ),
                       )
                     }
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#173052] bg-[#0B1930] px-3 text-[10px] font-semibold text-slate-400 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[#dddcd3] bg-[#fffefa] px-3 text-[10px] font-semibold text-[#687268] transition hover:border-[#9caf88] hover:bg-[#e5eadf] hover:text-[#526047] disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     Next
 

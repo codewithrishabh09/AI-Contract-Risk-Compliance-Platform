@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Bell,
   Check,
   ChevronRight,
   FileCheck2,
@@ -7,6 +8,7 @@ import {
   LockKeyhole,
   Menu,
   Scale,
+  Settings,
   ShieldCheck,
   Sparkles,
   X,
@@ -16,159 +18,59 @@ import { Link } from "react-router-dom";
 
 import LexMindLogo from "../../components/brand/LexMindLogo";
 
-function AnalysisPreview() {
-  return (
-    <div className="relative mx-auto w-full max-w-[620px]">
-      <div className="absolute -inset-6 rounded-[40px] bg-[#9caf88]/20 blur-3xl" />
+const heroImage =
+  "https://images.unsplash.com/photo-1649653084130-06638e40ca25?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=82&w=1600";
 
-      <div className="relative overflow-hidden rounded-[28px] border border-[#d9ddd2] bg-[#fffefa] shadow-[0_30px_90px_rgba(36,48,39,0.14)]">
-        <div className="flex items-center justify-between border-b border-[#e5e3da] px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526047]">
-              <FileSearch size={17} />
-            </div>
+const navItems = [
+  { label: "Home", href: "/" },
+  { label: "Contracts", href: "/contracts" },
+  { label: "Analysis", href: "/analysis" },
+  { label: "Risk Findings", href: "/findings" },
+  { label: "Compliance", href: "/compliance" },
+  { label: "Organizations", href: "/dashboard" },
+  { label: "Audit Logs", href: "/audit" },
+  { label: "Settings", href: "/settings" },
+];
 
-            <div>
-              <p className="text-sm font-semibold text-[#243027]">
-                Vendor Agreement
-              </p>
-              <p className="text-[11px] text-[#858d84]">
-                Contract analysis complete
-              </p>
-            </div>
-          </div>
+const capabilities = [
+  {
+    icon: ShieldCheck,
+    title: "Enterprise-Grade Security",
+  },
+  {
+    icon: Sparkles,
+    title: "AI-Powered Insights",
+  },
+  {
+    icon: Scale,
+    title: "Built for Legal Professionals",
+  },
+];
 
-          <span className="rounded-full bg-[#e5eadf] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#526047]">
-            Analysed
-          </span>
-        </div>
-
-        <div className="grid gap-0 md:grid-cols-[1fr_190px]">
-          <div className="space-y-5 p-6">
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.13em] text-[#858d84]">
-                  Overall risk
-                </span>
-
-                <span className="text-sm font-bold text-[#e8412c]">
-                  Medium
-                </span>
-              </div>
-
-              <div className="h-2 overflow-hidden rounded-full bg-[#ebece6]">
-                <div className="lexmind-risk-bar h-full w-[57%] rounded-full bg-[#e8412c]" />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[#e5e3da] bg-[#faf9f5] p-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#fce6e2] text-[#e8412c]">
-                  <ShieldCheck size={14} />
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold text-[#354136]">
-                    Payment obligation
-                  </p>
-
-                  <p className="mt-1 text-[11px] leading-5 text-[#7a8279]">
-                    Payment is due within 15 days after receipt of invoice.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[#e5e3da] bg-[#faf9f5] p-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#e5eadf] text-[#718060]">
-                  <FileCheck2 size={14} />
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold text-[#354136]">
-                    Renewal clause
-                  </p>
-
-                  <p className="mt-1 text-[11px] leading-5 text-[#7a8279]">
-                    Agreement automatically renews for successive 12-month
-                    periods.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-[#e5e3da] bg-[#f4f5ef] p-5 md:border-l md:border-t-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#858d84]">
-              Findings
-            </p>
-
-            <div className="mt-5 space-y-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#5e685e]">High</span>
-                  <span className="text-xs font-semibold text-[#e8412c]">
-                    02
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#5e685e]">Medium</span>
-                  <span className="text-xs font-semibold text-[#718060]">
-                    05
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#5e685e]">Low</span>
-                  <span className="text-xs font-semibold text-[#718060]">
-                    08
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-2xl bg-[#243027] p-4 text-white">
-              <Sparkles size={15} className="text-[#9caf88]" />
-
-              <p className="mt-3 text-xs font-semibold">
-                AI insight
-              </p>
-
-              <p className="mt-1 text-[10px] leading-5 text-white/60">
-                3 clauses require review before approval.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const intelligenceItems = [
+const features = [
   {
     icon: FileSearch,
-    title: "Contract Analysis",
+    title: "AI-Powered Analysis",
     description:
-      "Turn lengthy agreements into structured, understandable intelligence.",
+      "Understand complex contracts with structured AI-powered analysis.",
   },
   {
     icon: ShieldCheck,
     title: "Risk Detection",
     description:
-      "Surface risky clauses, obligations, and potential exposure before they become problems.",
+      "Identify risky clauses, obligations, and potential exposure early.",
+  },
+  {
+    icon: FileCheck2,
+    title: "Compliance Assurance",
+    description:
+      "Keep important contractual requirements visible and reviewable.",
   },
   {
     icon: Sparkles,
-    title: "AI-Powered Insights",
+    title: "Actionable Insights",
     description:
-      "Ask questions about contracts and get context-aware answers from your documents.",
+      "Turn contract intelligence into clearer, faster decisions.",
   },
 ];
 
@@ -179,59 +81,265 @@ const securityItems = [
   "Secure authenticated workspace",
 ];
 
+function ComplianceCard() {
+  return (
+    <div className="absolute bottom-8 right-5 z-20 w-[270px] rounded-[22px] border border-[#dddcd3] bg-[#fffefa]/95 p-5 shadow-[0_24px_60px_rgba(36,48,39,0.16)] backdrop-blur-md sm:right-8 sm:w-[300px]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e5eadf] text-[#526047]">
+            <Scale size={15} />
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-[#243027]">LexMind</p>
+            <p className="text-[9px] text-[#7a8379]">
+              AI Contract Intelligence
+            </p>
+          </div>
+        </div>
+
+        <span className="h-2 w-2 rounded-full bg-[#9caf88]" />
+      </div>
+
+      <div className="mt-5 grid grid-cols-[105px_1fr] items-center gap-4">
+        <div className="relative flex h-[92px] w-[92px] items-center justify-center rounded-full border-[10px] border-[#e5eadf]">
+          <div className="absolute inset-[-10px] rounded-full border-[10px] border-transparent border-t-[#e8412c] border-r-[#f1bd52] border-l-[#9caf88] rotate-[22deg]" />
+
+          <div className="text-center">
+            <p className="text-[21px] font-bold tracking-[-0.04em] text-[#243027]">
+              92%
+            </p>
+            <p className="text-[8px] font-medium text-[#718060]">
+              Compliance
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="flex items-center gap-2 text-[#526047]">
+              <span className="h-2 w-2 rounded-full bg-[#9caf88]" />
+              Low Risk
+            </span>
+            <span className="font-semibold text-[#243027]">66%</span>
+          </div>
+
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="flex items-center gap-2 text-[#526047]">
+              <span className="h-2 w-2 rounded-full bg-[#f1bd52]" />
+              Medium
+            </span>
+            <span className="font-semibold text-[#243027]">24%</span>
+          </div>
+
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="flex items-center gap-2 text-[#526047]">
+              <span className="h-2 w-2 rounded-full bg-[#e8412c]" />
+              High Risk
+            </span>
+            <span className="font-semibold text-[#243027]">10%</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-xl bg-[#f4f5ef] px-3 py-3">
+        <div className="flex h-7 items-end gap-1.5">
+          {[34, 43, 40, 58, 52, 68, 63, 78].map((height, index) => (
+            <div
+              key={index}
+              className="flex-1 rounded-t bg-[#9caf88]/55"
+              style={{ height: `${height}%` }}
+            />
+          ))}
+        </div>
+
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-[9px] text-[#858d84]">
+            Risk trend
+          </span>
+
+          <span className="rounded-full bg-[#e5eadf] px-2 py-1 text-[9px] font-semibold text-[#526047]">
+            +12% ↑
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardPreview() {
+  return (
+    <div className="relative overflow-hidden rounded-[28px] border border-[#dddcd3] bg-[#fffefa] shadow-[0_30px_70px_rgba(36,48,39,0.10)]">
+      <div className="flex items-center justify-between border-b border-[#e5e3da] px-5 py-4">
+        <div>
+          <p className="text-sm font-semibold text-[#243027]">
+            Contract Intelligence
+          </p>
+          <p className="mt-1 text-[10px] text-[#858d84]">
+            Overview of your contract portfolio
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="hidden h-8 w-24 rounded-lg border border-[#dddcd3] bg-[#f7f5ef] sm:block" />
+
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e5eadf] text-[#526047]">
+            <Bell size={14} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 p-5 sm:grid-cols-3">
+        {[
+          ["Total Contracts", "128"],
+          ["Under Review", "24"],
+          ["High Risk", "08"],
+        ].map(([label, value], index) => (
+          <div
+            key={label}
+            className="rounded-2xl border border-[#e5e3da] bg-[#faf9f5] p-4"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#858d84]">
+                {label}
+              </span>
+
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  index === 2 ? "bg-[#e8412c]" : "bg-[#9caf88]"
+                }`}
+              />
+            </div>
+
+            <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[#243027]">
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 px-5 pb-5 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-2xl border border-[#e5e3da] bg-[#faf9f5] p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-[#243027]">
+                Risk Overview
+              </p>
+              <p className="mt-1 text-[9px] text-[#858d84]">
+                Current contract portfolio
+              </p>
+            </div>
+
+            <span className="text-xs font-semibold text-[#718060]">
+              92% compliant
+            </span>
+          </div>
+
+          <div className="mt-7 flex h-[120px] items-end gap-3">
+            {[38, 54, 48, 67, 58, 78, 71, 90, 83, 96].map(
+              (height, index) => (
+                <div
+                  key={index}
+                  className="flex flex-1 items-end rounded-t-lg bg-[#9caf88]/40"
+                  style={{ height: `${height}%` }}
+                >
+                  <div
+                    className="w-full rounded-t-lg bg-[#718060]"
+                    style={{
+                      height: `${Math.max(28, height - 18)}%`,
+                    }}
+                  />
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#e5e3da] bg-[#243027] p-5 text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#9caf88]/15 text-[#9caf88]">
+            <Sparkles size={16} />
+          </div>
+
+          <p className="mt-5 text-xs font-semibold">
+            AI Insight
+          </p>
+
+          <p className="mt-2 text-[10px] leading-5 text-white/60">
+            3 clauses require review before approval.
+          </p>
+
+          <div className="mt-5 flex items-center gap-2 text-[9px] font-semibold text-[#9caf88]">
+            View findings
+            <ArrowRight size={12} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#f7f5ef] text-[#243027]">
       {/* Navigation */}
-      <header className="relative z-50 border-b border-[#dddcd3]/80 bg-[#f7f5ef]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[76px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
+      <header className="relative z-50 border-b border-[#dddcd3] bg-[#f7f5ef]/95">
+        <div className="mx-auto flex min-h-[76px] max-w-[1400px] items-center justify-between px-5 sm:px-8 lg:px-10">
           <LexMindLogo />
 
-          <nav className="hidden items-center gap-8 lg:flex">
-            <a
-              href="#intelligence"
-              className="text-sm font-medium text-[#687268] transition hover:text-[#243027]"
-            >
-              Intelligence
-            </a>
+          <nav className="hidden items-center gap-6 xl:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.href}
+                className={`relative py-7 text-[12px] font-medium transition ${
+                  item.label === "Home"
+                    ? "text-[#e8412c]"
+                    : "text-[#243027] hover:text-[#e8412c]"
+                }`}
+              >
+                {item.label}
 
-            <a
-              href="#workflow"
-              className="text-sm font-medium text-[#687268] transition hover:text-[#243027]"
-            >
-              Workflow
-            </a>
-
-            <a
-              href="#security"
-              className="text-sm font-medium text-[#687268] transition hover:text-[#243027]"
-            >
-              Security
-            </a>
+                {item.label === "Home" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#e8412c]" />
+                )}
+              </Link>
+            ))}
           </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <Link
-              to="/login"
-              className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[#526047] transition hover:bg-[#e5eadf]"
+          <div className="hidden items-center gap-4 xl:flex">
+            <button
+              type="button"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#526047] transition hover:bg-[#e5eadf]"
+              aria-label="Notifications"
             >
-              Sign in
-            </Link>
+              <Bell size={18} />
+
+              <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#e8412c] px-1 text-[8px] font-bold text-white">
+                3
+              </span>
+            </button>
 
             <Link
-              to="/register"
-              className="rounded-xl bg-[#243027] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(36,48,39,0.12)] transition hover:bg-[#354638]"
+              to="/login"
+              className="flex items-center gap-2.5"
             >
-              Get started
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dddcd3] bg-[#fffefa] text-xs font-semibold text-[#526047]">
+                R
+              </span>
+
+              <ChevronRight
+                size={14}
+                className="rotate-90 text-[#858d84]"
+              />
             </Link>
           </div>
 
           <button
             type="button"
             onClick={() => setMobileMenuOpen((value) => !value)}
-            className="rounded-xl border border-[#dddcd3] bg-white p-2.5 text-[#526047] lg:hidden"
+            className="rounded-xl border border-[#dddcd3] bg-[#fffefa] p-2.5 text-[#526047] xl:hidden"
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
@@ -239,33 +347,24 @@ function HomePage() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="border-t border-[#dddcd3] bg-[#fffefa] px-5 py-5 lg:hidden">
-            <div className="mx-auto flex max-w-[1240px] flex-col gap-2">
-              <a
-                href="#intelligence"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-[#526047] hover:bg-[#e5eadf]"
-              >
-                Intelligence
-              </a>
+          <div className="border-t border-[#dddcd3] bg-[#fffefa] px-5 py-5 xl:hidden">
+            <div className="mx-auto flex max-w-[1400px] flex-col gap-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`rounded-xl px-4 py-3 text-sm font-medium ${
+                    item.label === "Home"
+                      ? "bg-[#e5eadf] text-[#526047]"
+                      : "text-[#526047] hover:bg-[#f4f5ef]"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
 
-              <a
-                href="#workflow"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-[#526047] hover:bg-[#e5eadf]"
-              >
-                Workflow
-              </a>
-
-              <a
-                href="#security"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-[#526047] hover:bg-[#e5eadf]"
-              >
-                Security
-              </a>
-
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#e5e3da] pt-4">
                 <Link
                   to="/login"
                   className="rounded-xl border border-[#dddcd3] px-4 py-3 text-center text-sm font-semibold text-[#526047]"
@@ -275,7 +374,7 @@ function HomePage() {
 
                 <Link
                   to="/register"
-                  className="rounded-xl bg-[#243027] px-4 py-3 text-center text-sm font-semibold text-white"
+                  className="rounded-xl bg-[#e8412c] px-4 py-3 text-center text-sm font-semibold text-white"
                 >
                   Get started
                 </Link>
@@ -286,38 +385,34 @@ function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="relative">
-        <div className="absolute inset-0 lexmind-soft-grid opacity-70" />
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(156,175,136,0.18),transparent_32%)]" />
 
-        <div className="absolute -left-40 top-20 h-96 w-96 rounded-full bg-[#9caf88]/20 blur-3xl" />
-        <div className="absolute -right-40 top-40 h-96 w-96 rounded-full bg-[#e8412c]/8 blur-3xl" />
-
-        <div className="relative mx-auto grid min-h-[700px] max-w-[1240px] items-center gap-16 px-5 py-20 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-24">
-          <div>
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#9caf88]/40 bg-[#e5eadf] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#526047]">
-              <Scale size={14} />
-              AI Contract Intelligence
+        <div className="relative mx-auto grid min-h-[680px] max-w-[1400px] items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-20">
+          <div className="relative z-20">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#9caf88]/35 bg-[#e5eadf] px-4 py-2 text-[11px] font-semibold tracking-[0.04em] text-[#526047]">
+              <Sparkles size={14} />
+              Next-Gen Legal Tech Platform
             </div>
 
-            <h1 className="max-w-[650px] font-['Playfair_Display'] text-5xl font-medium leading-[1.02] tracking-[-0.045em] text-[#243027] sm:text-6xl lg:text-[72px]">
-              Make every contract
-              <span className="block text-[#718060]">
-                easier to understand.
+            <h1 className="max-w-[720px] font-['Playfair_Display'] text-5xl font-medium leading-[0.98] tracking-[-0.045em] text-[#243027] sm:text-6xl lg:text-[70px]">
+              Smarter Contract Analysis.
+              <span className="mt-2 block text-[#e8412c]">
+                Safer Business Decisions.
               </span>
             </h1>
 
-            <p className="mt-7 max-w-[560px] text-base leading-7 text-[#687268] sm:text-lg">
-              LexMind helps teams analyse contracts, identify risk, understand
-              obligations, and make confident decisions without getting lost
-              in legal complexity.
+            <p className="mt-7 max-w-[600px] text-base leading-7 text-[#687268] sm:text-lg">
+              Leverage the power of AI to analyze contracts, identify risks,
+              understand obligations, and ensure compliance with confidence.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/register"
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#243027] px-6 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(36,48,39,0.15)] transition hover:bg-[#354638]"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#e8412c] px-7 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(232,65,44,0.20)] transition hover:bg-[#d83a27]"
               >
-                Start analysing
+                Get Started
                 <ArrowRight
                   size={16}
                   className="transition-transform group-hover:translate-x-1"
@@ -326,160 +421,184 @@ function HomePage() {
 
               <Link
                 to="/login"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-[#d7d9d0] bg-[#fffefa] px-6 text-sm font-semibold text-[#526047] transition hover:border-[#9caf88] hover:bg-[#e5eadf]"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[#9caf88] bg-[#fffefa] px-7 text-sm font-semibold text-[#526047] transition hover:bg-[#e5eadf]"
               >
-                Sign in
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9caf88] text-white">
+                  <ArrowRight size={11} />
+                </span>
+                Watch Demo
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-[#7b847a]">
-              <span className="flex items-center gap-2">
-                <Check size={14} className="text-[#718060]" />
-                Risk-focused analysis
-              </span>
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-4">
+              {capabilities.map((item, index) => {
+                const Icon = item.icon;
 
-              <span className="flex items-center gap-2">
-                <Check size={14} className="text-[#718060]" />
-                Secure workspace
-              </span>
+                return (
+                  <div
+                    key={item.title}
+                    className={`flex items-center gap-3 ${
+                      index !== 0
+                        ? "border-l border-[#dddcd3] pl-6"
+                        : ""
+                    }`}
+                  >
+                    <Icon
+                      size={23}
+                      strokeWidth={1.7}
+                      className="text-[#718060]"
+                    />
 
-              <span className="flex items-center gap-2">
-                <Check size={14} className="text-[#718060]" />
-                Audit visibility
-              </span>
+                    <span className="max-w-[130px] text-[11px] font-medium leading-4 text-[#526047]">
+                      {item.title}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <div className="lexmind-float">
-            <AnalysisPreview />
+          {/* Hero image */}
+          <div className="relative min-h-[500px] lg:min-h-[600px]">
+            <div className="absolute right-[-18%] top-[-12%] h-[560px] w-[560px] rounded-full bg-[#e5eadf] opacity-70 blur-[1px]" />
+
+            <div className="absolute inset-y-[-8%] right-[-14%] w-[105%] overflow-hidden rounded-l-[48%] rounded-r-none lg:right-[-12%]">
+              <img
+                src={heroImage}
+                alt="Lady Justice representing legal intelligence"
+                className="h-full w-full object-cover object-center opacity-90"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-r from-[#f7f5ef] via-[#f7f5ef]/10 to-transparent" />
+              <div className="absolute inset-0 bg-[#9caf88]/10 mix-blend-multiply" />
+            </div>
+
+            <div className="absolute right-2 top-8 h-12 w-12 rounded-xl bg-[#e8412c]/85 shadow-lg sm:right-8" />
+            <div className="absolute right-14 top-20 h-8 w-8 rounded-lg bg-[#e5eadf] shadow-lg sm:right-20" />
+
+            <ComplianceCard />
           </div>
         </div>
       </section>
 
-      {/* Intelligence */}
-      <section
-        id="intelligence"
-        className="border-y border-[#dddcd3] bg-[#fffefa]"
-      >
-        <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#718060]">
-              One intelligent workspace
+      {/* Trusted / capability strip */}
+      <section className="border-y border-[#dddcd3] bg-[#fffefa]">
+        <div className="mx-auto max-w-[1240px] px-5 py-8 sm:px-8">
+          <div className="mb-6 flex items-center gap-5">
+            <div className="h-px flex-1 bg-[#dddcd3]" />
+
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#687268]">
+              Trusted by modern legal teams
             </p>
 
-            <h2 className="mt-4 font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.035em] text-[#243027] sm:text-5xl">
-              From documents to decisions.
-            </h2>
-
-            <p className="mt-5 text-base leading-7 text-[#687268]">
-              Bring contract review, risk analysis, and compliance visibility
-              into one focused workspace.
-            </p>
+            <div className="h-px flex-1 bg-[#dddcd3]" />
           </div>
 
-          <div className="mt-14 grid gap-4 md:grid-cols-3">
-            {intelligenceItems.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <div
-                  key={item.title}
-                  className="group rounded-[24px] border border-[#dddcd3] bg-[#f9f8f3] p-7 transition duration-300 hover:-translate-y-1 hover:border-[#9caf88] hover:shadow-[0_20px_45px_rgba(36,48,39,0.08)]"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526047] transition group-hover:bg-[#9caf88] group-hover:text-white">
-                    <Icon size={19} />
-                  </div>
-
-                  <h3 className="mt-7 text-lg font-semibold tracking-[-0.02em] text-[#243027]">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-6 text-[#687268]">
-                    {item.description}
-                  </p>
-
-                  <div className="mt-7 flex items-center gap-1 text-xs font-semibold text-[#718060]">
-                    Explore capability
-                    <ChevronRight size={14} />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              "Microsoft",
+              "amazon",
+              "Google",
+              "Meta",
+              "Deloitte.",
+              "LegalOps",
+            ].map((name) => (
+              <div
+                key={name}
+                className="text-lg font-semibold tracking-[-0.04em] text-[#718060] opacity-80"
+              >
+                {name}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Workflow */}
-      <section id="workflow" className="bg-[#e9ede4]">
-        <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8">
-          <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+      {/* Why LexMind */}
+      <section id="intelligence" className="bg-[#f7f5ef]">
+        <div className="mx-auto max-w-[1400px] px-5 py-24 sm:px-8 lg:px-10">
+          <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#718060]">
-                A clearer workflow
-              </p>
+              <div className="inline-flex rounded-full border border-[#9caf88]/35 bg-[#e5eadf] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#526047]">
+                Why choose LexMind
+              </div>
 
-              <h2 className="mt-4 font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.035em] text-[#243027] sm:text-5xl">
-                Less searching.
-                <br />
-                More understanding.
+              <h2 className="mt-5 max-w-[500px] font-['Playfair_Display'] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#243027] sm:text-5xl">
+                Built for Modern Legal Teams
               </h2>
 
-              <p className="mt-5 max-w-md text-base leading-7 text-[#687268]">
-                LexMind gives your team a structured way to move from uploaded
-                agreements to actionable contract intelligence.
+              <p className="mt-5 max-w-[460px] text-sm leading-6 text-[#687268]">
+                From complex language to clear decisions — LexMind helps you
+                stay ahead in a complex legal landscape.
               </p>
 
               <Link
                 to="/register"
-                className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#526047] transition hover:text-[#e8412c]"
+                className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#e8412c] px-6 py-3 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(232,65,44,0.15)] transition hover:bg-[#d83a27]"
               >
-                Build your workspace
-                <ArrowRight size={15} />
+                Explore Features
+                <ArrowRight size={14} />
               </Link>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  number: "01",
-                  title: "Upload",
-                  text: "Bring contracts into one secure workspace.",
-                },
-                {
-                  number: "02",
-                  title: "Analyse",
-                  text: "Extract clauses, risks, obligations, and insights.",
-                },
-                {
-                  number: "03",
-                  title: "Act",
-                  text: "Review findings and make better decisions.",
-                },
-              ].map((step) => (
-                <div
-                  key={step.number}
-                  className="rounded-[22px] border border-[#d4d9ce] bg-[#f7f5ef]/80 p-6"
-                >
-                  <span className="text-xs font-bold tracking-[0.15em] text-[#9caf88]">
-                    {step.number}
-                  </span>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {features.map((feature) => {
+                const Icon = feature.icon;
 
-                  <h3 className="mt-8 text-base font-semibold text-[#243027]">
-                    {step.title}
-                  </h3>
+                return (
+                  <div
+                    key={feature.title}
+                    className="rounded-[22px] border border-[#dddcd3] bg-[#fffefa] p-6 transition hover:-translate-y-0.5 hover:border-[#9caf88] hover:shadow-[0_16px_40px_rgba(36,48,39,0.07)]"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#e5eadf] text-[#718060]">
+                        <Icon size={20} strokeWidth={1.8} />
+                      </div>
 
-                  <p className="mt-2 text-sm leading-6 text-[#687268]">
-                    {step.text}
-                  </p>
-                </div>
-              ))}
+                      <div>
+                        <h3 className="font-['Playfair_Display'] text-lg font-semibold text-[#243027]">
+                          {feature.title}
+                        </h3>
+
+                        <p className="mt-2 text-xs leading-5 text-[#687268]">
+                          {feature.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Product preview */}
+      <section id="workflow" className="bg-[#fffefa]">
+        <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#718060]">
+              One intelligent workspace
+            </p>
+
+            <h2 className="mt-4 font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.04em] text-[#243027] sm:text-5xl">
+              See your contracts clearly.
+            </h2>
+
+            <p className="mt-5 text-sm leading-6 text-[#687268] sm:text-base">
+              A focused workspace for contracts, risk findings, compliance,
+              analysis, and audit visibility.
+            </p>
+          </div>
+
+          <div className="mt-14">
+            <DashboardPreview />
           </div>
         </div>
       </section>
 
       {/* Security */}
-      <section id="security" className="bg-[#f7f5ef]">
+      <section id="security" className="bg-[#e9ede4]">
         <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8">
           <div className="grid gap-14 lg:grid-cols-[1fr_0.9fr] lg:items-center">
             <div className="relative overflow-hidden rounded-[30px] bg-[#243027] p-8 text-white sm:p-10">
@@ -491,7 +610,9 @@ function HomePage() {
                 </div>
 
                 <h3 className="mt-8 max-w-md font-['Playfair_Display'] text-3xl font-medium leading-tight">
-                  Designed for sensitive contract intelligence.
+                  Secure by design.
+                  <br />
+                  Visible by default.
                 </h3>
 
                 <p className="mt-4 max-w-md text-sm leading-6 text-white/60">
@@ -517,17 +638,19 @@ function HomePage() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#718060]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#718060]">
                 Trust & visibility
               </p>
 
-              <h2 className="mt-4 font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.035em] text-[#243027] sm:text-5xl">
-                Know what changed,
+              <h2 className="mt-4 font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.04em] text-[#243027] sm:text-5xl">
+                Secure.
                 <br />
-                who acted, and why.
+                Compliant.
+                <br />
+                Intelligent.
               </h2>
 
-              <p className="mt-5 max-w-lg text-base leading-7 text-[#687268]">
+              <p className="mt-5 max-w-lg text-sm leading-6 text-[#687268] sm:text-base">
                 Contract intelligence is only useful when your team can trust
                 the process. LexMind brings analysis, findings, and audit
                 visibility together.
@@ -540,7 +663,7 @@ function HomePage() {
                   "Centralized contract history and activity",
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e5eadf] text-[#718060]">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#f7f5ef] text-[#718060]">
                       <Check size={14} strokeWidth={2.5} />
                     </span>
 
@@ -550,32 +673,40 @@ function HomePage() {
                   </div>
                 ))}
               </div>
+
+              <Link
+                to="/register"
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#e8412c] px-6 py-3 text-xs font-semibold text-white transition hover:bg-[#d83a27]"
+              >
+                Try LexMind Today
+                <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="border-t border-[#dddcd3] bg-[#e5eadf]">
+      <section className="bg-[#f7f5ef]">
         <div className="mx-auto max-w-[1000px] px-5 py-24 text-center sm:px-8">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#243027] text-[#9caf88]">
             <Scale size={23} />
           </div>
 
-          <h2 className="mx-auto mt-7 max-w-3xl font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.035em] text-[#243027] sm:text-5xl">
-            Make contract review a strategic advantage.
+          <h2 className="mx-auto mt-7 max-w-3xl font-['Playfair_Display'] text-4xl font-medium leading-tight tracking-[-0.04em] text-[#243027] sm:text-5xl">
+            Secure. Compliant. Intelligent.
           </h2>
 
-          <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-[#687268]">
-            Build a clearer view of your agreements, risks, and obligations
-            with LexMind.
+          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#687268] sm:text-base">
+            Make contract review a strategic advantage with a clearer view of
+            your agreements, risks, and obligations.
           </p>
 
           <Link
             to="/register"
-            className="mt-8 inline-flex h-12 items-center gap-2 rounded-xl bg-[#243027] px-7 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(36,48,39,0.14)] transition hover:bg-[#354638]"
+            className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-[#e8412c] px-7 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(232,65,44,0.16)] transition hover:bg-[#d83a27]"
           >
-            Create your workspace
+            Try LexMind Today
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -583,7 +714,7 @@ function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-[#dddcd3] bg-[#f7f5ef]">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-4 px-5 py-7 sm:px-8 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
           <LexMindLogo compact />
 
           <p className="text-xs text-[#8a9188]">
@@ -591,12 +722,26 @@ function HomePage() {
           </p>
 
           <div className="flex items-center gap-5 text-xs font-medium text-[#687268]">
-            <Link to="/login" className="hover:text-[#243027]">
+            <Link
+              to="/login"
+              className="transition hover:text-[#e8412c]"
+            >
               Sign in
             </Link>
 
-            <Link to="/register" className="hover:text-[#243027]">
+            <Link
+              to="/register"
+              className="transition hover:text-[#e8412c]"
+            >
               Get started
+            </Link>
+
+            <Link
+              to="/settings"
+              className="transition hover:text-[#e8412c]"
+              aria-label="Settings"
+            >
+              <Settings size={14} />
             </Link>
           </div>
         </div>

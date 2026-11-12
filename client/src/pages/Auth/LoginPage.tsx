@@ -1,5 +1,5 @@
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import LexMindLogo from "../../components/brand/LexMindLogo";

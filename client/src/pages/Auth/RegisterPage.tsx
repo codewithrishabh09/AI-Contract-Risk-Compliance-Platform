@@ -7,7 +7,7 @@ import {
   Mail,
   UserRound,
 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import LexMindLogo from "../../components/brand/LexMindLogo";

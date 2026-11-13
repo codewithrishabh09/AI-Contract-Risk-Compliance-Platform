@@ -25,36 +25,36 @@ function getRiskClasses(severity: string | null | undefined) {
     case "CRITICAL":
       return {
         badge:
-          "border-red-500/30 bg-red-500/10 text-red-300",
-        dot: "bg-red-400",
+          "border-[#E8412C]/25 bg-[#E8412C]/10 text-[#C93422]",
+        dot: "bg-[#E8412C]",
       };
 
     case "HIGH":
       return {
         badge:
-          "border-orange-500/30 bg-orange-500/10 text-orange-300",
-        dot: "bg-orange-400",
+          "border-[#D66A4A]/25 bg-[#D66A4A]/10 text-[#B65337]",
+        dot: "bg-[#D66A4A]",
       };
 
     case "MEDIUM":
       return {
         badge:
-          "border-amber-500/30 bg-amber-500/10 text-amber-300",
-        dot: "bg-amber-400",
+          "border-[#C5A34A]/25 bg-[#C5A34A]/10 text-[#92751E]",
+        dot: "bg-[#C5A34A]",
       };
 
     case "LOW":
       return {
         badge:
-          "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-        dot: "bg-emerald-400",
+          "border-[#9CAF88]/40 bg-[#E5EADF] text-[#5F6E52]",
+        dot: "bg-[#718060]",
       };
 
     default:
       return {
         badge:
-          "border-slate-700 bg-slate-900 text-slate-400",
-        dot: "bg-slate-500",
+          "border-[#DDDCD3] bg-[#F1F0EA] text-[#687268]",
+        dot: "bg-[#8B918B]",
       };
   }
 }
@@ -62,24 +62,22 @@ function getRiskClasses(severity: string | null | undefined) {
 function getStatusClasses(status: string | null | undefined) {
   switch (status?.toUpperCase()) {
     case "OPEN":
-      return "border-red-500/20 bg-red-500/10 text-red-300";
+      return "border-[#E8412C]/20 bg-[#E8412C]/8 text-[#C93422]";
 
     case "IN_REVIEW":
     case "REVIEW":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+      return "border-[#C5A34A]/25 bg-[#C5A34A]/10 text-[#92751E]";
 
     case "RESOLVED":
     case "CLOSED":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+      return "border-[#9CAF88]/40 bg-[#E5EADF] text-[#5F6E52]";
 
     default:
-      return "border-slate-700 bg-slate-900 text-slate-400";
+      return "border-[#DDDCD3] bg-[#F1F0EA] text-[#687268]";
   }
 }
 
-function formatPageReference(
-  finding: RiskFinding,
-) {
+function formatPageReference(finding: RiskFinding) {
   if (
     finding.page_start !== null &&
     finding.page_end !== null
@@ -98,9 +96,7 @@ function formatPageReference(
   return null;
 }
 
-function formatConfidence(
-  confidence: number | null,
-) {
+function formatConfidence(confidence: number | null) {
   if (confidence === null) {
     return "—";
   }
@@ -126,14 +122,16 @@ function FindingCard({
     formatPageReference(finding);
 
   return (
-    <article className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-xl shadow-black/10 transition hover:border-slate-700">
-      <div className="flex flex-col gap-4">
+    <article className="group relative overflow-hidden rounded-[22px] border border-[#DDDCD3] bg-[#FFFEFA] p-5 shadow-[0_14px_40px_rgba(36,48,39,0.055)] transition duration-200 hover:-translate-y-0.5 hover:border-[#C9CEC1] hover:shadow-[0_18px_48px_rgba(36,48,39,0.09)] sm:p-6">
+      <div className="absolute inset-y-0 left-0 w-1 bg-[#9CAF88] opacity-0 transition group-hover:opacity-100" />
+
+      <div className="flex flex-col gap-5">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskClasses.badge}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${riskClasses.badge}`}
               >
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${riskClasses.dot}`}
@@ -142,12 +140,12 @@ function FindingCard({
                 {finding.severity}
               </span>
 
-              <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-medium text-slate-400">
+              <span className="rounded-full border border-[#DDDCD3] bg-[#F3F2EC] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.07em] text-[#687268]">
                 {finding.category}
               </span>
 
               <span
-                className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getStatusClasses(
+                className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.07em] ${getStatusClasses(
                   finding.status,
                 )}`}
               >
@@ -155,17 +153,17 @@ function FindingCard({
               </span>
             </div>
 
-            <h3 className="text-base font-semibold leading-6 text-white">
+            <h3 className="font-['Playfair_Display'] text-lg font-semibold leading-7 text-[#243027] sm:text-xl">
               {finding.title}
             </h3>
           </div>
 
-          <div className="shrink-0 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-right">
-            <p className="text-[10px] uppercase tracking-wide text-slate-600">
+          <div className="shrink-0 rounded-2xl border border-[#E1E0D8] bg-[#F7F5EF] px-4 py-3 sm:min-w-[110px] sm:text-right">
+            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#8A9189]">
               Confidence
             </p>
 
-            <p className="mt-1 text-sm font-semibold text-slate-300">
+            <p className="mt-1 text-sm font-bold text-[#243027]">
               {formatConfidence(
                 finding.confidence_score,
               )}
@@ -176,11 +174,11 @@ function FindingCard({
         {/* Description */}
         {finding.description && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#8A9189]">
               Risk Description
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+            <p className="mt-2 text-sm leading-6 text-[#687268]">
               {finding.description}
             </p>
           </div>
@@ -188,20 +186,20 @@ function FindingCard({
 
         {/* Evidence */}
         {finding.evidence_text && (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+          <div className="rounded-2xl border border-[#DDDCD3] bg-[#F7F5EF]/75 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#718060]">
                 Evidence
               </p>
 
               {pageReference && (
-                <span className="text-[11px] font-medium text-slate-500">
+                <span className="text-[11px] font-semibold text-[#8A9189]">
                   {pageReference}
                 </span>
               )}
             </div>
 
-            <blockquote className="mt-2 border-l-2 border-slate-700 pl-3 text-sm leading-6 text-slate-400">
+            <blockquote className="mt-3 border-l-2 border-[#9CAF88] pl-4 text-sm leading-6 text-[#4F5A52]">
               {finding.evidence_text}
             </blockquote>
           </div>
@@ -209,32 +207,32 @@ function FindingCard({
 
         {/* Recommendation */}
         {finding.recommendation && (
-          <div className="rounded-xl border border-blue-500/10 bg-blue-500/[0.03] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-400/70">
+          <div className="rounded-2xl border border-[#9CAF88]/35 bg-[#E5EADF]/55 p-4 sm:p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#5F6E52]">
               Recommended Action
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+            <p className="mt-2 text-sm leading-6 text-[#536052]">
               {finding.recommendation}
             </p>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-4">
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <ShieldAlert className="h-3.5 w-3.5" />
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E5E4DD] pt-4">
+          <div className="flex items-center gap-2 text-xs text-[#8A9189]">
+            <ShieldAlert className="h-3.5 w-3.5 text-[#718060]" />
 
             <span>
               Finding ID:{" "}
-              <span className="font-mono text-slate-500">
+              <span className="font-mono text-[#687268]">
                 {finding.id.slice(0, 8)}
               </span>
             </span>
           </div>
 
           {pageReference && !finding.evidence_text && (
-            <span className="text-xs text-slate-500">
+            <span className="text-xs font-medium text-[#8A9189]">
               {pageReference}
             </span>
           )}
@@ -372,44 +370,48 @@ export default function FindingsPage() {
     Boolean(status);
 
   return (
-    <div className="min-h-full bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
+    <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
-        <section className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 p-6 shadow-2xl shadow-black/20">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-red-500/5 blur-3xl" />
+        <section className="lexmind-card relative overflow-hidden px-6 py-7 sm:px-8 sm:py-8">
+          <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[#9CAF88]/10 blur-3xl" />
 
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="pointer-events-none absolute bottom-0 right-0 h-px w-2/3 bg-gradient-to-l from-[#9CAF88]/40 to-transparent" />
+
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-300">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#9CAF88]/35 bg-[#E5EADF] text-[#5F6E52]">
                   <FileSearch className="h-5 w-5" />
                 </div>
 
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-red-300">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#718060]">
                   Contract Risk Intelligence
                 </span>
               </div>
 
-              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              <h1 className="lexmind-display text-3xl font-medium tracking-tight text-[#243027] sm:text-4xl">
                 Risk Findings
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#687268]">
                 Review AI-identified contractual risks,
                 supporting evidence, confidence scores,
                 and recommended actions.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
-              <ShieldAlert className="h-4 w-4 text-red-300" />
+            <div className="flex w-fit items-center gap-3 rounded-2xl border border-[#DDDCD3] bg-[#F7F5EF] px-4 py-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E5EADF] text-[#5F6E52]">
+                <ShieldAlert className="h-4 w-4" />
+              </div>
 
               <div>
-                <p className="text-xs font-semibold text-slate-300">
+                <p className="text-xs font-bold text-[#243027]">
                   Finding Intelligence
                 </p>
 
-                <p className="text-[11px] text-slate-500">
+                <p className="mt-0.5 text-[11px] text-[#8A9189]">
                   Evidence-backed risk review
                 </p>
               </div>
@@ -418,19 +420,21 @@ export default function FindingsPage() {
         </section>
 
         {/* Contract selection */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
+        <section className="lexmind-card p-5 sm:p-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A9189]">
                 Scope
               </p>
 
-              <h2 className="mt-1 text-lg font-semibold text-white">
+              <h2 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
                 Select Contract Version
               </h2>
             </div>
 
-            <FileSearch className="h-5 w-5 text-slate-600" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F1F0EA] text-[#718060]">
+              <FileSearch className="h-4 w-4" />
+            </div>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -438,7 +442,7 @@ export default function FindingsPage() {
             <div>
               <label
                 htmlFor="findings-contract"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                className="mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A9189]"
               >
                 Contract
               </label>
@@ -451,7 +455,7 @@ export default function FindingsPage() {
                     event.target.value,
                   )
                 }
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                className="w-full rounded-xl border border-[#D8D8CF] bg-[#FFFEFA] px-4 py-3 text-sm text-[#243027] outline-none transition placeholder:text-[#A2A7A1] focus:border-[#9CAF88] focus:ring-2 focus:ring-[#9CAF88]/15"
               >
                 <option value="">
                   Select a contract
@@ -470,13 +474,13 @@ export default function FindingsPage() {
               </select>
 
               {contractsQuery.isPending && (
-                <p className="mt-2 text-xs text-slate-600">
+                <p className="mt-2 text-xs text-[#8A9189]">
                   Loading contracts...
                 </p>
               )}
 
               {contractsQuery.isError && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-red-400">
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-[#C93422]">
                   <AlertCircle className="h-3.5 w-3.5" />
                   Unable to load contracts.
                 </p>
@@ -487,7 +491,7 @@ export default function FindingsPage() {
             <div>
               <label
                 htmlFor="findings-version"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                className="mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A9189]"
               >
                 Contract Version
               </label>
@@ -505,7 +509,7 @@ export default function FindingsPage() {
                   contractDetailQuery
                     .versionsQuery.isPending
                 }
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-xl border border-[#D8D8CF] bg-[#FFFEFA] px-4 py-3 text-sm text-[#243027] outline-none transition focus:border-[#9CAF88] focus:ring-2 focus:ring-[#9CAF88]/15 disabled:cursor-not-allowed disabled:bg-[#F1F0EA] disabled:opacity-60"
               >
                 <option value="">
                   {!selectedContractId
@@ -527,14 +531,14 @@ export default function FindingsPage() {
               {contractDetailQuery
                 .versionsQuery.isPending &&
                 selectedContractId && (
-                  <p className="mt-2 text-xs text-slate-600">
+                  <p className="mt-2 text-xs text-[#8A9189]">
                     Loading versions...
                   </p>
                 )}
 
               {contractDetailQuery
                 .versionsQuery.isError && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-red-400">
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-[#C93422]">
                   <AlertCircle className="h-3.5 w-3.5" />
                   Unable to load contract versions.
                 </p>
@@ -546,7 +550,7 @@ export default function FindingsPage() {
                 versions.length === 0 &&
                 !contractDetailQuery
                   .versionsQuery.isError && (
-                  <p className="mt-2 text-xs text-amber-400">
+                  <p className="mt-2 text-xs text-[#92751E]">
                     No uploaded versions are available.
                   </p>
                 )}
@@ -555,13 +559,13 @@ export default function FindingsPage() {
 
           {selectedContract &&
             selectedVersion && (
-              <div className="mt-5 rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3 text-xs text-slate-500">
+              <div className="mt-5 rounded-xl border border-[#DDDCD3] bg-[#F7F5EF] px-4 py-3 text-xs text-[#687268]">
                 Viewing findings for{" "}
-                <strong className="font-medium text-slate-300">
+                <strong className="font-semibold text-[#243027]">
                   {selectedContract.title}
                 </strong>{" "}
                 — Version{" "}
-                <strong className="font-medium text-slate-300">
+                <strong className="font-semibold text-[#243027]">
                   {selectedVersion.version_number}
                 </strong>
               </div>
@@ -569,19 +573,19 @@ export default function FindingsPage() {
         </section>
 
         {/* Filters */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
+        <section className="lexmind-card p-5 sm:p-6">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F1F0EA] text-[#718060]">
                 <Filter className="h-4 w-4" />
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A9189]">
                   Filters
                 </p>
 
-                <h2 className="mt-1 text-lg font-semibold text-white">
+                <h2 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
                   Refine Findings
                 </h2>
               </div>
@@ -591,7 +595,7 @@ export default function FindingsPage() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-xs font-medium text-blue-400 transition hover:text-blue-300"
+                className="text-xs font-bold text-[#718060] transition hover:text-[#526044]"
               >
                 Clear filters
               </button>
@@ -603,7 +607,7 @@ export default function FindingsPage() {
             <div>
               <label
                 htmlFor="severity-filter"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                className="mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A9189]"
               >
                 Severity
               </label>
@@ -617,7 +621,7 @@ export default function FindingsPage() {
                   )
                 }
                 disabled={!selectedVersionId}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full rounded-xl border border-[#D8D8CF] bg-[#FFFEFA] px-4 py-3 text-sm text-[#243027] outline-none transition focus:border-[#9CAF88] focus:ring-2 focus:ring-[#9CAF88]/15 disabled:cursor-not-allowed disabled:bg-[#F1F0EA] disabled:opacity-50"
               >
                 <option value="">
                   All severities
@@ -641,7 +645,7 @@ export default function FindingsPage() {
             <div>
               <label
                 htmlFor="category-filter"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                className="mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A9189]"
               >
                 Category
               </label>
@@ -657,7 +661,7 @@ export default function FindingsPage() {
                 }
                 disabled={!selectedVersionId}
                 placeholder="e.g. payment"
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-300 outline-none transition placeholder:text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full rounded-xl border border-[#D8D8CF] bg-[#FFFEFA] px-4 py-3 text-sm text-[#243027] outline-none transition placeholder:text-[#A2A7A1] focus:border-[#9CAF88] focus:ring-2 focus:ring-[#9CAF88]/15 disabled:cursor-not-allowed disabled:bg-[#F1F0EA] disabled:opacity-50"
               />
             </div>
 
@@ -665,7 +669,7 @@ export default function FindingsPage() {
             <div>
               <label
                 htmlFor="status-filter"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
+                className="mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-[#8A9189]"
               >
                 Status
               </label>
@@ -679,7 +683,7 @@ export default function FindingsPage() {
                   )
                 }
                 disabled={!selectedVersionId}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full rounded-xl border border-[#D8D8CF] bg-[#FFFEFA] px-4 py-3 text-sm text-[#243027] outline-none transition focus:border-[#9CAF88] focus:ring-2 focus:ring-[#9CAF88]/15 disabled:cursor-not-allowed disabled:bg-[#F1F0EA] disabled:opacity-50"
               >
                 <option value="">
                   All statuses
@@ -703,48 +707,56 @@ export default function FindingsPage() {
 
         {/* Findings */}
         {!selectedVersionId ? (
-          <section className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/50 px-6 py-14 text-center">
-            <FileSearch className="mx-auto h-10 w-10 text-slate-700" />
+          <section className="lexmind-card border-dashed px-6 py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F1F0EA] text-[#8A9189]">
+              <FileSearch className="h-7 w-7" />
+            </div>
 
-            <h3 className="mt-4 text-base font-semibold text-slate-300">
+            <h3 className="lexmind-display mt-5 text-xl font-medium text-[#243027]">
               Select a contract version
             </h3>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#8A9189]">
               Choose a contract and version above to
               review its AI-generated risk findings.
             </p>
           </section>
         ) : findingsQuery.isPending ? (
-          <section className="rounded-2xl border border-slate-800 bg-slate-950/60 px-6 py-14 text-center">
-            <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-400" />
+          <section className="lexmind-card px-6 py-16 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E5EADF] text-[#718060]">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
 
-            <p className="mt-3 text-sm text-slate-500">
+            <p className="mt-4 text-sm font-medium text-[#687268]">
               Loading risk findings...
             </p>
           </section>
         ) : findingsQuery.isError ? (
-          <section className="rounded-2xl border border-red-500/20 bg-red-500/5 px-6 py-10 text-center">
-            <AlertCircle className="mx-auto h-8 w-8 text-red-400" />
+          <section className="rounded-[22px] border border-[#E8412C]/20 bg-[#E8412C]/5 px-6 py-12 text-center shadow-[0_14px_40px_rgba(36,48,39,0.04)]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E8412C]/10 text-[#C93422]">
+              <AlertCircle className="h-6 w-6" />
+            </div>
 
-            <h3 className="mt-3 text-base font-semibold text-red-300">
+            <h3 className="lexmind-display mt-4 text-xl font-medium text-[#243027]">
               Unable to load risk findings
             </h3>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-red-400/70">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#8A9189]">
               The findings service could not return
               results for the selected contract version.
             </p>
           </section>
         ) : findings.length === 0 ? (
-          <section className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/50 px-6 py-14 text-center">
-            <ShieldAlert className="mx-auto h-10 w-10 text-emerald-500/50" />
+          <section className="lexmind-card border-dashed px-6 py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E5EADF] text-[#718060]">
+              <ShieldAlert className="h-7 w-7" />
+            </div>
 
-            <h3 className="mt-4 text-base font-semibold text-slate-300">
+            <h3 className="lexmind-display mt-5 text-xl font-medium text-[#243027]">
               No findings found
             </h3>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#8A9189]">
               No risk findings match the selected
               contract version and current filters.
             </p>
@@ -754,21 +766,21 @@ export default function FindingsPage() {
             <section>
               <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A9189]">
                     Findings
                   </p>
 
-                  <h2 className="mt-1 text-lg font-semibold text-white">
+                  <h2 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
                     Identified Contract Risks
                   </h2>
                 </div>
 
-                <span className="w-fit rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-400">
+                <span className="w-fit rounded-full border border-[#DDDCD3] bg-[#F1F0EA] px-3 py-1 text-xs font-semibold text-[#687268]">
                   {total} total
                 </span>
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-2">
+              <div className="grid gap-5 xl:grid-cols-2">
                 {findings.map((finding) => (
                   <FindingCard
                     key={finding.id}
@@ -780,14 +792,14 @@ export default function FindingsPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <section className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-500">
+              <section className="lexmind-card flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-[#8A9189]">
                   Page{" "}
-                  <span className="font-medium text-slate-300">
+                  <span className="font-semibold text-[#243027]">
                     {page}
                   </span>{" "}
                   of{" "}
-                  <span className="font-medium text-slate-300">
+                  <span className="font-semibold text-[#243027]">
                     {totalPages}
                   </span>
                 </p>
@@ -804,7 +816,7 @@ export default function FindingsPage() {
                       !findingsQuery.data
                         ?.has_previous
                     }
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-600 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#D8D8CF] bg-[#FFFEFA] px-3.5 py-2.5 text-xs font-semibold text-[#526057] transition hover:border-[#BFC7B7] hover:bg-[#F1F0EA] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                     Previous
@@ -820,7 +832,7 @@ export default function FindingsPage() {
                     disabled={
                       !findingsQuery.data?.has_next
                     }
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-600 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#243027] px-3.5 py-2.5 text-xs font-semibold text-[#F7F5EF] transition hover:bg-[#344239] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Next
                     <ChevronRight className="h-3.5 w-3.5" />

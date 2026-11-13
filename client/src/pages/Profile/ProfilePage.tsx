@@ -61,123 +61,110 @@ function ProfilePage() {
   const initials = getInitials(fullName);
 
   return (
-    <div className="relative min-h-full overflow-hidden">
-      <div className="pointer-events-none absolute right-0 top-0 h-[420px] w-[520px] rounded-full bg-indigo-600/[0.05] blur-3xl" />
-
-      <div className="relative mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8">
+    <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl space-y-8">
         {/* Header */}
-        <div className="mb-6">
+        <section>
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
-            className="mb-5 inline-flex items-center gap-2 text-xs text-slate-500 transition hover:text-slate-200"
+            className="mb-5 inline-flex items-center gap-2 text-xs font-medium text-[#7a8279] transition hover:text-[#243027]"
           >
-            <ArrowLeft size={14} />
-
+            <ArrowLeft className="h-3.5 w-3.5" />
             Back to Dashboard
           </button>
 
-          <div>
-            <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-indigo-400">
-              Account
-            </div>
-
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-              Profile
-            </h1>
-
-            <p className="mt-1.5 text-sm text-slate-500">
-              View your account and organization information.
-            </p>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+            Account
           </div>
-        </div>
+
+          <h1 className="lexmind-display mt-2 text-4xl leading-tight text-[#243027] sm:text-5xl">
+            Profile
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#687268]">
+            View your account and organization
+            information.
+          </p>
+        </section>
 
         {/* Profile hero */}
-        <div className="overflow-hidden rounded-2xl border border-[#173052] bg-[#071426]/85">
-          <div className="h-24 bg-gradient-to-r from-indigo-600/[0.16] via-blue-500/[0.08] to-transparent" />
+        <section className="relative overflow-hidden rounded-[28px] border border-[#dddcd3] bg-[#fffefa] shadow-[0_18px_45px_rgba(36,48,39,0.06)]">
+          <div className="h-28 bg-gradient-to-r from-[#e5eadf] via-[#f0f2eb] to-[#fffefa]" />
 
-          <div className="-mt-10 px-5 pb-6 sm:px-7">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="relative px-5 pb-7 sm:px-8">
+            <div className="-mt-11 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex items-end gap-4">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-4 border-[#071426] bg-gradient-to-br from-indigo-500 to-blue-600 text-xl font-bold text-white shadow-xl shadow-black/20">
+                <div className="flex h-22 w-22 shrink-0 items-center justify-center rounded-[22px] border-4 border-[#fffefa] bg-[#243027] text-xl font-semibold text-white shadow-[0_12px_30px_rgba(36,48,39,0.18)]">
                   {initials}
                 </div>
 
                 <div className="pb-1">
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-xl font-semibold tracking-tight text-[#243027]">
                     {fullName}
                   </h2>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-sm text-[#7a8279]">
                     {user.email}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-start rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 sm:self-auto">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <div className="flex w-fit items-center gap-2 rounded-full border border-[#9caf88]/45 bg-[#e5eadf] px-3.5 py-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#718060]" />
 
-                <span className="text-[10px] font-medium text-emerald-300">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#526347]">
                   {formatStatus(user.status)}
                 </span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Information grid */}
-        <div className="mt-5 grid gap-5 lg:grid-cols-2">
-          {/* Personal information */}
-          <section className="rounded-2xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="flex items-center gap-3 border-b border-[#173052] pb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10">
-                <UserRound
-                  size={17}
-                  className="text-indigo-400"
-                />
+        <div className="grid gap-5 lg:grid-cols-2">
+          {/* Personal */}
+          <section className="lexmind-card p-5 sm:p-6">
+            <div className="flex items-center gap-3 border-b border-[#ebe9e1] pb-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+                <UserRound className="h-4.5 w-4.5" />
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-slate-200">
+                <h2 className="text-sm font-semibold text-[#243027]">
                   Personal Information
                 </h2>
 
-                <p className="mt-0.5 text-[10px] text-slate-600">
+                <p className="mt-1 text-[11px] text-[#7a8279]">
                   Your account details
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 space-y-4">
+            <div className="mt-6 space-y-6">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-600">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
                   Full Name
                 </p>
 
-                <div className="mt-1.5 flex items-center gap-2">
-                  <UserRound
-                    size={14}
-                    className="text-slate-600"
-                  />
+                <div className="mt-2 flex items-center gap-2.5">
+                  <UserRound className="h-3.5 w-3.5 text-[#9aa198]" />
 
-                  <p className="text-sm text-slate-300">
+                  <p className="text-sm font-medium text-[#243027]">
                     {fullName}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-600">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
                   Email Address
                 </p>
 
-                <div className="mt-1.5 flex items-center gap-2">
-                  <Mail
-                    size={14}
-                    className="text-slate-600"
-                  />
+                <div className="mt-2 flex items-center gap-2.5">
+                  <Mail className="h-3.5 w-3.5 shrink-0 text-[#9aa198]" />
 
-                  <p className="break-all text-sm text-slate-300">
+                  <p className="break-all text-sm font-medium text-[#243027]">
                     {user.email}
                   </p>
                 </div>
@@ -185,57 +172,48 @@ function ProfilePage() {
             </div>
           </section>
 
-          {/* Organization information */}
-          <section className="rounded-2xl border border-[#173052] bg-[#071426]/80 p-5">
-            <div className="flex items-center gap-3 border-b border-[#173052] pb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
-                <Building2
-                  size={17}
-                  className="text-blue-400"
-                />
+          {/* Organization */}
+          <section className="lexmind-card p-5 sm:p-6">
+            <div className="flex items-center gap-3 border-b border-[#ebe9e1] pb-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+                <Building2 className="h-4.5 w-4.5" />
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-slate-200">
+                <h2 className="text-sm font-semibold text-[#243027]">
                   Organization
                 </h2>
 
-                <p className="mt-0.5 text-[10px] text-slate-600">
+                <p className="mt-1 text-[11px] text-[#7a8279]">
                   Workspace membership
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 space-y-4">
+            <div className="mt-6 space-y-6">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-600">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
                   Role
                 </p>
 
-                <div className="mt-1.5 flex items-center gap-2">
-                  <ShieldCheck
-                    size={14}
-                    className="text-slate-600"
-                  />
+                <div className="mt-2 flex items-center gap-2.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#9aa198]" />
 
-                  <p className="text-sm text-slate-300">
+                  <p className="text-sm font-medium text-[#243027]">
                     {formatRole(user.role)}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-600">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
                   Organization ID
                 </p>
 
-                <div className="mt-1.5 flex items-center gap-2">
-                  <Building2
-                    size={14}
-                    className="text-slate-600"
-                  />
+                <div className="mt-2 flex items-start gap-2.5">
+                  <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#9aa198]" />
 
-                  <p className="break-all font-mono text-xs text-slate-400">
+                  <p className="break-all font-mono text-xs leading-5 text-[#687268]">
                     {user.organization_id}
                   </p>
                 </div>
@@ -244,24 +222,21 @@ function ProfilePage() {
           </section>
         </div>
 
-        {/* Account status */}
-        <section className="mt-5 rounded-2xl border border-[#173052] bg-[#071426]/80 p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-              <CheckCircle2
-                size={17}
-                className="text-emerald-400"
-              />
+        {/* Account security */}
+        <section className="rounded-[24px] border border-[#9caf88]/35 bg-[#f1f4ec] p-5 shadow-[0_12px_35px_rgba(36,48,39,0.04)] sm:p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+              <CheckCircle2 className="h-5 w-5" />
             </div>
 
             <div>
-              <h2 className="text-sm font-semibold text-slate-200">
+              <h2 className="text-sm font-semibold text-[#243027]">
                 Account Security
               </h2>
 
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                Your session is authenticated through LexMind
-                secure access controls.
+              <p className="mt-1.5 max-w-2xl text-xs leading-5 text-[#687268]">
+                Your session is authenticated through
+                LexMind secure access controls.
               </p>
             </div>
           </div>

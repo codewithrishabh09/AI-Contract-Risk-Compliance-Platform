@@ -33,3 +33,10 @@ class ProcessingJobStatusResponse(BaseModel):
     completed_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class ProcessingJobListResponse(BaseModel):
+    items: list[ProcessingJobResponse]
+    total: int
+    page: int
+    page_size: int

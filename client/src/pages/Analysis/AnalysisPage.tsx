@@ -49,37 +49,47 @@ function getRiskClasses(level: string | null | undefined) {
   switch (level?.toUpperCase()) {
     case "CRITICAL":
       return {
-        badge: "border-red-500/30 bg-red-500/10 text-red-300",
-        dot: "bg-red-400",
-        score: "text-red-300",
+        badge:
+          "border-[#e8412c]/25 bg-[#e8412c]/10 text-[#c93625]",
+        dot: "bg-[#e8412c]",
+        score: "text-[#c93625]",
+        soft: "bg-[#e8412c]/6",
       };
 
     case "HIGH":
       return {
-        badge: "border-orange-500/30 bg-orange-500/10 text-orange-300",
-        dot: "bg-orange-400",
-        score: "text-orange-300",
+        badge:
+          "border-orange-300 bg-orange-50 text-orange-700",
+        dot: "bg-orange-500",
+        score: "text-orange-700",
+        soft: "bg-orange-50/70",
       };
 
     case "MEDIUM":
       return {
-        badge: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-        dot: "bg-amber-400",
-        score: "text-amber-300",
+        badge:
+          "border-amber-300 bg-amber-50 text-amber-700",
+        dot: "bg-amber-500",
+        score: "text-amber-700",
+        soft: "bg-amber-50/70",
       };
 
     case "LOW":
       return {
-        badge: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-        dot: "bg-emerald-400",
-        score: "text-emerald-300",
+        badge:
+          "border-[#9caf88]/45 bg-[#e5eadf] text-[#526344]",
+        dot: "bg-[#718060]",
+        score: "text-[#526344]",
+        soft: "bg-[#e5eadf]/70",
       };
 
     default:
       return {
-        badge: "border-slate-600 bg-slate-800/60 text-slate-300",
-        dot: "bg-slate-400",
-        score: "text-slate-200",
+        badge:
+          "border-[#dddcd3] bg-white text-[#687268]",
+        dot: "bg-[#8b948c]",
+        score: "text-[#243027]",
+        soft: "bg-[#f7f5ef]",
       };
   }
 }
@@ -129,6 +139,18 @@ function getFindingCount(
   ).length;
 }
 
+function SectionEyebrow({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#718060]">
+      {children}
+    </p>
+  );
+}
+
 function AnalysisStatusCard({
   jobStatus,
 }: {
@@ -139,81 +161,83 @@ function AnalysisStatusCard({
   const isFailed = isJobFailed(jobStatus);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            Processing State
-          </p>
+    <section className="lexmind-card overflow-hidden">
+      <div className="border-b border-[#dddcd3] px-5 py-4 sm:px-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <SectionEyebrow>Processing State</SectionEyebrow>
 
-          <h3 className="mt-1 text-lg font-semibold text-white">
-            Analysis Pipeline
-          </h3>
+            <h3 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
+              Analysis Pipeline
+            </h3>
+          </div>
+
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
+              isProcessing
+                ? "border-[#9caf88]/40 bg-[#e5eadf] text-[#526344]"
+                : isCompleted
+                  ? "border-[#9caf88]/40 bg-[#e5eadf] text-[#526344]"
+                  : isFailed
+                    ? "border-[#e8412c]/25 bg-[#e8412c]/10 text-[#c93625]"
+                    : "border-[#dddcd3] bg-[#f7f5ef] text-[#718060]"
+            }`}
+          >
+            {isProcessing ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : isCompleted ? (
+              <CheckCircle2 className="h-5 w-5" />
+            ) : isFailed ? (
+              <XCircle className="h-5 w-5" />
+            ) : (
+              <Clock3 className="h-5 w-5" />
+            )}
+          </div>
         </div>
+      </div>
 
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
-            isProcessing
-              ? "border-blue-500/20 bg-blue-500/10 text-blue-300"
-              : isCompleted
-                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                : isFailed
-                  ? "border-red-500/20 bg-red-500/10 text-red-300"
-                  : "border-slate-700 bg-slate-900 text-slate-400"
-          }`}
-        >
-          {isProcessing ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : isCompleted ? (
-            <CheckCircle2 className="h-5 w-5" />
-          ) : isFailed ? (
-            <XCircle className="h-5 w-5" />
-          ) : (
-            <Clock3 className="h-5 w-5" />
+      <div className="px-5 py-5 sm:px-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <span
+            className={`inline-flex w-fit items-center rounded-full border px-3 py-1.5 text-sm font-semibold ${
+              isProcessing
+                ? "border-[#9caf88]/45 bg-[#e5eadf] text-[#526344]"
+                : isCompleted
+                  ? "border-[#9caf88]/45 bg-[#e5eadf] text-[#526344]"
+                  : isFailed
+                    ? "border-[#e8412c]/25 bg-[#e8412c]/10 text-[#c93625]"
+                    : "border-[#dddcd3] bg-white text-[#687268]"
+            }`}
+          >
+            {getJobStatusLabel(jobStatus)}
+          </span>
+
+          {isProcessing && (
+            <span className="text-sm text-[#687268]">
+              AI engine is processing the selected contract version.
+            </span>
+          )}
+
+          {isCompleted && (
+            <span className="text-sm text-[#687268]">
+              Analysis completed successfully.
+            </span>
+          )}
+
+          {isFailed && (
+            <span className="text-sm text-[#c93625]">
+              The analysis job did not complete successfully.
+            </span>
+          )}
+
+          {!jobStatus && (
+            <span className="text-sm text-[#687268]">
+              Start an analysis to generate risk intelligence.
+            </span>
           )}
         </div>
       </div>
-
-      <div className="flex items-center gap-3">
-        <span
-          className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${
-            isProcessing
-              ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
-              : isCompleted
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                : isFailed
-                  ? "border-red-500/30 bg-red-500/10 text-red-300"
-                  : "border-slate-700 bg-slate-900 text-slate-400"
-          }`}
-        >
-          {getJobStatusLabel(jobStatus)}
-        </span>
-
-        {isProcessing && (
-          <span className="text-sm text-slate-500">
-            AI engine is processing the selected contract version.
-          </span>
-        )}
-
-        {isCompleted && (
-          <span className="text-sm text-slate-500">
-            Analysis completed successfully.
-          </span>
-        )}
-
-        {isFailed && (
-          <span className="text-sm text-red-400">
-            The analysis job did not complete successfully.
-          </span>
-        )}
-
-        {!jobStatus && (
-          <span className="text-sm text-slate-500">
-            Start an analysis to generate risk intelligence.
-          </span>
-        )}
-      </div>
-    </div>
+    </section>
   );
 }
 
@@ -229,48 +253,54 @@ function RiskSummaryCard({
   const riskClasses = getRiskClasses(level);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            Risk Overview
-          </p>
+    <section className="lexmind-card overflow-hidden">
+      <div className="border-b border-[#dddcd3] px-5 py-4 sm:px-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <SectionEyebrow>Risk Overview</SectionEyebrow>
 
-          <h3 className="mt-1 text-lg font-semibold text-white">
-            Contract Risk Profile
-          </h3>
+            <h3 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
+              Contract Risk Profile
+            </h3>
+          </div>
+
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f7f5ef] text-[#718060]">
+            <ShieldAlert className="h-5 w-5" />
+          </div>
         </div>
-
-        <ShieldAlert className="h-5 w-5 text-slate-500" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">
+      <div className="grid gap-4 p-5 sm:grid-cols-3 sm:p-6">
+        <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/75 p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#718060]">
             Overall Score
           </p>
 
-          <div className="mt-2 flex items-end gap-1">
+          <div className="mt-3 flex items-end gap-1">
             <span
-              className={`text-3xl font-bold ${riskClasses.score}`}
+              className={`text-4xl font-semibold tracking-tight ${riskClasses.score}`}
             >
               {score ?? "—"}
             </span>
 
             {score !== null && score !== undefined && (
-              <span className="mb-1 text-sm text-slate-500">
+              <span className="mb-1.5 text-sm text-[#8b948c]">
                 / 100
               </span>
             )}
           </div>
+
+          <p className="mt-2 text-xs text-[#8b948c]">
+            Overall contractual risk assessment
+          </p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">
+        <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/75 p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#718060]">
             Risk Level
           </p>
 
-          <div className="mt-3">
+          <div className="mt-4">
             <span
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold ${riskClasses.badge}`}
             >
@@ -283,17 +313,17 @@ function RiskSummaryCard({
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">
+        <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/75 p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#718060]">
             Analysis Status
           </p>
 
-          <p className="mt-3 text-sm font-semibold text-slate-200">
+          <p className="mt-4 text-sm font-semibold text-[#243027]">
             {status || "Not analyzed"}
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -305,10 +335,10 @@ function FindingMiniCard({
   const riskClasses = getRiskClasses(finding.severity);
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+    <article className="group rounded-2xl border border-[#dddcd3] bg-white p-5 transition-shadow hover:shadow-[0_16px_36px_rgba(36,48,39,0.07)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskClasses.badge}`}
             >
@@ -319,17 +349,17 @@ function FindingMiniCard({
               {finding.severity}
             </span>
 
-            <span className="rounded-full border border-slate-700 bg-slate-800/70 px-2.5 py-1 text-[11px] font-medium text-slate-400">
+            <span className="rounded-full border border-[#dddcd3] bg-[#f7f5ef] px-2.5 py-1 text-[11px] font-medium text-[#687268]">
               {finding.category}
             </span>
           </div>
 
-          <h4 className="font-semibold text-slate-100">
+          <h4 className="font-semibold leading-6 text-[#243027]">
             {finding.title}
           </h4>
 
           {finding.description && (
-            <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">
+            <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#687268]">
               {finding.description}
             </p>
           )}
@@ -338,11 +368,11 @@ function FindingMiniCard({
         {finding.confidence_score !== null &&
           finding.confidence_score !== undefined && (
             <div className="shrink-0 text-right">
-              <p className="text-[10px] uppercase tracking-wide text-slate-600">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8b948c]">
                 Confidence
               </p>
 
-              <p className="mt-1 text-sm font-semibold text-slate-300">
+              <p className="mt-1 text-sm font-semibold text-[#243027]">
                 {Math.round(
                   finding.confidence_score * 100,
                 )}
@@ -353,17 +383,17 @@ function FindingMiniCard({
       </div>
 
       {finding.evidence_text && (
-        <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+        <div className="mt-4 rounded-xl border border-[#dddcd3] bg-[#f7f5ef]/70 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#718060]">
             Evidence
           </p>
 
-          <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#687268]">
             {finding.evidence_text}
           </p>
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -506,261 +536,270 @@ export default function AnalysisPage() {
     latestAnalysis !== undefined;
 
   return (
-    <div className="min-h-full bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
+    <div className="lexmind-page min-h-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
-        <section className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 p-6 shadow-2xl shadow-black/20">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl" />
+        <section className="lexmind-card relative overflow-hidden">
+          <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[#9caf88]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 right-20 h-48 w-48 rounded-full bg-[#e8412c]/5 blur-3xl" />
 
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-300">
-                  <Bot className="h-5 w-5" />
+          <div className="relative p-6 sm:p-8">
+            <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-3xl">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#9caf88]/40 bg-[#e5eadf] text-[#526344]">
+                    <Bot className="h-5 w-5" />
+                  </div>
+
+                  <SectionEyebrow>
+                    AI Contract Intelligence
+                  </SectionEyebrow>
                 </div>
 
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
-                  AI Contract Intelligence
-                </span>
+                <h1 className="lexmind-display text-3xl font-medium tracking-tight text-[#243027] sm:text-4xl">
+                  AI Analysis
+                </h1>
+
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[#687268] sm:text-[15px]">
+                  Run the LexMind analysis engine against a
+                  specific contract version and review its
+                  risk intelligence, evidence, and
+                  recommendations.
+                </p>
               </div>
 
-              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                AI Analysis
-              </h1>
+              <div className="flex w-full max-w-sm items-center gap-3 rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/80 p-4 lg:w-auto">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526344]">
+                  <Sparkles className="h-4 w-4" />
+                </div>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                Run the LexMind analysis engine against a
-                specific contract version and review its
-                risk intelligence, evidence, and
-                recommendations.
-              </p>
-            </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#243027]">
+                    AI Risk Engine
+                  </p>
 
-            <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
-              <Sparkles className="h-4 w-4 text-blue-300" />
-
-              <div>
-                <p className="text-xs font-semibold text-slate-300">
-                  AI Risk Engine
-                </p>
-
-                <p className="text-[11px] text-slate-500">
-                  Evidence-backed analysis
-                </p>
+                  <p className="mt-0.5 text-xs text-[#718060]">
+                    Evidence-backed analysis
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Configuration */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Analysis Configuration
-              </p>
+        <section className="lexmind-card overflow-hidden">
+          <div className="border-b border-[#dddcd3] px-5 py-5 sm:px-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <SectionEyebrow>
+                  Analysis Configuration
+                </SectionEyebrow>
 
-              <h2 className="mt-1 text-lg font-semibold text-white">
-                Select Contract Version
-              </h2>
+                <h2 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
+                  Select Contract Version
+                </h2>
+              </div>
+
+              <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-[#f7f5ef] text-[#718060] sm:flex">
+                <FileText className="h-5 w-5" />
+              </div>
             </div>
-
-            <FileText className="h-5 w-5 text-slate-600" />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_1fr_auto]">
-            {/* Contract */}
-            <div>
-              <label
-                htmlFor="analysis-contract"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >
-                Contract
-              </label>
+          <div className="p-5 sm:p-6">
+            <div className="grid gap-5 lg:grid-cols-[1fr_1fr_auto]">
+              {/* Contract */}
+              <div>
+                <label
+                  htmlFor="analysis-contract"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#718060]"
+                >
+                  Contract
+                </label>
 
-              <select
-                id="analysis-contract"
-                value={selectedContractId}
-                onChange={(event) =>
-                  handleContractChange(
-                    event.target.value,
-                  )
-                }
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-              >
-                <option value="">
-                  Select a contract
-                </option>
-
-                {contractsQuery.data?.items.map(
-                  (contract) => (
-                    <option
-                      key={contract.id}
-                      value={contract.id}
-                    >
-                      {contract.title}
-                    </option>
-                  ),
-                )}
-              </select>
-
-              {contractsQuery.isPending && (
-                <p className="mt-2 text-xs text-slate-600">
-                  Loading contracts...
-                </p>
-              )}
-
-              {contractsQuery.isError && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-red-400">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  Unable to load contracts.
-                </p>
-              )}
-            </div>
-
-            {/* Version */}
-            <div>
-              <label
-                htmlFor="analysis-version"
-                className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >
-                Contract Version
-              </label>
-
-              <select
-                id="analysis-version"
-                value={selectedVersionId}
-                onChange={(event) =>
-                  handleVersionChange(
-                    event.target.value,
-                  )
-                }
-                disabled={
-                  !selectedContractId ||
-                  contractDetailQuery
-                    .versionsQuery.isPending
-                }
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">
-                  {!selectedContractId
-                    ? "Select a contract first"
-                    : "Select a version"}
-                </option>
-
-                {versions.map((version) => (
-                  <option
-                    key={version.id}
-                    value={version.id}
-                  >
-                    Version{" "}
-                    {version.version_number}
-                    {" — "}
-                    {formatDate(
-                      version.created_at,
-                    )}
+                <select
+                  id="analysis-contract"
+                  value={selectedContractId}
+                  onChange={(event) =>
+                    handleContractChange(
+                      event.target.value,
+                    )
+                  }
+                  className="w-full rounded-xl border border-[#d5d7cf] bg-white px-4 py-3 text-sm text-[#243027] outline-none transition focus:border-[#9caf88] focus:ring-4 focus:ring-[#9caf88]/10"
+                >
+                  <option value="">
+                    Select a contract
                   </option>
-                ))}
-              </select>
 
-              {contractDetailQuery
-                .versionsQuery.isPending &&
-                selectedContractId && (
-                  <p className="mt-2 text-xs text-slate-600">
-                    Loading versions...
+                  {contractsQuery.data?.items.map(
+                    (contract) => (
+                      <option
+                        key={contract.id}
+                        value={contract.id}
+                      >
+                        {contract.title}
+                      </option>
+                    ),
+                  )}
+                </select>
+
+                {contractsQuery.isPending && (
+                  <p className="mt-2 text-xs text-[#8b948c]">
+                    Loading contracts...
                   </p>
                 )}
 
-              {contractDetailQuery
-                .versionsQuery.isError && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-red-400">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  Unable to load contract versions.
-                </p>
+                {contractsQuery.isError && (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-[#c93625]">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    Unable to load contracts.
+                  </p>
+                )}
+              </div>
+
+              {/* Version */}
+              <div>
+                <label
+                  htmlFor="analysis-version"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#718060]"
+                >
+                  Contract Version
+                </label>
+
+                <select
+                  id="analysis-version"
+                  value={selectedVersionId}
+                  onChange={(event) =>
+                    handleVersionChange(
+                      event.target.value,
+                    )
+                  }
+                  disabled={
+                    !selectedContractId ||
+                    contractDetailQuery
+                      .versionsQuery.isPending
+                  }
+                  className="w-full rounded-xl border border-[#d5d7cf] bg-white px-4 py-3 text-sm text-[#243027] outline-none transition focus:border-[#9caf88] focus:ring-4 focus:ring-[#9caf88]/10 disabled:cursor-not-allowed disabled:bg-[#f7f5ef] disabled:text-[#9ca39c]"
+                >
+                  <option value="">
+                    {!selectedContractId
+                      ? "Select a contract first"
+                      : "Select a version"}
+                  </option>
+
+                  {versions.map((version) => (
+                    <option
+                      key={version.id}
+                      value={version.id}
+                    >
+                      Version{" "}
+                      {version.version_number}
+                      {" — "}
+                      {formatDate(
+                        version.created_at,
+                      )}
+                    </option>
+                  ))}
+                </select>
+
+                {contractDetailQuery
+                  .versionsQuery.isPending &&
+                  selectedContractId && (
+                    <p className="mt-2 text-xs text-[#8b948c]">
+                      Loading versions...
+                    </p>
+                  )}
+
+                {contractDetailQuery
+                  .versionsQuery.isError && (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-[#c93625]">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    Unable to load contract versions.
+                  </p>
+                )}
+
+                {!contractDetailQuery
+                  .versionsQuery.isPending &&
+                  selectedContractId &&
+                  versions.length === 0 &&
+                  !contractDetailQuery
+                    .versionsQuery.isError && (
+                    <p className="mt-2 text-xs text-amber-700">
+                      No uploaded versions are available
+                      for this contract.
+                    </p>
+                  )}
+              </div>
+
+              {/* Action */}
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={handleRunAnalysis}
+                  disabled={!canRunAnalysis}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#e8412c] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,65,44,0.18)] transition hover:bg-[#cf3826] disabled:cursor-not-allowed disabled:opacity-40 lg:w-auto lg:min-w-[190px]"
+                >
+                  {isRunning ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Running...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4" />
+                      Run AI Analysis
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {selectedContract &&
+              selectedVersion && (
+                <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-[#dddcd3] bg-[#f7f5ef]/70 px-4 py-3 text-xs text-[#687268]">
+                  <span>
+                    Contract:{" "}
+                    <strong className="font-semibold text-[#243027]">
+                      {selectedContract.title}
+                    </strong>
+                  </span>
+
+                  <span>
+                    Type:{" "}
+                    <strong className="font-semibold text-[#243027]">
+                      {selectedContract.contract_type}
+                    </strong>
+                  </span>
+
+                  <span>
+                    Version:{" "}
+                    <strong className="font-semibold text-[#243027]">
+                      {selectedVersion.version_number}
+                    </strong>
+                  </span>
+                </div>
               )}
 
-              {!contractDetailQuery
-                .versionsQuery.isPending &&
-                selectedContractId &&
-                versions.length === 0 &&
-                !contractDetailQuery
-                  .versionsQuery.isError && (
-                  <p className="mt-2 text-xs text-amber-400">
-                    No uploaded versions are available
-                    for this contract.
+            {startAnalysisMutation.isError && (
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#e8412c]/20 bg-[#e8412c]/5 px-4 py-3 text-sm text-[#c93625]">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+
+                <div>
+                  <p className="font-semibold">
+                    Unable to start analysis.
                   </p>
-                )}
-            </div>
 
-            {/* Action */}
-            <div className="flex items-end">
-              <button
-                type="button"
-                onClick={handleRunAnalysis}
-                disabled={!canRunAnalysis}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-400/20 bg-blue-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/20 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-40 lg:w-auto lg:min-w-[180px]"
-              >
-                {isRunning ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Running...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" />
-                    Run AI Analysis
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {selectedContract &&
-            selectedVersion && (
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3 text-xs text-slate-500">
-                <span>
-                  Contract:{" "}
-                  <strong className="font-medium text-slate-300">
-                    {selectedContract.title}
-                  </strong>
-                </span>
-
-                <span>
-                  Type:{" "}
-                  <strong className="font-medium text-slate-300">
-                    {selectedContract.contract_type}
-                  </strong>
-                </span>
-
-                <span>
-                  Version:{" "}
-                  <strong className="font-medium text-slate-300">
-                    {
-                      selectedVersion.version_number
-                    }
-                  </strong>
-                </span>
+                  <p className="mt-1 text-xs leading-5 text-[#c93625]/80">
+                    Please verify that the selected
+                    contract version is available and
+                    that your account has analysis
+                    permission.
+                  </p>
+                </div>
               </div>
             )}
-
-          {startAnalysisMutation.isError && (
-            <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-
-              <div>
-                <p className="font-medium">
-                  Unable to start analysis.
-                </p>
-
-                <p className="mt-1 text-xs text-red-400/80">
-                  Please verify that the selected
-                  contract version is available and
-                  that your account has analysis
-                  permission.
-                </p>
-              </div>
-            </div>
-          )}
+          </div>
         </section>
 
         {/* Processing */}
@@ -772,49 +811,59 @@ export default function AnalysisPage() {
         )}
 
         {jobError && (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
+          <section className="rounded-2xl border border-[#e8412c]/20 bg-[#e8412c]/5 p-5">
             <div className="flex items-start gap-3">
-              <XCircle className="mt-0.5 h-5 w-5 text-red-400" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e8412c]/10 text-[#c93625]">
+                <XCircle className="h-5 w-5" />
+              </div>
 
               <div>
-                <h3 className="font-semibold text-red-300">
+                <h3 className="font-semibold text-[#243027]">
                   Analysis failed
                 </h3>
 
-                <p className="mt-1 text-sm leading-6 text-red-400/80">
+                <p className="mt-1 text-sm leading-6 text-[#c93625]">
                   {jobError}
                 </p>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
         {/* Loading */}
         {selectedVersionId &&
           latestAnalysisQuery.isPending && (
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-8 text-center">
-              <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-400" />
+            <section className="lexmind-card px-6 py-10 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e5eadf] text-[#526344]">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
 
-              <p className="mt-3 text-sm text-slate-400">
+              <p className="mt-4 text-sm font-medium text-[#243027]">
                 Loading latest analysis...
               </p>
-            </div>
+
+              <p className="mt-1 text-xs text-[#8b948c]">
+                Retrieving the latest risk intelligence.
+              </p>
+            </section>
           )}
 
         {/* Analysis error */}
         {selectedVersionId &&
           latestAnalysisQuery.isError &&
           !latestAnalysisQuery.isPending && (
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6">
+            <section className="lexmind-card p-6">
               <div className="flex items-start gap-3">
-                <AlertCircle className="mt-0.5 h-5 w-5 text-amber-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+                  <AlertCircle className="h-5 w-5" />
+                </div>
 
                 <div>
-                  <h3 className="font-semibold text-slate-200">
+                  <h3 className="font-semibold text-[#243027]">
                     No completed analysis available
                   </h3>
 
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                  <p className="mt-1 text-sm leading-6 text-[#687268]">
                     This version has not produced a
                     readable analysis result yet. Start
                     an AI analysis to generate risk
@@ -822,7 +871,7 @@ export default function AnalysisPage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </section>
           )}
 
         {/* Analysis result */}
@@ -838,44 +887,48 @@ export default function AnalysisPage() {
 
             <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
               {/* AI Summary */}
-              <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-300">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
+              <section className="lexmind-card overflow-hidden">
+                <div className="border-b border-[#dddcd3] px-5 py-5 sm:px-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526344]">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      AI Summary
-                    </p>
+                    <div>
+                      <SectionEyebrow>
+                        AI Summary
+                      </SectionEyebrow>
 
-                    <h3 className="mt-1 text-lg font-semibold text-white">
-                      Contract Intelligence
-                    </h3>
+                      <h3 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
+                        Contract Intelligence
+                      </h3>
+                    </div>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                  <p className="whitespace-pre-line text-sm leading-7 text-slate-400">
-                    {latestAnalysis.summary ||
-                      "The AI engine did not return a summary for this analysis."}
-                  </p>
+                <div className="p-5 sm:p-6">
+                  <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/70 p-5">
+                    <p className="whitespace-pre-line text-sm leading-7 text-[#687268]">
+                      {latestAnalysis.summary ||
+                        "The AI engine did not return a summary for this analysis."}
+                    </p>
+                  </div>
                 </div>
               </section>
 
               {/* Distribution */}
-              <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-                <div className="mb-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <section className="lexmind-card overflow-hidden">
+                <div className="border-b border-[#dddcd3] px-5 py-5 sm:px-6">
+                  <SectionEyebrow>
                     Risk Findings
-                  </p>
+                  </SectionEyebrow>
 
-                  <h3 className="mt-1 text-lg font-semibold text-white">
+                  <h3 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
                     Severity Distribution
                   </h3>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 p-5 sm:p-6">
                   {(
                     [
                       ["CRITICAL", "Critical"],
@@ -897,19 +950,19 @@ export default function AnalysisPage() {
                       return (
                         <div
                           key={level}
-                          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3"
+                          className={`flex items-center justify-between rounded-xl border border-[#dddcd3] px-4 py-3.5 ${riskClasses.soft}`}
                         >
                           <div className="flex items-center gap-3">
                             <span
                               className={`h-2.5 w-2.5 rounded-full ${riskClasses.dot}`}
                             />
 
-                            <span className="text-sm font-medium text-slate-300">
+                            <span className="text-sm font-medium text-[#243027]">
                               {label}
                             </span>
                           </div>
 
-                          <span className="text-lg font-semibold text-white">
+                          <span className="text-lg font-semibold text-[#243027]">
                             {count}
                           </span>
                         </div>
@@ -921,107 +974,115 @@ export default function AnalysisPage() {
             </div>
 
             {/* Findings */}
-            <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    AI Findings
-                  </p>
+            <section className="lexmind-card overflow-hidden">
+              <div className="border-b border-[#dddcd3] px-5 py-5 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <SectionEyebrow>
+                      AI Findings
+                    </SectionEyebrow>
 
-                  <h3 className="mt-1 text-lg font-semibold text-white">
-                    Identified Contract Risks
-                  </h3>
+                    <h3 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
+                      Identified Contract Risks
+                    </h3>
+                  </div>
+
+                  <span className="w-fit rounded-full border border-[#dddcd3] bg-[#f7f5ef] px-3 py-1 text-xs font-semibold text-[#687268]">
+                    {findingsQuery.data?.total ??
+                      findings.length}{" "}
+                    findings
+                  </span>
                 </div>
-
-                <span className="w-fit rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-400">
-                  {findingsQuery.data?.total ??
-                    findings.length}{" "}
-                  findings
-                </span>
               </div>
 
-              {findingsQuery.isPending ? (
-                <div className="flex items-center justify-center py-10">
-                  <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-                </div>
-              ) : findings.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/30 px-5 py-10 text-center">
-                  <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400/70" />
+              <div className="p-5 sm:p-6">
+                {findingsQuery.isPending ? (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526344]">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    </div>
+                  </div>
+                ) : findings.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-[#cfd4c9] bg-[#f7f5ef]/60 px-5 py-10 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e5eadf] text-[#526344]">
+                      <CheckCircle2 className="h-7 w-7" />
+                    </div>
 
-                  <p className="mt-3 text-sm font-medium text-slate-300">
-                    No risk findings were returned.
-                  </p>
+                    <p className="mt-4 text-sm font-semibold text-[#243027]">
+                      No risk findings were returned.
+                    </p>
 
-                  <p className="mt-1 text-xs text-slate-600">
-                    The selected contract version
-                    currently has no identified findings
-                    from the analysis engine.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4 lg:grid-cols-2">
-                  {findings.map((finding) => (
-                    <FindingMiniCard
-                      key={finding.id}
-                      finding={finding}
-                    />
-                  ))}
-                </div>
-              )}
+                    <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-[#8b948c]">
+                      The selected contract version
+                      currently has no identified findings
+                      from the analysis engine.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    {findings.map((finding) => (
+                      <FindingMiniCard
+                        key={finding.id}
+                        finding={finding}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </section>
 
             {/* Metadata */}
-            <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-xl shadow-black/10">
-              <div className="mb-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <section className="lexmind-card overflow-hidden">
+              <div className="border-b border-[#dddcd3] px-5 py-5 sm:px-6">
+                <SectionEyebrow>
                   Analysis Metadata
-                </p>
+                </SectionEyebrow>
 
-                <h3 className="mt-1 text-lg font-semibold text-white">
+                <h3 className="lexmind-display mt-1 text-xl font-medium text-[#243027]">
                   Model & Execution Details
                 </h3>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-600">
+              <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
+                <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/70 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#718060]">
                     Provider
                   </p>
 
-                  <p className="mt-2 text-sm font-semibold text-slate-200">
+                  <p className="mt-2 text-sm font-semibold text-[#243027]">
                     {latestAnalysis.model_provider ||
                       "—"}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-600">
+                <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/70 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#718060]">
                     Model
                   </p>
 
-                  <p className="mt-2 break-all text-sm font-semibold text-slate-200">
+                  <p className="mt-2 break-all text-sm font-semibold text-[#243027]">
                     {latestAnalysis.model_name ||
                       "—"}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-600">
+                <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/70 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#718060]">
                     Prompt Version
                   </p>
 
-                  <p className="mt-2 text-sm font-semibold text-slate-200">
+                  <p className="mt-2 text-sm font-semibold text-[#243027]">
                     {latestAnalysis.prompt_version ||
                       "—"}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-600">
+                <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef]/70 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#718060]">
                     Version
                   </p>
 
-                  <p className="mt-2 text-sm font-semibold text-slate-200">
+                  <p className="mt-2 text-sm font-semibold text-[#243027]">
                     {selectedVersion
                       ? `v${selectedVersion.version_number}`
                       : "—"}

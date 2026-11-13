@@ -4,6 +4,16 @@ import {
   type ChangeEvent,
 } from "react";
 
+import {
+  AlertCircle,
+  CheckCircle2,
+  FileCheck2,
+  FileText,
+  ShieldAlert,
+  ShieldCheck,
+  TriangleAlert,
+} from "lucide-react";
+
 import { useContracts } from "../../features/contracts/useContracts";
 import { useContractDetail } from "../../features/contracts/useContractDetail";
 import { useComplianceOverview } from "../../features/compliance/useCompliance";
@@ -36,38 +46,38 @@ function getSeverityClass(
 ) {
   switch (severity?.toUpperCase()) {
     case "CRITICAL":
-      return "compliance-severity-critical";
+      return "border-[#e8412c]/25 bg-[#e8412c]/10 text-[#c52f20]";
 
     case "HIGH":
-      return "compliance-severity-high";
+      return "border-[#e8412c]/20 bg-[#fff0ed] text-[#d63a28]";
 
     case "MEDIUM":
-      return "compliance-severity-medium";
+      return "border-amber-300 bg-amber-50 text-amber-700";
 
     case "LOW":
-      return "compliance-severity-low";
+      return "border-[#9caf88]/50 bg-[#e5eadf] text-[#526347]";
 
     default:
-      return "compliance-severity-neutral";
+      return "border-[#dddcd3] bg-[#f4f3ed] text-[#687268]";
   }
 }
 
 function getStatusClass(status: string) {
   switch (status.toUpperCase()) {
     case "OPEN":
-      return "compliance-status-open";
+      return "border-[#e8412c]/20 bg-[#fff0ed] text-[#d63a28]";
 
     case "ACCEPTED":
-      return "compliance-status-accepted";
+      return "border-amber-300 bg-amber-50 text-amber-700";
 
     case "MITIGATED":
-      return "compliance-status-mitigated";
+      return "border-[#9caf88]/50 bg-[#e5eadf] text-[#526347]";
 
     case "DISMISSED":
-      return "compliance-status-dismissed";
+      return "border-[#dddcd3] bg-[#f4f3ed] text-[#687268]";
 
     default:
-      return "compliance-status-neutral";
+      return "border-[#dddcd3] bg-[#f4f3ed] text-[#687268]";
   }
 }
 
@@ -84,19 +94,33 @@ function OverviewCard({
 }) {
   return (
     <div
-      className={`compliance-overview-card ${
-        danger ? "compliance-overview-card-danger" : ""
+      className={`rounded-[22px] border p-5 shadow-[0_12px_35px_rgba(36,48,39,0.05)] transition ${
+        danger
+          ? "border-[#e8412c]/20 bg-[#fffaf8]"
+          : "border-[#dddcd3] bg-[#fffefa]"
       }`}
     >
-      <div className="compliance-card-label">
-        {label}
+      <div className="flex items-start justify-between gap-4">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7a8279]">
+          {label}
+        </div>
+
+        {danger ? (
+          <ShieldAlert className="h-4 w-4 text-[#e8412c]" />
+        ) : (
+          <ShieldCheck className="h-4 w-4 text-[#718060]" />
+        )}
       </div>
 
-      <div className="compliance-card-value">
+      <div
+        className={`mt-5 text-3xl font-semibold tracking-tight ${
+          danger ? "text-[#c52f20]" : "text-[#243027]"
+        }`}
+      >
         {value}
       </div>
 
-      <div className="compliance-card-description">
+      <div className="mt-2 text-xs leading-5 text-[#7a8279]">
         {description}
       </div>
     </div>
@@ -110,7 +134,7 @@ function SeverityBadge({
 }) {
   return (
     <span
-      className={`compliance-severity-badge ${getSeverityClass(
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getSeverityClass(
         severity,
       )}`}
     >
@@ -126,7 +150,7 @@ function StatusBadge({
 }) {
   return (
     <span
-      className={`compliance-status-badge ${getStatusClass(
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getStatusClass(
         status,
       )}`}
     >
@@ -142,7 +166,7 @@ function CategoryTable({
 }) {
   if (categories.length === 0) {
     return (
-      <div className="compliance-empty-state">
+      <div className="rounded-2xl border border-dashed border-[#dddcd3] bg-[#faf9f4] px-6 py-12 text-center text-sm text-[#7a8279]">
         No compliance category data is available for this
         version.
       </div>
@@ -150,61 +174,87 @@ function CategoryTable({
   }
 
   return (
-    <div className="compliance-table-container">
-      <table className="compliance-table">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Total</th>
-            <th>Critical</th>
-            <th>High</th>
-            <th>Medium</th>
-            <th>Low</th>
-          </tr>
-        </thead>
+    <div className="overflow-hidden rounded-2xl border border-[#dddcd3] bg-[#fffefa]">
+      <div className="overflow-x-auto">
+        <table className="min-w-[720px] w-full border-collapse">
+          <thead>
+            <tr className="border-b border-[#dddcd3] bg-[#f4f3ed]">
+              <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a8279]">
+                Category
+              </th>
 
-        <tbody>
-          {categories.map((category) => (
-            <tr key={category.category}>
-              <td>
-                <span className="compliance-category-name">
-                  {formatLabel(category.category)}
-                </span>
-              </td>
+              <th className="px-5 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a8279]">
+                Total
+              </th>
 
-              <td>
-                <span className="compliance-total-count">
-                  {category.total}
-                </span>
-              </td>
+              <th className="px-5 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-[#c52f20]">
+                Critical
+              </th>
 
-              <td>
-                <span className="compliance-count-critical">
-                  {category.critical}
-                </span>
-              </td>
+              <th className="px-5 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-[#d63a28]">
+                High
+              </th>
 
-              <td>
-                <span className="compliance-count-high">
-                  {category.high}
-                </span>
-              </td>
+              <th className="px-5 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-700">
+                Medium
+              </th>
 
-              <td>
-                <span className="compliance-count-medium">
-                  {category.medium}
-                </span>
-              </td>
-
-              <td>
-                <span className="compliance-count-low">
-                  {category.low}
-                </span>
-              </td>
+              <th className="px-5 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-[#526347]">
+                Low
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {categories.map((category, index) => (
+              <tr
+                key={category.category}
+                className={`border-b border-[#ebe9e1] last:border-b-0 transition hover:bg-[#f8f7f1] ${
+                  index % 2 === 0
+                    ? "bg-[#fffefa]"
+                    : "bg-[#fcfbf7]"
+                }`}
+              >
+                <td className="px-5 py-4">
+                  <span className="font-medium text-[#243027]">
+                    {formatLabel(category.category)}
+                  </span>
+                </td>
+
+                <td className="px-5 py-4 text-right">
+                  <span className="font-semibold text-[#243027]">
+                    {category.total}
+                  </span>
+                </td>
+
+                <td className="px-5 py-4 text-right">
+                  <span className="font-semibold text-[#c52f20]">
+                    {category.critical}
+                  </span>
+                </td>
+
+                <td className="px-5 py-4 text-right">
+                  <span className="font-semibold text-[#d63a28]">
+                    {category.high}
+                  </span>
+                </td>
+
+                <td className="px-5 py-4 text-right">
+                  <span className="font-semibold text-amber-700">
+                    {category.medium}
+                  </span>
+                </td>
+
+                <td className="px-5 py-4 text-right">
+                  <span className="font-semibold text-[#526347]">
+                    {category.low}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -216,61 +266,78 @@ function FindingsTable({
 }) {
   if (findings.length === 0) {
     return (
-      <div className="compliance-empty-state">
-        No compliance findings were found for this version.
+      <div className="rounded-2xl border border-dashed border-[#dddcd3] bg-[#faf9f4] px-6 py-12 text-center text-sm text-[#7a8279]">
+        No compliance findings were found for this
+        version.
       </div>
     );
   }
 
   return (
-    <div className="compliance-table-container">
-      <table className="compliance-table compliance-findings-table">
-        <thead>
-          <tr>
-            <th>Finding</th>
-            <th>Severity</th>
-            <th>Status</th>
-            <th>Recommendation</th>
-          </tr>
-        </thead>
+    <div className="overflow-hidden rounded-2xl border border-[#dddcd3] bg-[#fffefa]">
+      <div className="overflow-x-auto">
+        <table className="min-w-[1000px] w-full border-collapse">
+          <thead>
+            <tr className="border-b border-[#dddcd3] bg-[#f4f3ed]">
+              <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a8279]">
+                Finding
+              </th>
 
-        <tbody>
-          {findings.map((finding) => (
-            <tr key={finding.id}>
-              <td>
-                <div className="compliance-finding-title">
-                  {finding.title}
-                </div>
+              <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a8279]">
+                Severity
+              </th>
 
-                <div className="compliance-finding-description">
-                  {finding.description}
-                </div>
+              <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a8279]">
+                Status
+              </th>
 
-                <div className="compliance-finding-category">
-                  {formatLabel(finding.category)}
-                </div>
-              </td>
-
-              <td>
-                <SeverityBadge
-                  severity={finding.severity}
-                />
-              </td>
-
-              <td>
-                <StatusBadge status={finding.status} />
-              </td>
-
-              <td>
-                <div className="compliance-recommendation">
-                  {finding.recommendation ||
-                    "No recommendation provided."}
-                </div>
-              </td>
+              <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7a8279]">
+                Recommendation
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {findings.map((finding) => (
+              <tr
+                key={finding.id}
+                className="border-b border-[#ebe9e1] last:border-b-0 transition hover:bg-[#f8f7f1]"
+              >
+                <td className="max-w-[420px] px-5 py-5 align-top">
+                  <div className="font-semibold text-[#243027]">
+                    {finding.title}
+                  </div>
+
+                  <div className="mt-2 text-sm leading-6 text-[#687268]">
+                    {finding.description}
+                  </div>
+
+                  <div className="mt-3 inline-flex rounded-full border border-[#dddcd3] bg-[#f4f3ed] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#687268]">
+                    {formatLabel(finding.category)}
+                  </div>
+                </td>
+
+                <td className="px-5 py-5 align-top">
+                  <SeverityBadge
+                    severity={finding.severity}
+                  />
+                </td>
+
+                <td className="px-5 py-5 align-top">
+                  <StatusBadge status={finding.status} />
+                </td>
+
+                <td className="max-w-[360px] px-5 py-5 align-top">
+                  <div className="text-sm leading-6 text-[#687268]">
+                    {finding.recommendation ||
+                      "No recommendation provided."}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -332,9 +399,21 @@ export default function CompliancePage() {
 
   if (contractsQuery.isLoading) {
     return (
-      <div className="compliance-page">
-        <div className="compliance-state">
-          Loading compliance workspace...
+      <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center">
+          <div className="lexmind-card w-full max-w-md px-6 py-10 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e5eadf] text-[#526347]">
+              <FileCheck2 className="h-5 w-5" />
+            </div>
+
+            <p className="mt-5 text-sm font-medium text-[#243027]">
+              Loading compliance workspace...
+            </p>
+
+            <p className="mt-2 text-xs text-[#7a8279]">
+              Preparing your contract compliance data.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -342,9 +421,22 @@ export default function CompliancePage() {
 
   if (contractsQuery.isError) {
     return (
-      <div className="compliance-page">
-        <div className="compliance-state compliance-state-error">
-          Unable to load contracts. Please try again.
+      <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[70vh] max-w-7xl items-center justify-center">
+          <div className="w-full max-w-md rounded-[24px] border border-[#e8412c]/20 bg-[#fffaf8] px-6 py-10 text-center shadow-[0_18px_45px_rgba(36,48,39,0.06)]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff0ed] text-[#e8412c]">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+
+            <h2 className="lexmind-display mt-5 text-2xl text-[#243027]">
+              Unable to load contracts
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-[#7a8279]">
+              Please try again after checking your
+              connection and workspace access.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -352,244 +444,390 @@ export default function CompliancePage() {
 
   if (contracts.length === 0) {
     return (
-      <div className="compliance-page">
-        <div className="compliance-header">
-          <div>
-            <div className="compliance-eyebrow">
-              COMPLIANCE
+      <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl space-y-8">
+          <section className="relative overflow-hidden rounded-[28px] border border-[#dddcd3] bg-[#fffefa] px-6 py-8 shadow-[0_18px_45px_rgba(36,48,39,0.06)] sm:px-8 lg:px-10">
+            <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#9caf88]/15 blur-3xl" />
+
+            <div className="relative">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+                  Compliance
+                </span>
+              </div>
+
+              <h1 className="lexmind-display mt-5 text-4xl leading-tight text-[#243027] sm:text-5xl">
+                Compliance Workspace
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#687268] sm:text-base">
+                Review contractual risk, compliance
+                categories, and outstanding findings from
+                one centralized workspace.
+              </p>
             </div>
+          </section>
 
-            <h1>Compliance Workspace</h1>
+          <div className="rounded-[24px] border border-dashed border-[#dddcd3] bg-[#faf9f4] px-6 py-16 text-center">
+            <FileText className="mx-auto h-10 w-10 text-[#9aa198]" />
 
-            <p>
-              Review contract compliance posture, risk
-              categories, and outstanding findings.
+            <h2 className="mt-5 text-lg font-semibold text-[#243027]">
+              No contracts available
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#7a8279]">
+              No contracts are available for compliance
+              review.
             </p>
           </div>
-        </div>
-
-        <div className="compliance-state">
-          No contracts are available for compliance review.
         </div>
       </div>
     );
   }
 
   return (
-    <div className="compliance-page">
-      <header className="compliance-header">
-        <div className="compliance-header-content">
-          <div className="compliance-eyebrow">
-            COMPLIANCE
-          </div>
+    <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        {/* Header */}
+        <header className="relative overflow-hidden rounded-[28px] border border-[#dddcd3] bg-[#fffefa] px-6 py-7 shadow-[0_18px_45px_rgba(36,48,39,0.06)] sm:px-8 lg:px-10">
+          <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[#9caf88]/15 blur-3xl" />
 
-          <h1>Compliance Workspace</h1>
-
-          <p>
-            Review contractual risk, compliance categories,
-            and unresolved findings.
-          </p>
-        </div>
-
-        <div className="compliance-selectors">
-          <label className="compliance-selector">
-            <span>Contract</span>
-
-            <select
-              value={effectiveContractId}
-              onChange={handleContractChange}
-            >
-              {contracts.map((contract) => (
-                <option
-                  key={contract.id}
-                  value={contract.id}
-                >
-                  {contract.title}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="compliance-selector">
-            <span>Version</span>
-
-            <select
-              value={effectiveVersionId ?? ""}
-              onChange={handleVersionChange}
-              disabled={versionsQuery.isLoading}
-            >
-              {versions.map((version) => (
-                <option
-                  key={version.id}
-                  value={version.id}
-                >
-                  Version {version.version_number}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </header>
-
-      {versionsQuery.isLoading && (
-        <div className="compliance-state">
-          Loading contract versions...
-        </div>
-      )}
-
-      {!versionsQuery.isLoading &&
-        versions.length === 0 && (
-          <div className="compliance-state">
-            No versions are available for this contract.
-          </div>
-        )}
-
-      {complianceQuery.isLoading &&
-        effectiveVersionId && (
-          <div className="compliance-state">
-            Loading compliance analysis...
-          </div>
-        )}
-
-      {complianceQuery.isError && (
-        <div className="compliance-state compliance-state-error">
-          Unable to load compliance data for this contract
-          version.
-        </div>
-      )}
-
-      {compliance && (
-        <>
-          <section className="compliance-section">
-            <div className="compliance-section-header">
-              <div>
-                <div className="compliance-section-eyebrow">
-                  OVERVIEW
+          <div className="relative flex flex-col gap-7 xl:flex-row xl:items-end xl:justify-between">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
 
-                <h2>Compliance Overview</h2>
-              </div>
-
-              <div className="compliance-context">
-                <strong>
-                  {compliance.contract_title}
-                </strong>
-
-                <span>
-                  {formatLabel(compliance.contract_type)}
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+                  Compliance
                 </span>
               </div>
+
+              <h1 className="lexmind-display mt-5 text-4xl leading-tight text-[#243027] sm:text-5xl">
+                Compliance Workspace
+              </h1>
+
+              <p className="mt-4 text-sm leading-7 text-[#687268] sm:text-base">
+                Review contractual risk, compliance
+                categories, and unresolved findings in one
+                focused workspace.
+              </p>
             </div>
 
-            <div className="compliance-overview-grid">
-              <OverviewCard
-                label="Compliance Score"
-                value={formatScore(
-                  compliance.overall_risk_score,
-                )}
-                description="Overall contract risk score"
-              />
+            {/* Selectors */}
+            <div className="grid w-full gap-3 sm:grid-cols-2 xl:w-[560px]">
+              <label className="group">
+                <span className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7a8279]">
+                  Contract
+                </span>
 
-              <div className="compliance-overview-card">
-                <div className="compliance-card-label">
-                  Overall Status
+                <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef] px-4 py-1 transition focus-within:border-[#9caf88] focus-within:ring-4 focus-within:ring-[#9caf88]/10">
+                  <select
+                    value={effectiveContractId}
+                    onChange={handleContractChange}
+                    className="w-full cursor-pointer bg-transparent py-3 text-sm font-medium text-[#243027] outline-none"
+                  >
+                    {contracts.map((contract) => (
+                      <option
+                        key={contract.id}
+                        value={contract.id}
+                      >
+                        {contract.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+
+              <label className="group">
+                <span className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7a8279]">
+                  Version
+                </span>
+
+                <div className="rounded-2xl border border-[#dddcd3] bg-[#f7f5ef] px-4 py-1 transition focus-within:border-[#9caf88] focus-within:ring-4 focus-within:ring-[#9caf88]/10">
+                  <select
+                    value={effectiveVersionId ?? ""}
+                    onChange={handleVersionChange}
+                    disabled={versionsQuery.isLoading}
+                    className="w-full cursor-pointer bg-transparent py-3 text-sm font-medium text-[#243027] outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {versions.map((version) => (
+                      <option
+                        key={version.id}
+                        value={version.id}
+                      >
+                        Version {version.version_number}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+            </div>
+          </div>
+        </header>
+
+        {/* Version loading */}
+        {versionsQuery.isLoading && (
+          <div className="lexmind-card flex items-center gap-4 px-5 py-4">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+              <FileText className="h-4 w-4" />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-[#243027]">
+                Loading contract versions
+              </p>
+
+              <p className="mt-1 text-xs text-[#7a8279]">
+                Preparing available versions for review.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!versionsQuery.isLoading &&
+          versions.length === 0 && (
+            <div className="rounded-[22px] border border-dashed border-[#dddcd3] bg-[#faf9f4] px-6 py-10 text-center">
+              <FileText className="mx-auto h-8 w-8 text-[#9aa198]" />
+
+              <p className="mt-4 text-sm font-medium text-[#243027]">
+                No versions are available
+              </p>
+
+              <p className="mt-1 text-xs text-[#7a8279]">
+                This contract does not have a version
+                available for compliance review.
+              </p>
+            </div>
+          )}
+
+        {/* Compliance loading */}
+        {complianceQuery.isLoading &&
+          effectiveVersionId && (
+            <div className="lexmind-card flex items-center gap-4 px-5 py-4">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-[#9caf88]" />
+
+              <div>
+                <p className="text-sm font-medium text-[#243027]">
+                  Loading compliance analysis
+                </p>
+
+                <p className="mt-1 text-xs text-[#7a8279]">
+                  Evaluating the selected contract version.
+                </p>
+              </div>
+            </div>
+          )}
+
+        {complianceQuery.isError && (
+          <div className="rounded-[22px] border border-[#e8412c]/20 bg-[#fffaf8] px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#fff0ed] text-[#e8412c]">
+                <AlertCircle className="h-4 w-4" />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-[#243027]">
+                  Unable to load compliance data
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-[#7a8279]">
+                  Compliance data could not be loaded for
+                  the selected contract version.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {compliance && (
+          <>
+            {/* Overview */}
+            <section className="space-y-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+                    Overview
+                  </div>
+
+                  <h2 className="lexmind-display mt-2 text-3xl text-[#243027]">
+                    Compliance Overview
+                  </h2>
                 </div>
 
-                <div className="compliance-status-value">
-                  <span
-                    className={`compliance-severity-badge ${getSeverityClass(
-                      compliance.risk_level,
-                    )}`}
-                  >
-                    {compliance.risk_level ||
-                      "UNASSESSED"}
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="rounded-full border border-[#dddcd3] bg-[#fffefa] px-3 py-1.5 font-medium text-[#243027]">
+                    {compliance.contract_title}
+                  </span>
+
+                  <span className="rounded-full bg-[#e5eadf] px-3 py-1.5 font-medium text-[#526347]">
+                    {formatLabel(
+                      compliance.contract_type,
+                    )}
                   </span>
                 </div>
+              </div>
 
-                <div className="compliance-card-description">
-                  Analysis:{" "}
-                  {formatLabel(
-                    compliance.analysis_status,
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                <OverviewCard
+                  label="Compliance Score"
+                  value={formatScore(
+                    compliance.overall_risk_score,
                   )}
+                  description="Overall contract risk score"
+                />
+
+                <div className="rounded-[22px] border border-[#dddcd3] bg-[#fffefa] p-5 shadow-[0_12px_35px_rgba(36,48,39,0.05)]">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7a8279]">
+                      Overall Status
+                    </div>
+
+                    <CheckCircle2 className="h-4 w-4 text-[#718060]" />
+                  </div>
+
+                  <div className="mt-5">
+                    <span
+                      className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${getSeverityClass(
+                        compliance.risk_level,
+                      )}`}
+                    >
+                      {compliance.risk_level ||
+                        "UNASSESSED"}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 text-xs text-[#7a8279]">
+                    Analysis:{" "}
+                    <span className="font-medium text-[#526347]">
+                      {formatLabel(
+                        compliance.analysis_status,
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <OverviewCard
+                  label="Open Findings"
+                  value={compliance.open_findings}
+                  description="Findings requiring attention"
+                  danger={compliance.open_findings > 0}
+                />
+
+                <OverviewCard
+                  label="Critical Findings"
+                  value={compliance.critical_findings}
+                  description="Critical compliance risks"
+                  danger={
+                    compliance.critical_findings > 0
+                  }
+                />
+
+                <OverviewCard
+                  label="High Findings"
+                  value={compliance.high_risk_findings}
+                  description="High severity risks"
+                  danger={
+                    compliance.high_risk_findings > 0
+                  }
+                />
+              </div>
+            </section>
+
+            {/* Category distribution */}
+            <section className="space-y-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+                    Risk Distribution
+                  </div>
+
+                  <h2 className="lexmind-display mt-2 text-3xl text-[#243027]">
+                    Compliance Categories
+                  </h2>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-[#7a8279]">
+                  <TriangleAlert className="h-3.5 w-3.5 text-[#e8412c]" />
+
+                  <span>
+                    {compliance.total_findings} total
+                    findings
+                  </span>
                 </div>
               </div>
 
-              <OverviewCard
-                label="Open Findings"
-                value={compliance.open_findings}
-                description="Findings requiring attention"
-                danger={compliance.open_findings > 0}
+              <CategoryTable
+                categories={compliance.categories}
               />
+            </section>
 
-              <OverviewCard
-                label="Critical Findings"
-                value={compliance.critical_findings}
-                description="Critical compliance risks"
-                danger={
-                  compliance.critical_findings > 0
-                }
-              />
+            {/* Findings */}
+            <section className="space-y-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+                    Review Queue
+                  </div>
 
-              <OverviewCard
-                label="High Findings"
-                value={compliance.high_risk_findings}
-                description="High severity risks"
-                danger={
-                  compliance.high_risk_findings > 0
-                }
-              />
-            </div>
-          </section>
-
-          <section className="compliance-section">
-            <div className="compliance-section-header">
-              <div>
-                <div className="compliance-section-eyebrow">
-                  RISK DISTRIBUTION
+                  <h2 className="lexmind-display mt-2 text-3xl text-[#243027]">
+                    Compliance Findings
+                  </h2>
                 </div>
 
-                <h2>Compliance Categories</h2>
-              </div>
-
-              <span className="compliance-section-meta">
-                {compliance.total_findings} total findings
-              </span>
-            </div>
-
-            <CategoryTable
-              categories={compliance.categories}
-            />
-          </section>
-
-          <section className="compliance-section">
-            <div className="compliance-section-header">
-              <div>
-                <div className="compliance-section-eyebrow">
-                  REVIEW QUEUE
+                <div className="rounded-full border border-[#dddcd3] bg-[#fffefa] px-3 py-1.5 text-xs font-medium text-[#687268]">
+                  {findings.length} findings loaded
                 </div>
-
-                <h2>Compliance Findings</h2>
               </div>
 
-              <span className="compliance-section-meta">
-                {findings.length} findings loaded
-              </span>
-            </div>
+              {findingsQuery.isLoading ? (
+                <div className="lexmind-card flex items-center gap-4 px-5 py-6">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+                    <FileCheck2 className="h-4 w-4" />
+                  </div>
 
-            {findingsQuery.isLoading ? (
-              <div className="compliance-state">
-                Loading findings...
-              </div>
-            ) : findingsQuery.isError ? (
-              <div className="compliance-state compliance-state-error">
-                Unable to load compliance findings.
-              </div>
-            ) : (
-              <FindingsTable findings={findings} />
-            )}
-          </section>
-        </>
-      )}
+                  <div>
+                    <p className="text-sm font-medium text-[#243027]">
+                      Loading findings
+                    </p>
+
+                    <p className="mt-1 text-xs text-[#7a8279]">
+                      Fetching compliance findings for this
+                      version.
+                    </p>
+                  </div>
+                </div>
+              ) : findingsQuery.isError ? (
+                <div className="rounded-[22px] border border-[#e8412c]/20 bg-[#fffaf8] px-5 py-6">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#fff0ed] text-[#e8412c]">
+                      <AlertCircle className="h-4 w-4" />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#243027]">
+                        Unable to load compliance findings
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-[#7a8279]">
+                        The findings for this contract
+                        version could not be loaded.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <FindingsTable findings={findings} />
+              )}
+            </section>
+          </>
+        )}
+      </div>
     </div>
   );
 }

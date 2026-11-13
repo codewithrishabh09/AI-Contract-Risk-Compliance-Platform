@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.contract import Contract
@@ -51,6 +51,84 @@ class ProcessingJobRepository:
         )
 
         return session.scalar(statement)
+
+    @staticmethod
+    def list_for_organization(
+        session: Session,
+        *,
+        organization_id: uuid.UUID,
+        status: str | None = None,
+        job_type: str | None = None,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> tuple[list[ProcessingJob], int]:
+        """List processing jobs belonging to an organization."""
+
+        base_statement = (
+            select(ProcessingJob)
+            .join(
+                ContractVersion,
+                ContractVersion.id == ProcessingJob.contract_version_id,
+            )
+            .join(
+                Contract,
+                Contract.id == ContractVersion.contract_id,
+            )
+            .where(
+                Contract.organization_id == organization_id,
+            )
+        )
+
+        if status:
+            base_statement = base_statement.where(
+                ProcessingJob.status == status,
+            )
+
+        if job_type:
+            base_statement = base_statement.where(
+                ProcessingJob.job_type == job_type,
+            )
+
+        count_statement = select(
+            func.count(ProcessingJob.id),
+        ).select_from(
+            ProcessingJob,
+        ).join(
+            ContractVersion,
+            ContractVersion.id == ProcessingJob.contract_version_id,
+        ).join(
+            Contract,
+            Contract.id == ContractVersion.contract_id,
+        ).where(
+            Contract.organization_id == organization_id,
+        )
+
+        if status:
+            count_statement = count_statement.where(
+                ProcessingJob.status == status,
+            )
+
+        if job_type:
+            count_statement = count_statement.where(
+                ProcessingJob.job_type == job_type,
+            )
+
+        total = session.scalar(count_statement) or 0
+
+        offset = (page - 1) * page_size
+
+        statement = (
+            base_statement
+            .order_by(
+                ProcessingJob.created_at.desc(),
+            )
+            .offset(offset)
+            .limit(page_size)
+        )
+
+        jobs = list(session.scalars(statement).all())
+
+        return jobs, total
 
     @staticmethod
     def create(

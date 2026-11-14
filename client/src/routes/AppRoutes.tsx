@@ -23,6 +23,8 @@ import RiskTrendsPage from "../pages/RiskTrends/RiskTrendsPage";
 import CompliancePage from "../pages/Compliance/CompliancePage";
 import AuditPage from "../pages/Audit/AuditPage";
 
+import ProcessingJobsPage from "../pages/Jobs/ProcessingJobsPage";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -101,11 +103,7 @@ export default function AppRoutes() {
 
           <Route
             path="/jobs"
-            element={
-              <div className="p-8 text-slate-300">
-                Processing Jobs
-              </div>
-            }
+            element={<ProcessingJobsPage />}
           />
 
           <Route

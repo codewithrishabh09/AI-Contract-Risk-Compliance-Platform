@@ -22,8 +22,8 @@ import FindingsPage from "../pages/Findings/FindingsPage";
 import RiskTrendsPage from "../pages/RiskTrends/RiskTrendsPage";
 import CompliancePage from "../pages/Compliance/CompliancePage";
 import AuditPage from "../pages/Audit/AuditPage";
-
 import ProcessingJobsPage from "../pages/Jobs/ProcessingJobsPage";
+import SettingsPage from "../pages/Settings/SettingsPage";
 
 export default function AppRoutes() {
   return (
@@ -105,15 +105,8 @@ export default function AppRoutes() {
             path="/jobs"
             element={<ProcessingJobsPage />}
           />
-
-          <Route
-            path="/settings"
-            element={
-              <div className="p-8 text-slate-300">
-                Settings
-              </div>
-            }
-          />
+          <Route path="/settings" element={<SettingsPage />} />
+          
         </Route>
       </Route>
 

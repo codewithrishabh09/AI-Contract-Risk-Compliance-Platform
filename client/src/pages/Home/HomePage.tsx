@@ -2,7 +2,6 @@ import {
   ArrowRight,
   Bell,
   Check,
-  ChevronRight,
   FileCheck2,
   FileSearch,
   LockKeyhole,
@@ -23,13 +22,9 @@ const heroImage =
 
 const navItems = [
   { label: "Home", href: "/" },
-  { label: "Contracts", href: "/contracts" },
-  { label: "Analysis", href: "/analysis" },
-  { label: "Risk Findings", href: "/findings" },
-  { label: "Compliance", href: "/compliance" },
-  { label: "Organizations", href: "/dashboard" },
-  { label: "Audit Logs", href: "/audit" },
-  { label: "Settings", href: "/settings" },
+  { label: "Intelligence", href: "#intelligence" },
+  { label: "Workflow", href: "#workflow" },
+  { label: "Security", href: "#security" },
 ];
 
 const capabilities = [
@@ -81,92 +76,6 @@ const securityItems = [
   "Secure authenticated workspace",
 ];
 
-function ComplianceCard() {
-  return (
-    <div className="absolute bottom-8 right-5 z-20 w-[270px] rounded-[22px] border border-[#dddcd3] bg-[#fffefa]/95 p-5 shadow-[0_24px_60px_rgba(36,48,39,0.16)] backdrop-blur-md sm:right-8 sm:w-[300px]">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e5eadf] text-[#526047]">
-            <Scale size={15} />
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold text-[#243027]">LexMind</p>
-            <p className="text-[9px] text-[#7a8379]">
-              AI Contract Intelligence
-            </p>
-          </div>
-        </div>
-
-        <span className="h-2 w-2 rounded-full bg-[#9caf88]" />
-      </div>
-
-      <div className="mt-5 grid grid-cols-[105px_1fr] items-center gap-4">
-        <div className="relative flex h-[92px] w-[92px] items-center justify-center rounded-full border-[10px] border-[#e5eadf]">
-          <div className="absolute inset-[-10px] rounded-full border-[10px] border-transparent border-t-[#e8412c] border-r-[#f1bd52] border-l-[#9caf88] rotate-[22deg]" />
-
-          <div className="text-center">
-            <p className="text-[21px] font-bold tracking-[-0.04em] text-[#243027]">
-              92%
-            </p>
-            <p className="text-[8px] font-medium text-[#718060]">
-              Compliance
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="flex items-center gap-2 text-[#526047]">
-              <span className="h-2 w-2 rounded-full bg-[#9caf88]" />
-              Low Risk
-            </span>
-            <span className="font-semibold text-[#243027]">66%</span>
-          </div>
-
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="flex items-center gap-2 text-[#526047]">
-              <span className="h-2 w-2 rounded-full bg-[#f1bd52]" />
-              Medium
-            </span>
-            <span className="font-semibold text-[#243027]">24%</span>
-          </div>
-
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="flex items-center gap-2 text-[#526047]">
-              <span className="h-2 w-2 rounded-full bg-[#e8412c]" />
-              High Risk
-            </span>
-            <span className="font-semibold text-[#243027]">10%</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 rounded-xl bg-[#f4f5ef] px-3 py-3">
-        <div className="flex h-7 items-end gap-1.5">
-          {[34, 43, 40, 58, 52, 68, 63, 78].map((height, index) => (
-            <div
-              key={index}
-              className="flex-1 rounded-t bg-[#9caf88]/55"
-              style={{ height: `${height}%` }}
-            />
-          ))}
-        </div>
-
-        <div className="mt-2 flex items-center justify-between">
-          <span className="text-[9px] text-[#858d84]">
-            Risk trend
-          </span>
-
-          <span className="rounded-full bg-[#e5eadf] px-2 py-1 text-[9px] font-semibold text-[#526047]">
-            +12% ↑
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DashboardPreview() {
   return (
     <div className="relative overflow-hidden rounded-[28px] border border-[#dddcd3] bg-[#fffefa] shadow-[0_30px_70px_rgba(36,48,39,0.10)]">
@@ -175,6 +84,7 @@ function DashboardPreview() {
           <p className="text-sm font-semibold text-[#243027]">
             Contract Intelligence
           </p>
+
           <p className="mt-1 text-[10px] text-[#858d84]">
             Overview of your contract portfolio
           </p>
@@ -225,6 +135,7 @@ function DashboardPreview() {
               <p className="text-xs font-semibold text-[#243027]">
                 Risk Overview
               </p>
+
               <p className="mt-1 text-[9px] text-[#858d84]">
                 Current contract portfolio
               </p>
@@ -255,7 +166,7 @@ function DashboardPreview() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#e5e3da] bg-[#243027] p-5 text-white">
+        <div className="rounded-2xl border border-[#243027] bg-[#243027] p-5 text-white">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#9caf88]/15 text-[#9caf88]">
             <Sparkles size={16} />
           </div>
@@ -283,98 +194,111 @@ function HomePage() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#f7f5ef] text-[#243027]">
-      {/* Navigation */}
-      <header className="relative z-50 border-b border-[#dddcd3] bg-[#f7f5ef]/95">
-        <div className="mx-auto flex min-h-[76px] max-w-[1400px] items-center justify-between px-5 sm:px-8 lg:px-10">
-          <LexMindLogo />
+      {/* =========================================================
+          NAVIGATION
+      ========================================================== */}
+      <header className="sticky top-0 z-50 border-b border-[#dddcd3]/80 bg-[#f7f5ef]/95 backdrop-blur-xl">
+        <div className="mx-auto flex min-h-[78px] max-w-[1320px] items-center justify-between px-5 sm:px-8 lg:px-10">
+          {/* Brand */}
+          <Link
+            to="/"
+            className="shrink-0 transition-opacity hover:opacity-80"
+          >
+            <LexMindLogo />
+          </Link>
 
-          <nav className="hidden items-center gap-6 xl:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={`relative py-7 text-[12px] font-medium transition ${
-                  item.label === "Home"
-                    ? "text-[#e8412c]"
-                    : "text-[#243027] hover:text-[#e8412c]"
-                }`}
-              >
-                {item.label}
+          {/* Desktop Navigation */}
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center rounded-full border border-[#dddcd3] bg-[#fffefa]/80 p-1 shadow-[0_4px_18px_rgba(36,48,39,0.04)] lg:flex">
+            {navItems.map((item) => {
+              const isHome = item.label === "Home";
 
-                {item.label === "Home" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#e8412c]" />
-                )}
-              </Link>
-            ))}
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={`relative rounded-full px-5 py-2.5 text-[11px] font-semibold tracking-[0.01em] transition-all duration-200 ${
+                    isHome
+                      ? "bg-[#e5eadf] text-[#526047] shadow-sm"
+                      : "text-[#687268] hover:bg-[#f1f3ed] hover:text-[#243027]"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
 
-          <div className="hidden items-center gap-4 xl:flex">
-            <button
-              type="button"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#526047] transition hover:bg-[#e5eadf]"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-
-              <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#e8412c] px-1 text-[8px] font-bold text-white">
-                3
-              </span>
-            </button>
-
+          {/* Desktop Actions */}
+          <div className="hidden items-center gap-3 lg:flex">
             <Link
               to="/login"
-              className="flex items-center gap-2.5"
+              className="rounded-full px-4 py-2.5 text-[11px] font-semibold text-[#526047] transition hover:bg-[#e5eadf]"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dddcd3] bg-[#fffefa] text-xs font-semibold text-[#526047]">
-                R
-              </span>
+              Sign in
+            </Link>
 
-              <ChevronRight
-                size={14}
-                className="rotate-90 text-[#858d84]"
+            <Link
+              to="/register"
+              className="group inline-flex items-center gap-2 rounded-full bg-[#e8412c] px-5 py-2.5 text-[11px] font-semibold text-white shadow-[0_8px_22px_rgba(232,65,44,0.16)] transition hover:bg-[#d83a27]"
+            >
+              Get Started
+              <ArrowRight
+                size={13}
+                className="transition-transform group-hover:translate-x-0.5"
               />
             </Link>
           </div>
 
+          {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((value) => !value)}
-            className="rounded-xl border border-[#dddcd3] bg-[#fffefa] p-2.5 text-[#526047] xl:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#dddcd3] bg-[#fffefa] text-[#526047] transition hover:bg-[#e5eadf] lg:hidden"
             aria-label="Toggle navigation"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
 
+        {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="border-t border-[#dddcd3] bg-[#fffefa] px-5 py-5 xl:hidden">
-            <div className="mx-auto flex max-w-[1400px] flex-col gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                    item.label === "Home"
-                      ? "bg-[#e5eadf] text-[#526047]"
-                      : "text-[#526047] hover:bg-[#f4f5ef]"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+          <div className="border-t border-[#dddcd3] bg-[#fffefa] px-5 py-5 shadow-[0_15px_30px_rgba(36,48,39,0.05)] lg:hidden">
+            <div className="mx-auto max-w-[1320px]">
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const isHome = item.label === "Home";
 
-              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#e5e3da] pt-4">
+                  return (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block rounded-xl px-4 py-3 text-sm font-medium transition ${
+                        isHome
+                          ? "bg-[#e5eadf] text-[#526047]"
+                          : "text-[#526047] hover:bg-[#f4f5ef]"
+                      }`}
+                    >
+                      {item.label}
+                    </a>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[#e5e3da] pt-4">
                 <Link
                   to="/login"
-                  className="rounded-xl border border-[#dddcd3] px-4 py-3 text-center text-sm font-semibold text-[#526047]"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-xl border border-[#dddcd3] bg-[#fffefa] px-4 py-3 text-center text-sm font-semibold text-[#526047] transition hover:bg-[#f4f5ef]"
                 >
                   Sign in
                 </Link>
 
                 <Link
                   to="/register"
-                  className="rounded-xl bg-[#e8412c] px-4 py-3 text-center text-sm font-semibold text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-xl bg-[#e8412c] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#d83a27]"
                 >
                   Get started
                 </Link>
@@ -384,11 +308,14 @@ function HomePage() {
         )}
       </header>
 
-      {/* Hero */}
+      {/* =========================================================
+          HERO
+      ========================================================== */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(156,175,136,0.18),transparent_32%)]" />
 
         <div className="relative mx-auto grid min-h-[680px] max-w-[1400px] items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-20">
+          {/* Hero Content */}
           <div className="relative z-20">
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#9caf88]/35 bg-[#e5eadf] px-4 py-2 text-[11px] font-semibold tracking-[0.04em] text-[#526047]">
               <Sparkles size={14} />
@@ -413,6 +340,7 @@ function HomePage() {
                 className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#e8412c] px-7 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(232,65,44,0.20)] transition hover:bg-[#d83a27]"
               >
                 Get Started
+
                 <ArrowRight
                   size={16}
                   className="transition-transform group-hover:translate-x-1"
@@ -426,6 +354,7 @@ function HomePage() {
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9caf88] text-white">
                   <ArrowRight size={11} />
                 </span>
+
                 Watch Demo
               </Link>
             </div>
@@ -458,7 +387,7 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Hero image */}
+          {/* Hero Image */}
           <div className="relative min-h-[500px] lg:min-h-[600px]">
             <div className="absolute right-[-18%] top-[-12%] h-[560px] w-[560px] rounded-full bg-[#e5eadf] opacity-70 blur-[1px]" />
 
@@ -470,24 +399,27 @@ function HomePage() {
               />
 
               <div className="absolute inset-0 bg-gradient-to-r from-[#f7f5ef] via-[#f7f5ef]/10 to-transparent" />
+
               <div className="absolute inset-0 bg-[#9caf88]/10 mix-blend-multiply" />
             </div>
 
+            {/* Decorative Elements */}
             <div className="absolute right-2 top-8 h-12 w-12 rounded-xl bg-[#e8412c]/85 shadow-lg sm:right-8" />
-            <div className="absolute right-14 top-20 h-8 w-8 rounded-lg bg-[#e5eadf] shadow-lg sm:right-20" />
 
-            <ComplianceCard />
+            <div className="absolute right-14 top-20 h-8 w-8 rounded-lg bg-[#e5eadf] shadow-lg sm:right-20" />
           </div>
         </div>
       </section>
 
-      {/* Trusted / capability strip */}
+      {/* =========================================================
+          TRUSTED STRIP
+      ========================================================== */}
       <section className="border-y border-[#dddcd3] bg-[#fffefa]">
         <div className="mx-auto max-w-[1240px] px-5 py-8 sm:px-8">
           <div className="mb-6 flex items-center gap-5">
             <div className="h-px flex-1 bg-[#dddcd3]" />
 
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#687268]">
+            <p className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.28em] text-[#687268]">
               Trusted by modern legal teams
             </p>
 
@@ -514,7 +446,9 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Why LexMind */}
+      {/* =========================================================
+          WHY LEXMIND
+      ========================================================== */}
       <section id="intelligence" className="bg-[#f7f5ef]">
         <div className="mx-auto max-w-[1400px] px-5 py-24 sm:px-8 lg:px-10">
           <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
@@ -573,7 +507,9 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Product preview */}
+      {/* =========================================================
+          PRODUCT WORKFLOW
+      ========================================================== */}
       <section id="workflow" className="bg-[#fffefa]">
         <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8">
           <div className="mx-auto max-w-2xl text-center">
@@ -597,7 +533,9 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Security */}
+      {/* =========================================================
+          SECURITY
+      ========================================================== */}
       <section id="security" className="bg-[#e9ede4]">
         <div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8">
           <div className="grid gap-14 lg:grid-cols-[1fr_0.9fr] lg:items-center">
@@ -630,6 +568,7 @@ function HomePage() {
                         size={14}
                         className="mt-0.5 shrink-0 text-[#9caf88]"
                       />
+
                       {item}
                     </div>
                   ))}
@@ -686,7 +625,9 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* =========================================================
+          FINAL CTA
+      ========================================================== */}
       <section className="bg-[#f7f5ef]">
         <div className="mx-auto max-w-[1000px] px-5 py-24 text-center sm:px-8">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#243027] text-[#9caf88]">
@@ -712,7 +653,9 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* =========================================================
+          FOOTER
+      ========================================================== */}
       <footer className="border-t border-[#dddcd3] bg-[#f7f5ef]">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
           <LexMindLogo compact />

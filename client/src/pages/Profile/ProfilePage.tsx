@@ -1,11 +1,14 @@
 import {
   ArrowLeft,
   Building2,
+  Check,
   CheckCircle2,
+  Copy,
   Mail,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
@@ -50,6 +53,7 @@ function formatStatus(status: string): string {
 function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [copied, setCopied] = useState(false);
 
   if (!user) {
     return null;
@@ -59,61 +63,175 @@ function ProfilePage() {
     user.full_name?.trim() || "User";
 
   const initials = getInitials(fullName);
+  const organizationId = user.organization_id;
+
+  async function handleCopyOrganizationId() {
+    try {
+      await navigator.clipboard.writeText(organizationId);
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1500);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
     <div className="lexmind-page px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
+
         {/* Header */}
         <section>
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
-            className="mb-5 inline-flex items-center gap-2 text-xs font-medium text-[#7a8279] transition hover:text-[#243027]"
+            className="
+              mb-5 inline-flex items-center gap-2
+              text-xs font-medium text-[#7a8279]
+              transition hover:text-[#243027]
+            "
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Dashboard
           </button>
 
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718060]">
+          <div className="
+            text-[10px] font-semibold uppercase
+            tracking-[0.2em] text-[#718060]
+          ">
             Account
           </div>
 
-          <h1 className="lexmind-display mt-2 text-4xl leading-tight text-[#243027] sm:text-5xl">
+          <h1 className="
+            lexmind-display mt-2
+            text-4xl leading-tight text-[#243027]
+            sm:text-5xl
+          ">
             Profile
           </h1>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#687268]">
+          <p className="
+            mt-3 max-w-2xl
+            text-sm leading-6 text-[#687268]
+          ">
             View your account and organization
             information.
           </p>
         </section>
 
         {/* Profile hero */}
-        <section className="relative overflow-hidden rounded-[28px] border border-[#dddcd3] bg-[#fffefa] shadow-[0_18px_45px_rgba(36,48,39,0.06)]">
-          <div className="h-28 bg-gradient-to-r from-[#e5eadf] via-[#f0f2eb] to-[#fffefa]" />
+        <section className="
+          relative overflow-hidden
+          rounded-[28px]
+          border border-[#dddcd3]
+          bg-[#fffefa]
+          shadow-[0_18px_45px_rgba(36,48,39,0.06)]
+        ">
+          {/* Soft profile banner */}
+          <div className="
+            relative h-32 overflow-hidden
+            bg-gradient-to-r
+            from-[#dfe8d9]
+            via-[#edf1e9]
+            to-[#fffefa]
+          ">
+            <div className="
+              absolute -right-16 -top-24
+              h-64 w-64 rounded-full
+              border border-[#9caf88]/20
+            " />
 
-          <div className="relative px-5 pb-7 sm:px-8">
-            <div className="-mt-11 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex items-end gap-4">
-                <div className="flex h-22 w-22 shrink-0 items-center justify-center rounded-[22px] border-4 border-[#fffefa] bg-[#243027] text-xl font-semibold text-white shadow-[0_12px_30px_rgba(36,48,39,0.18)]">
+            <div className="
+              absolute right-16 -top-16
+              h-44 w-44 rounded-full
+              border border-[#9caf88]/15
+            " />
+          </div>
+
+          <div className="
+            relative px-5 pb-8
+            sm:px-8
+          ">
+            <div className="
+              -mt-12
+              flex flex-col gap-5
+              sm:flex-row
+              sm:items-end
+              sm:justify-between
+            ">
+              {/* Identity */}
+              <div className="
+                flex items-end gap-4
+              ">
+                <div className="
+                  flex h-[88px] w-[88px]
+                  shrink-0 items-center justify-center
+                  rounded-[24px]
+                  border-4 border-[#fffefa]
+                  bg-[#243027]
+                  text-2xl font-semibold
+                  text-[#F7F5EF]
+                  shadow-[0_12px_30px_rgba(36,48,39,0.18)]
+                ">
                   {initials}
                 </div>
 
                 <div className="pb-1">
-                  <h2 className="text-xl font-semibold tracking-tight text-[#243027]">
+                  <h2 className="
+                    text-xl font-semibold
+                    tracking-tight text-[#243027]
+                    sm:text-2xl
+                  ">
                     {fullName}
                   </h2>
 
-                  <p className="mt-1 text-sm text-[#7a8279]">
-                    {user.email}
+                  <div className="
+                    mt-1 flex items-center gap-2
+                  ">
+                    <Mail
+                      className="h-3.5 w-3.5 text-[#9aa198]"
+                    />
+
+                    <p className="
+                      text-sm text-[#7a8279]
+                    ">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  <p className="
+                    mt-2 text-[10px]
+                    font-semibold uppercase
+                    tracking-[0.14em]
+                    text-[#718060]
+                  ">
+                    {formatRole(user.role)}
                   </p>
                 </div>
               </div>
 
-              <div className="flex w-fit items-center gap-2 rounded-full border border-[#9caf88]/45 bg-[#e5eadf] px-3.5 py-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#718060]" />
+              {/* Status */}
+              <div className="
+                flex w-fit items-center gap-2
+                rounded-full
+                border border-[#9caf88]/45
+                bg-[#e5eadf]
+                px-3.5 py-2
+              ">
+                <span className="
+                  h-1.5 w-1.5 rounded-full
+                  bg-[#718060]
+                " />
 
-                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#526347]">
+                <span className="
+                  text-[10px]
+                  font-semibold uppercase
+                  tracking-[0.12em]
+                  text-[#526347]
+                ">
                   {formatStatus(user.status)}
                 </span>
               </div>
@@ -122,49 +240,106 @@ function ProfilePage() {
         </section>
 
         {/* Information grid */}
-        <div className="grid gap-5 lg:grid-cols-2">
-          {/* Personal */}
-          <section className="lexmind-card p-5 sm:p-6">
-            <div className="flex items-center gap-3 border-b border-[#ebe9e1] pb-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+        <div className="
+          grid gap-5
+          lg:grid-cols-2
+        ">
+
+          {/* Personal Information */}
+          <section className="
+            lexmind-card
+            p-5 sm:p-6
+          ">
+            <div className="
+              flex items-center gap-3
+              border-b border-[#ebe9e1]
+              pb-5
+            ">
+              <div className="
+                flex h-10 w-10
+                items-center justify-center
+                rounded-xl
+                bg-[#e5eadf]
+                text-[#526347]
+              ">
                 <UserRound className="h-4.5 w-4.5" />
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-[#243027]">
+                <h2 className="
+                  text-sm font-semibold
+                  text-[#243027]
+                ">
                   Personal Information
                 </h2>
 
-                <p className="mt-1 text-[11px] text-[#7a8279]">
+                <p className="
+                  mt-1 text-[11px]
+                  text-[#7a8279]
+                ">
                   Your account details
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-6">
+            <div className="
+              mt-6 space-y-6
+            ">
+              {/* Full Name */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
+                <p className="
+                  text-[10px]
+                  font-semibold uppercase
+                  tracking-[0.16em]
+                  text-[#9aa198]
+                ">
                   Full Name
                 </p>
 
-                <div className="mt-2 flex items-center gap-2.5">
-                  <UserRound className="h-3.5 w-3.5 text-[#9aa198]" />
+                <div className="
+                  mt-2 flex items-center gap-2.5
+                ">
+                  <UserRound
+                    className="
+                      h-3.5 w-3.5
+                      text-[#9aa198]
+                    "
+                  />
 
-                  <p className="text-sm font-medium text-[#243027]">
+                  <p className="
+                    text-sm font-medium
+                    text-[#243027]
+                  ">
                     {fullName}
                   </p>
                 </div>
               </div>
 
+              {/* Email */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
+                <p className="
+                  text-[10px]
+                  font-semibold uppercase
+                  tracking-[0.16em]
+                  text-[#9aa198]
+                ">
                   Email Address
                 </p>
 
-                <div className="mt-2 flex items-center gap-2.5">
-                  <Mail className="h-3.5 w-3.5 shrink-0 text-[#9aa198]" />
+                <div className="
+                  mt-2 flex items-center gap-2.5
+                ">
+                  <Mail
+                    className="
+                      h-3.5 w-3.5 shrink-0
+                      text-[#9aa198]
+                    "
+                  />
 
-                  <p className="break-all text-sm font-medium text-[#243027]">
+                  <p className="
+                    break-all text-sm
+                    font-medium text-[#243027]
+                  ">
                     {user.email}
                   </p>
                 </div>
@@ -173,48 +348,137 @@ function ProfilePage() {
           </section>
 
           {/* Organization */}
-          <section className="lexmind-card p-5 sm:p-6">
-            <div className="flex items-center gap-3 border-b border-[#ebe9e1] pb-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+          <section className="
+            lexmind-card
+            p-5 sm:p-6
+          ">
+            <div className="
+              flex items-center gap-3
+              border-b border-[#ebe9e1]
+              pb-5
+            ">
+              <div className="
+                flex h-10 w-10
+                items-center justify-center
+                rounded-xl
+                bg-[#e5eadf]
+                text-[#526347]
+              ">
                 <Building2 className="h-4.5 w-4.5" />
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-[#243027]">
+                <h2 className="
+                  text-sm font-semibold
+                  text-[#243027]
+                ">
                   Organization
                 </h2>
 
-                <p className="mt-1 text-[11px] text-[#7a8279]">
+                <p className="
+                  mt-1 text-[11px]
+                  text-[#7a8279]
+                ">
                   Workspace membership
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-6">
+            <div className="
+              mt-6 space-y-6
+            ">
+              {/* Role */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
+                <p className="
+                  text-[10px]
+                  font-semibold uppercase
+                  tracking-[0.16em]
+                  text-[#9aa198]
+                ">
                   Role
                 </p>
 
-                <div className="mt-2 flex items-center gap-2.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-[#9aa198]" />
+                <div className="
+                  mt-2 flex items-center gap-2.5
+                ">
+                  <ShieldCheck
+                    className="
+                      h-3.5 w-3.5
+                      text-[#9aa198]
+                    "
+                  />
 
-                  <p className="text-sm font-medium text-[#243027]">
+                  <p className="
+                    text-sm font-medium
+                    text-[#243027]
+                  ">
                     {formatRole(user.role)}
                   </p>
                 </div>
               </div>
 
+              {/* Organization ID */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9aa198]">
-                  Organization ID
-                </p>
+                <div className="
+                  flex items-center justify-between gap-3
+                ">
+                  <p className="
+                    text-[10px]
+                    font-semibold uppercase
+                    tracking-[0.16em]
+                    text-[#9aa198]
+                  ">
+                    Organization ID
+                  </p>
 
-                <div className="mt-2 flex items-start gap-2.5">
-                  <Building2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#9aa198]" />
+                  <button
+                    type="button"
+                    onClick={handleCopyOrganizationId}
+                    className="
+                      inline-flex items-center gap-1.5
+                      rounded-lg
+                      border border-[#dddcd3]
+                      bg-[#fffefa]
+                      px-2.5 py-1.5
+                      text-[10px]
+                      font-semibold
+                      text-[#687268]
+                      transition
+                      hover:border-[#9caf88]
+                      hover:bg-[#f5f6f1]
+                      hover:text-[#526347]
+                    "
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-3 w-3" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3 w-3" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
 
-                  <p className="break-all font-mono text-xs leading-5 text-[#687268]">
-                    {user.organization_id}
+                <div className="
+                  mt-2 flex items-start gap-2.5
+                ">
+                  <Building2
+                    className="
+                      mt-0.5 h-3.5 w-3.5
+                      shrink-0 text-[#9aa198]
+                    "
+                  />
+
+                  <p className="
+                    break-all
+                    font-mono text-xs
+                    leading-5 text-[#687268]
+                  ">
+                    {organizationId}
                   </p>
                 </div>
               </div>
@@ -222,25 +486,70 @@ function ProfilePage() {
           </section>
         </div>
 
-        {/* Account security */}
-        <section className="rounded-[24px] border border-[#9caf88]/35 bg-[#f1f4ec] p-5 shadow-[0_12px_35px_rgba(36,48,39,0.04)] sm:p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e5eadf] text-[#526347]">
+        {/* Account Security */}
+        <section className="
+          rounded-[24px]
+          border border-[#9caf88]/35
+          bg-[#f1f4ec]
+          p-5
+          shadow-[0_12px_35px_rgba(36,48,39,0.04)]
+          sm:p-6
+        ">
+          <div className="
+            flex items-start gap-4
+          ">
+            <div className="
+              flex h-10 w-10
+              shrink-0 items-center justify-center
+              rounded-xl
+              bg-[#e5eadf]
+              text-[#526347]
+            ">
               <CheckCircle2 className="h-5 w-5" />
             </div>
 
-            <div>
-              <h2 className="text-sm font-semibold text-[#243027]">
-                Account Security
-              </h2>
+            <div className="min-w-0">
+              <div className="
+                flex flex-wrap
+                items-center gap-3
+              ">
+                <h2 className="
+                  text-sm font-semibold
+                  text-[#243027]
+                ">
+                  Account Security
+                </h2>
 
-              <p className="mt-1.5 max-w-2xl text-xs leading-5 text-[#687268]">
+                <span className="
+                  inline-flex items-center gap-1.5
+                  rounded-full
+                  bg-[#e5eadf]
+                  px-2.5 py-1
+                  text-[9px]
+                  font-semibold uppercase
+                  tracking-[0.12em]
+                  text-[#526347]
+                ">
+                  <span className="
+                    h-1.5 w-1.5 rounded-full
+                    bg-[#718060]
+                  " />
+                  Secure
+                </span>
+              </div>
+
+              <p className="
+                mt-1.5 max-w-2xl
+                text-xs leading-5
+                text-[#687268]
+              ">
                 Your session is authenticated through
                 LexMind secure access controls.
               </p>
             </div>
           </div>
         </section>
+
       </div>
     </div>
   );

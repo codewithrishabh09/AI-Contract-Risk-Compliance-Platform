@@ -13,6 +13,7 @@ from app.api.v1.audit import router as audit_router
 from app.api.v1.findings import router as findings_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.jobs import router as jobs_router
+from app.api.v1.settings import router as settings_router
 from app.api.v1.analysis import router as analysis_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.contracts import router as contracts_router
@@ -200,6 +201,16 @@ app.include_router(
 
 app.include_router(
     dashboard.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    jobs_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    settings_router,
     prefix="/api/v1",
 )
 

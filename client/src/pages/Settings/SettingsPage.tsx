@@ -1,4 +1,6 @@
 import {
+  AlertCircle,
+  Building2,
   CheckCircle2,
   Clock3,
   Copy,
@@ -6,18 +8,14 @@ import {
   Globe2,
   KeyRound,
   LoaderCircle,
-  Mail,
   ShieldCheck,
-  UserRound,
-  Building2,
-  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
 
 import { useSettings } from "../../features/settings/useSettings";
 
-function formatRole(role: string): string {
-  return role
+function formatStatus(value: string): string {
+  return value
     .split("_")
     .map(
       (part) =>
@@ -55,7 +53,8 @@ function StatusBadge({ status }: { status: string }) {
           isActive ? "bg-[#718060]" : "bg-[#E8412C]",
         ].join(" ")}
       />
-      {formatRole(status)}
+
+      {formatStatus(status)}
     </span>
   );
 }
@@ -66,7 +65,7 @@ function InfoRow({
   value,
   copyable = false,
 }: {
-  icon: typeof UserRound;
+  icon: typeof Building2;
   label: string;
   value: string;
   copyable?: boolean;
@@ -128,8 +127,14 @@ function InfoRow({
 }
 
 export default function SettingsPage() {
-  const { data, isLoading, isError, error, refetch, isFetching } =
-    useSettings();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useSettings();
 
   if (isLoading) {
     return (
@@ -141,7 +146,7 @@ export default function SettingsPage() {
                 size={20}
                 className="animate-spin text-[#718060]"
               />
-              Loading settings...
+              Loading workspace settings...
             </div>
           </div>
         </div>
@@ -161,13 +166,13 @@ export default function SettingsPage() {
 
               <div>
                 <h2 className="text-lg font-semibold text-[#243027]">
-                  Unable to load settings
+                  Unable to load workspace settings
                 </h2>
 
                 <p className="mt-1 text-sm leading-6 text-[#687268]">
                   {error instanceof Error
                     ? error.message
-                    : "Something went wrong while loading your account settings."}
+                    : "Something went wrong while loading your workspace settings."}
                 </p>
 
                 <button
@@ -185,7 +190,7 @@ export default function SettingsPage() {
     );
   }
 
-  const { account, organization, security } = data;
+  const { organization, security } = data;
 
   return (
     <div className="min-h-full bg-[#F7F5EF]">
@@ -202,8 +207,8 @@ export default function SettingsPage() {
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[#687268]">
-              Review your LexMind account, organization, and security
-              information.
+              Manage and review your LexMind workspace configuration
+              and security information.
             </p>
           </div>
 
@@ -217,52 +222,52 @@ export default function SettingsPage() {
               size={16}
               className={isFetching ? "animate-spin" : ""}
             />
+
             Refresh
           </button>
         </div>
 
-        {/* Account overview */}
+        {/* Workspace overview */}
         <section className="mt-10">
           <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+            {/* Workspace card */}
             <div className="rounded-[28px] border border-[#DDDCD3] bg-[#FFFEFA] p-7 shadow-[0_12px_40px_rgba(36,48,39,0.05)]">
               <div className="flex items-start gap-5">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#243027] font-['Playfair_Display'] text-2xl text-[#F7F5EF]">
-                  {account.full_name
-                    .split(/\s+/)
-                    .filter(Boolean)
-                    .slice(0, 2)
-                    .map((part) => part.charAt(0).toUpperCase())
-                    .join("")}
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#E5EADF] text-[#718060]">
+                  <Building2 size={28} strokeWidth={1.6} />
                 </div>
 
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="font-['Playfair_Display'] text-2xl font-medium text-[#243027]">
-                      {account.full_name}
+                      {organization.name}
                     </h2>
 
-                    <StatusBadge status={account.status} />
+                    <StatusBadge status={organization.status} />
                   </div>
 
-                  <p className="mt-1 text-sm text-[#687268]">
-                    {account.email}
+                  <p className="mt-2 text-sm text-[#687268]">
+                    {organization.slug}
                   </p>
 
-                  <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#8A9189]">
-                    {formatRole(account.role)}
+                  <p className="mt-4 max-w-xl text-sm leading-6 text-[#687268]">
+                    This workspace contains your organization's contracts,
+                    analysis results, risk findings, compliance data,
+                    and processing activity.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-[#DDDCD3] bg-[#243027] p-7 text-[#F7F5EF] shadow-[0_12px_40px_rgba(36,48,39,0.08)]">
+            {/* Security overview */}
+            <div className="rounded-[28px] border border-[#243027] bg-[#243027] p-7 text-[#F7F5EF] shadow-[0_12px_40px_rgba(36,48,39,0.08)]">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#9CAF88]/15 text-[#B8C8A8]">
                   <ShieldCheck size={19} />
                 </div>
 
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B8C8A8]">
-                  Account security
+                  Workspace security
                 </p>
               </div>
 
@@ -271,8 +276,8 @@ export default function SettingsPage() {
               </p>
 
               <p className="mt-2 text-sm leading-6 text-[#C9CEC8]">
-                Your account is authenticated through LexMind's secured
-                session layer.
+                Your current workspace session is authenticated through
+                LexMind's secured authentication layer.
               </p>
 
               <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-[#B8C8A8]">
@@ -283,53 +288,8 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Main settings */}
+        {/* Settings content */}
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          {/* Account */}
-          <section className="rounded-[28px] border border-[#DDDCD3] bg-[#FFFEFA] p-7 shadow-[0_12px_40px_rgba(36,48,39,0.05)]">
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E5EADF] text-[#718060]">
-                <UserRound size={18} />
-              </div>
-
-              <div>
-                <h2 className="font-['Playfair_Display'] text-2xl font-medium text-[#243027]">
-                  Account
-                </h2>
-
-                <p className="text-xs text-[#8A9189]">
-                  Your personal account information
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-2">
-              <InfoRow
-                icon={UserRound}
-                label="Full name"
-                value={account.full_name}
-              />
-
-              <InfoRow
-                icon={Mail}
-                label="Email address"
-                value={account.email}
-              />
-
-              <InfoRow
-                icon={KeyRound}
-                label="Role"
-                value={formatRole(account.role)}
-              />
-
-              <InfoRow
-                icon={CheckCircle2}
-                label="Account status"
-                value={formatRole(account.status)}
-              />
-            </div>
-          </section>
-
           {/* Organization */}
           <section className="rounded-[28px] border border-[#DDDCD3] bg-[#FFFEFA] p-7 shadow-[0_12px_40px_rgba(36,48,39,0.05)]">
             <div className="mb-3 flex items-center gap-3">
@@ -343,7 +303,7 @@ export default function SettingsPage() {
                 </h2>
 
                 <p className="text-xs text-[#8A9189]">
-                  Your workspace information
+                  Workspace identity and status
                 </p>
               </div>
             </div>
@@ -371,7 +331,7 @@ export default function SettingsPage() {
               <InfoRow
                 icon={CheckCircle2}
                 label="Organization status"
-                value={formatRole(organization.status)}
+                value={formatStatus(organization.status)}
               />
             </div>
           </section>
@@ -389,7 +349,7 @@ export default function SettingsPage() {
                 </h2>
 
                 <p className="text-xs text-[#8A9189]">
-                  Authentication and account lifecycle
+                  Authentication and active session
                 </p>
               </div>
             </div>
@@ -403,7 +363,7 @@ export default function SettingsPage() {
 
               <InfoRow
                 icon={KeyRound}
-                label="Session"
+                label="Current session"
                 value={security.session}
               />
 
@@ -416,7 +376,7 @@ export default function SettingsPage() {
           </section>
 
           {/* Workspace identity */}
-          <section className="rounded-[28px] border border-[#DDDCD3] bg-[#243027] p-7 text-[#F7F5EF] shadow-[0_12px_40px_rgba(36,48,39,0.08)]">
+          <section className="rounded-[28px] border border-[#243027] bg-[#243027] p-7 text-[#F7F5EF] shadow-[0_12px_40px_rgba(36,48,39,0.08)]">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#B8C8A8]">
               Workspace identity
             </p>
@@ -437,17 +397,40 @@ export default function SettingsPage() {
 
                 <span className="inline-flex items-center gap-2 rounded-full bg-[#9CAF88]/15 px-3 py-1.5 text-xs font-semibold text-[#B8C8A8]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#9CAF88]" />
-                  {formatRole(organization.status)}
+                  {formatStatus(organization.status)}
                 </span>
               </div>
             </div>
           </section>
+
+          {/* Security note */}
+          <section className="rounded-[28px] border border-[#DDDCD3] bg-[#F1F2EC] p-7">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E5EADF] text-[#718060]">
+              <ShieldCheck size={18} />
+            </div>
+
+            <h2 className="mt-5 font-['Playfair_Display'] text-2xl font-medium text-[#243027]">
+              Secure by design
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-[#687268]">
+              LexMind keeps authentication and workspace access protected
+              through its secured API and session layer. Account identity
+              details remain available from your Profile page.
+            </p>
+
+            <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-[#516047]">
+              <CheckCircle2 size={15} />
+              Authentication verified
+            </div>
+          </section>
         </div>
 
-        <div className="mt-8 rounded-2xl border border-[#DDDCD3] bg-[#F1F2EC] px-5 py-4 text-xs leading-5 text-[#687268]">
-          Settings currently displays verified account and organization
-          information from your LexMind workspace. Profile changes and
-          preference controls will be added only when their corresponding
+        {/* Footer note */}
+        <div className="mt-8 rounded-2xl border border-[#DDDCD3] bg-[#FFFEFA] px-5 py-4 text-xs leading-5 text-[#687268]">
+          Workspace settings currently reflect verified organization and
+          security information from LexMind. Additional configuration
+          controls will be introduced only when their corresponding
           backend capabilities are available.
         </div>
       </div>

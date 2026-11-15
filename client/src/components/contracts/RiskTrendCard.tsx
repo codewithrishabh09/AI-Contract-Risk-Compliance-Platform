@@ -7,9 +7,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-import type {
-  ContractRiskTrend,
-} from "../../types/versionAnalysis";
+import type { ContractRiskTrend } from "../../types/versionAnalysis";
 
 interface RiskTrendCardProps {
   trend: ContractRiskTrend;
@@ -18,19 +16,34 @@ interface RiskTrendCardProps {
 function getRiskClasses(riskLevel: string | null) {
   switch (riskLevel) {
     case "CRITICAL":
-      return "border-rose-500/20 bg-rose-500/10 text-rose-300";
+      return {
+        badge: "border-[#e8412c]/25 bg-[#fff0ed] text-[#c93422]",
+        dot: "bg-[#e8412c]",
+      };
 
     case "HIGH":
-      return "border-orange-500/20 bg-orange-500/10 text-orange-300";
+      return {
+        badge: "border-[#e8412c]/20 bg-[#fff5f2] text-[#c93422]",
+        dot: "bg-[#e8412c]",
+      };
 
     case "MEDIUM":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
+      return {
+        badge: "border-[#d8ad43]/30 bg-[#fff8df] text-[#9b7415]",
+        dot: "bg-[#d8ad43]",
+      };
 
     case "LOW":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
+      return {
+        badge: "border-[#9caf88]/40 bg-[#e5eadf] text-[#526047]",
+        dot: "bg-[#9caf88]",
+      };
 
     default:
-      return "border-slate-500/20 bg-slate-500/10 text-slate-400";
+      return {
+        badge: "border-[#dddcd3] bg-[#f4f5ef] text-[#687268]",
+        dot: "bg-[#9caf88]",
+      };
   }
 }
 
@@ -41,7 +54,7 @@ function getDirectionContent(trend: ContractRiskTrend) {
         label: "Improved",
         icon: TrendingDown,
         classes:
-          "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+          "border-[#9caf88]/40 bg-[#e5eadf] text-[#526047]",
       };
 
     case "WORSENED":
@@ -49,7 +62,7 @@ function getDirectionContent(trend: ContractRiskTrend) {
         label: "Worsened",
         icon: TrendingUp,
         classes:
-          "border-rose-500/20 bg-rose-500/10 text-rose-300",
+          "border-[#e8412c]/20 bg-[#fff0ed] text-[#c93422]",
       };
 
     case "UNCHANGED":
@@ -57,7 +70,7 @@ function getDirectionContent(trend: ContractRiskTrend) {
         label: "Unchanged",
         icon: Minus,
         classes:
-          "border-slate-500/20 bg-slate-500/10 text-slate-300",
+          "border-[#dddcd3] bg-[#f4f5ef] text-[#687268]",
       };
 
     default:
@@ -65,7 +78,7 @@ function getDirectionContent(trend: ContractRiskTrend) {
         label: "No Previous Data",
         icon: Minus,
         classes:
-          "border-slate-500/20 bg-slate-500/10 text-slate-400",
+          "border-[#dddcd3] bg-[#f4f5ef] text-[#8a9188]",
       };
   }
 }
@@ -90,20 +103,21 @@ export default function RiskTrendCard({
     ) ?? null;
 
   return (
-    <section className="rounded-xl border border-[#173052] bg-[#071426]/80 p-5 sm:p-6">
+    <section className="rounded-[24px] border border-[#dddcd3] bg-[#243027] p-5 shadow-[0_16px_42px_rgba(36,48,39,0.10)] sm:p-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-              <ShieldAlert size={17} />
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#9caf88]/15 text-[#9caf88]">
+              <ShieldAlert size={18} strokeWidth={1.8} />
             </div>
 
             <div>
-              <h2 className="text-sm font-semibold text-white">
+              <h2 className="font-['Playfair_Display'] text-lg font-semibold text-white">
                 Risk Trend
               </h2>
 
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-1 text-[11px] text-white/50">
                 Version-by-version contract risk analysis
               </p>
             </div>
@@ -111,7 +125,7 @@ export default function RiskTrendCard({
         </div>
 
         <div
-          className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${direction.classes}`}
+          className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${direction.classes}`}
         >
           <DirectionIcon size={13} />
 
@@ -119,34 +133,43 @@ export default function RiskTrendCard({
         </div>
       </div>
 
+      {/* Current summary */}
       {currentPoint ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border border-[#173052] bg-[#09182b] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-600">
+          {/* Current Risk */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/40">
               Current Risk
             </p>
 
             <div className="mt-2 flex items-end gap-2">
-              <span className="text-2xl font-semibold text-white">
+              <span className="text-3xl font-semibold tracking-[-0.04em] text-white">
                 {currentPoint.overall_risk_score}
               </span>
 
-              <span className="pb-1 text-[10px] text-slate-600">
+              <span className="pb-1 text-[10px] text-white/35">
                 / 100
               </span>
             </div>
 
             <span
-              className={`mt-2 inline-flex rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-wide ${getRiskClasses(
-                currentPoint.risk_level,
-              )}`}
+              className={`mt-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em] ${
+                getRiskClasses(currentPoint.risk_level).badge
+              }`}
             >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  getRiskClasses(currentPoint.risk_level).dot
+                }`}
+              />
+
               {currentPoint.risk_level ?? "Not analyzed"}
             </span>
           </div>
 
-          <div className="rounded-lg border border-[#173052] bg-[#09182b] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-600">
+          {/* Risk Change */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/40">
               Risk Change
             </p>
 
@@ -155,22 +178,22 @@ export default function RiskTrendCard({
                 trend.risk_score_change < 0 ? (
                   <ArrowDownRight
                     size={18}
-                    className="text-emerald-400"
+                    className="text-[#9caf88]"
                   />
                 ) : trend.risk_score_change > 0 ? (
                   <ArrowUpRight
                     size={18}
-                    className="text-rose-400"
+                    className="text-[#e8412c]"
                   />
                 ) : (
                   <Minus
                     size={18}
-                    className="text-slate-400"
+                    className="text-white/40"
                   />
                 )
               ) : null}
 
-              <span className="text-2xl font-semibold text-white">
+              <span className="text-3xl font-semibold tracking-[-0.04em] text-white">
                 {trend.risk_score_change !== null
                   ? trend.risk_score_change > 0
                     ? `+${trend.risk_score_change}`
@@ -179,130 +202,147 @@ export default function RiskTrendCard({
               </span>
             </div>
 
-            <p className="mt-2 text-[10px] text-slate-600">
+            <p className="mt-2 text-[10px] leading-4 text-white/35">
               Compared with previous analyzed version
             </p>
           </div>
 
-          <div className="rounded-lg border border-[#173052] bg-[#09182b] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-600">
+          {/* Current Findings */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/40">
               Current Findings
             </p>
 
             <div className="mt-2 flex items-end gap-3">
-              <span className="text-2xl font-semibold text-white">
+              <span className="text-3xl font-semibold tracking-[-0.04em] text-white">
                 {currentPoint.finding_count}
               </span>
 
-              <span className="pb-1 text-[10px] text-slate-600">
+              <span className="pb-1 text-[10px] text-white/35">
                 total
               </span>
             </div>
 
-            <div className="mt-2 flex gap-3 text-[10px]">
-              <span className="text-orange-300">
+            <div className="mt-3 flex gap-3 text-[10px]">
+              <span className="text-[#e7bd58]">
                 {currentPoint.high_risk_findings} high
               </span>
 
-              <span className="text-rose-300">
+              <span className="text-[#f07869]">
                 {currentPoint.critical_findings} critical
               </span>
             </div>
           </div>
         </div>
       ) : (
-        <div className="mt-6 rounded-lg border border-dashed border-[#173052] bg-[#09182b]/60 p-8 text-center">
-          <ShieldAlert
-            size={22}
-            className="mx-auto text-slate-600"
-          />
+        <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-white/[0.035] p-10 text-center">
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.05] text-white/40">
+            <ShieldAlert size={21} />
+          </div>
 
-          <p className="mt-3 text-xs font-medium text-slate-400">
+          <p className="mt-4 text-sm font-medium text-white/65">
             No analyzed versions yet
           </p>
 
-          <p className="mt-1 text-[10px] text-slate-600">
+          <p className="mt-1 text-[10px] leading-5 text-white/35">
             Run contract analysis to start tracking risk over time.
           </p>
         </div>
       )}
 
+      {/* Version history */}
       {analyzedVersions.length > 0 ? (
-        <div className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-600">
+        <div className="mt-7">
+          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">
               Version History
             </span>
 
-            <span className="text-[10px] text-slate-600">
+            <span className="text-[10px] text-white/35">
               Lower score = lower risk
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {trend.versions.map((point) => {
               const score = point.overall_risk_score;
+              const riskClasses = getRiskClasses(
+                point.risk_level,
+              );
 
               return (
                 <div
                   key={point.contract_version_id}
-                  className="rounded-lg border border-[#173052] bg-[#09182b]/70 p-4"
+                  className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-white/15 hover:bg-white/[0.06]"
                 >
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10 text-[10px] font-bold text-indigo-300">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#9caf88]/20 bg-[#9caf88]/10 text-[10px] font-bold text-[#b9c8aa]">
                         V{point.version_number}
                       </div>
 
                       <div>
-                        <p className="text-xs font-medium text-slate-200">
+                        <p className="text-xs font-semibold text-white/85">
                           Version {point.version_number}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] text-slate-600">
+                        <p className="mt-1 text-[10px] text-white/35">
                           {point.finding_count} findings
                         </p>
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                       {score !== null ? (
-                        <>
-                          <p className="text-sm font-semibold text-white">
+                        <div className="flex items-center gap-2 sm:justify-end">
+                          <p className="text-lg font-semibold tracking-[-0.03em] text-white">
                             {score}
                           </p>
 
                           <span
-                            className={`text-[9px] font-semibold uppercase ${getRiskClasses(
-                              point.risk_level,
-                            )} rounded-full border px-2 py-1`}
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.06em] ${riskClasses.badge}`}
                           >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${riskClasses.dot}`}
+                            />
+
                             {point.risk_level}
                           </span>
-                        </>
+                        </div>
                       ) : (
-                        <span className="text-[10px] text-slate-600">
+                        <span className="text-[10px] text-white/35">
                           Not analyzed
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#10233d]">
-                    {score !== null ? (
-                      <div
-                        className="h-full rounded-full bg-indigo-400 transition-all duration-500"
-                        style={{
-                          width: `${Math.max(
-                            4,
-                            Math.min(100, score),
-                          )}%`,
-                        }}
-                      />
-                    ) : null}
+                  {/* Score bar */}
+                  <div className="mt-4">
+                    <div className="h-2 overflow-hidden rounded-full bg-white/[0.07]">
+                      {score !== null ? (
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            point.risk_level === "CRITICAL" ||
+                            point.risk_level === "HIGH"
+                              ? "bg-[#e8412c]"
+                              : point.risk_level ===
+                                  "MEDIUM"
+                                ? "bg-[#d8ad43]"
+                                : "bg-[#9caf88]"
+                          }`}
+                          style={{
+                            width: `${Math.max(
+                              4,
+                              Math.min(100, score),
+                            )}%`,
+                          }}
+                        />
+                      ) : null}
+                    </div>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between text-[9px] text-slate-600">
+                  <div className="mt-3 flex items-center justify-between text-[9px] text-white/30">
                     <span>
                       {point.high_risk_findings} high
                     </span>

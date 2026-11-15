@@ -73,6 +73,100 @@ function getModelLabel(
   return model;
 }
 
+function renderInlineMarkdown(
+  text: string,
+) {
+  const parts = text.split(
+    /(\*\*.*?\*\*)/g,
+  );
+
+  return parts.map((part, index) => {
+    if (
+      part.startsWith("**") &&
+      part.endsWith("**")
+    ) {
+      return (
+        <strong
+          key={index}
+          className="font-semibold text-[#243027]"
+        >
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return (
+      <span key={index}>
+        {part}
+      </span>
+    );
+  });
+}
+
+function renderAnswerContent(
+  content: string,
+) {
+  const cleanedContent = content
+    .replace(/\[chunk-\d+\]/gi, "")
+    .trim();
+
+  const lines = cleanedContent.split("\n");
+
+  return (
+    <div className="space-y-3">
+      {lines.map((line, index) => {
+        const trimmedLine = line.trim();
+
+        if (!trimmedLine) {
+          return null;
+        }
+
+        const isBullet =
+          trimmedLine.startsWith("- ") ||
+          trimmedLine.startsWith("• ");
+
+        const bulletText = isBullet
+          ? trimmedLine.slice(2).trim()
+          : trimmedLine;
+
+        const renderedText =
+          renderInlineMarkdown(bulletText);
+
+        if (isBullet) {
+          return (
+            <div
+              key={index}
+              className="flex items-start gap-3"
+            >
+              <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#9caf88]" />
+
+              <p className="text-[13px] leading-7 text-[#3e493f]">
+                {renderedText}
+              </p>
+            </div>
+          );
+        }
+
+        const isHeading =
+          /^\*\*.*\*\*$/.test(trimmedLine);
+
+        return (
+          <p
+            key={index}
+            className={
+              isHeading
+                ? "text-[14px] leading-7 text-[#243027]"
+                : "text-[13px] leading-7 text-[#3e493f]"
+            }
+          >
+            {renderedText}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ContractQaPanel({
   contractId,
   versionId,
@@ -196,9 +290,9 @@ export default function ContractQaPanel({
               </h2>
 
               <p className="mt-1.5 max-w-2xl text-xs leading-5 text-[#7a8279]">
-                Explore this contract with grounded AI answers
-                backed by source citations from the selected
-                version.
+                Explore this contract with grounded AI
+                answers backed by source citations from
+                the selected version.
               </p>
             </div>
           </div>
@@ -334,9 +428,9 @@ export default function ContractQaPanel({
 
                         {/* Answer */}
                         <div className="mt-5">
-                          <p className="whitespace-pre-wrap text-[13px] leading-7 text-[#3e493f]">
-                            {message.content}
-                          </p>
+                          {renderAnswerContent(
+                            message.content,
+                          )}
                         </div>
 
                         {/* Sources */}

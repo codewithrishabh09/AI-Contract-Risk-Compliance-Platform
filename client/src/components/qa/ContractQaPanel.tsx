@@ -58,24 +58,7 @@ function formatCitationLabel(
   return `Pages ${pageStart}-${pageEnd} · Chunk ${chunkIndex}`;
 }
 
-function getModelLabel(
-  provider: string | null | undefined,
-  model: string | null | undefined,
-): string | null {
-  if (!model) {
-    return null;
-  }
-
-  if (provider) {
-    return `${provider} · ${model}`;
-  }
-
-  return model;
-}
-
-function renderInlineMarkdown(
-  text: string,
-) {
+function renderInlineMarkdown(text: string) {
   const parts = text.split(
     /(\*\*.*?\*\*)/g,
   );
@@ -103,66 +86,167 @@ function renderInlineMarkdown(
   });
 }
 
-function renderAnswerContent(
-  content: string,
-) {
+function renderAnswerContent(content: string) {
   const cleanedContent = content
     .replace(/\[chunk-\d+\]/gi, "")
     .trim();
 
-  const lines = cleanedContent.split("\n");
+  const lines = cleanedContent
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const renderedLines: React.ReactNode[] = [];
+
+  let currentIndex = 0;
+
+  while (currentIndex < lines.length) {
+    const line = lines[currentIndex];
+
+    /*
+     * Numbered provision:
+     *
+     * 1. Client termination for convenience — ...
+     * 2. Vendor termination for convenience — ...
+     */
+    const numberedMatch = line.match(
+      /^(\d+)\.\s+(.+)$/,
+    );
+
+    if (numberedMatch) {
+      const number = numberedMatch[1];
+      const text = numberedMatch[2];
+
+      const separatorIndex = text.search(
+        /\s+[—–-]\s+/,
+      );
+
+      if (separatorIndex !== -1) {
+        const title = text
+          .slice(0, separatorIndex)
+          .trim();
+
+        const description = text
+          .slice(separatorIndex)
+          .replace(/^[\s—–-]+/, "")
+          .trim();
+
+        renderedLines.push(
+          <div
+            key={`provision-${currentIndex}`}
+            className="flex items-start gap-3 rounded-xl border border-[#e1e6dc] bg-[#fbfcf9] px-4 py-3.5"
+          >
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#e5eadf] text-[10px] font-bold text-[#718060]">
+              {number}
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[12px] font-semibold leading-6 text-[#334032]">
+                {renderInlineMarkdown(title)}
+              </p>
+
+              <p className="mt-0.5 text-[12px] leading-6 text-[#687268]">
+                {renderInlineMarkdown(description)}
+              </p>
+            </div>
+          </div>,
+        );
+      } else {
+        renderedLines.push(
+          <div
+            key={`numbered-${currentIndex}`}
+            className="flex items-start gap-3 rounded-xl border border-[#e1e6dc] bg-[#fbfcf9] px-4 py-3.5"
+          >
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#e5eadf] text-[10px] font-bold text-[#718060]">
+              {number}
+            </div>
+
+            <p className="text-[12px] leading-6 text-[#3e493f]">
+              {renderInlineMarkdown(text)}
+            </p>
+          </div>,
+        );
+      }
+
+      currentIndex += 1;
+      continue;
+    }
+
+    /*
+     * Bullet point
+     */
+    const isBullet =
+      line.startsWith("- ") ||
+      line.startsWith("• ") ||
+      line.startsWith("* ");
+
+    if (isBullet) {
+      const bulletText = line
+        .slice(2)
+        .trim();
+
+      renderedLines.push(
+        <div
+          key={`bullet-${currentIndex}`}
+          className="flex items-start gap-3"
+        >
+          <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#9caf88]" />
+
+          <p className="text-[13px] leading-7 text-[#3e493f]">
+            {renderInlineMarkdown(bulletText)}
+          </p>
+        </div>,
+      );
+
+      currentIndex += 1;
+      continue;
+    }
+
+    /*
+     * Bold-only heading
+     */
+    const boldHeadingMatch = line.match(
+      /^\*\*(.+)\*\*$/,
+    );
+
+    if (boldHeadingMatch) {
+      renderedLines.push(
+        <div
+          key={`heading-${currentIndex}`}
+          className="mb-1"
+        >
+          <h3 className="font-['Playfair_Display'] text-[17px] font-medium text-[#243027]">
+            {boldHeadingMatch[1]}
+          </h3>
+        </div>,
+      );
+
+      currentIndex += 1;
+      continue;
+    }
+
+    /*
+     * Regular paragraph
+     */
+    renderedLines.push(
+      <p
+        key={`paragraph-${currentIndex}`}
+        className={
+          currentIndex === 0
+            ? "text-[13px] leading-7 text-[#3e493f]"
+            : "text-[13px] leading-7 text-[#687268]"
+        }
+      >
+        {renderInlineMarkdown(line)}
+      </p>,
+    );
+
+    currentIndex += 1;
+  }
 
   return (
     <div className="space-y-3">
-      {lines.map((line, index) => {
-        const trimmedLine = line.trim();
-
-        if (!trimmedLine) {
-          return null;
-        }
-
-        const isBullet =
-          trimmedLine.startsWith("- ") ||
-          trimmedLine.startsWith("• ");
-
-        const bulletText = isBullet
-          ? trimmedLine.slice(2).trim()
-          : trimmedLine;
-
-        const renderedText =
-          renderInlineMarkdown(bulletText);
-
-        if (isBullet) {
-          return (
-            <div
-              key={index}
-              className="flex items-start gap-3"
-            >
-              <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#9caf88]" />
-
-              <p className="text-[13px] leading-7 text-[#3e493f]">
-                {renderedText}
-              </p>
-            </div>
-          );
-        }
-
-        const isHeading =
-          /^\*\*.*\*\*$/.test(trimmedLine);
-
-        return (
-          <p
-            key={index}
-            className={
-              isHeading
-                ? "text-[14px] leading-7 text-[#243027]"
-                : "text-[13px] leading-7 text-[#3e493f]"
-            }
-          >
-            {renderedText}
-          </p>
-        );
-      })}
+      {renderedLines}
     </div>
   );
 }
@@ -280,8 +364,8 @@ export default function ContractQaPanel({
                   Contract Intelligence
                 </span>
 
-                <span className="rounded-full border border-[#cbd8c2] bg-[#f0f4eb] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#718060]">
-                  RAG
+                <span className="rounded-full border border-[#cbd8c2] bg-[#f0f4eb] px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.13em] text-[#718060]">
+                  Grounded Intelligence
                 </span>
               </div>
 
@@ -362,11 +446,6 @@ export default function ContractQaPanel({
               const isUser =
                 message.role === "user";
 
-              const modelLabel = getModelLabel(
-                message.model_provider,
-                message.model_name,
-              );
-
               return (
                 <div
                   key={message.id}
@@ -399,35 +478,31 @@ export default function ContractQaPanel({
                       <div className="absolute bottom-0 left-0 top-0 w-1 bg-[#9caf88]" />
 
                       <div className="p-5 pl-6 sm:p-6 sm:pl-7">
-                        {/* AI header */}
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#cbd8c2] bg-[#e5eadf] text-[#718060]">
-                              <Bot size={15} />
+                        {/* AI Header */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#cbd8c2] bg-[#e5eadf] text-[#718060]">
+                            <Bot size={15} />
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#526047]">
+                                LexMind
+                              </span>
+
+                              <span className="rounded-full border border-[#d6dfcf] bg-[#fffefa] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#7a8574]">
+                                AI Answer
+                              </span>
                             </div>
 
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#526047]">
-                                  LexMind
-                                </span>
-
-                                <span className="rounded-full border border-[#d6dfcf] bg-[#fffefa] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#7a8574]">
-                                  AI Answer
-                                </span>
-                              </div>
-
-                              {modelLabel ? (
-                                <p className="mt-1 text-[9px] text-[#98a097]">
-                                  {modelLabel}
-                                </p>
-                              ) : null}
-                            </div>
+                            <p className="mt-1 text-[9px] text-[#98a097]">
+                              Application Model
+                            </p>
                           </div>
                         </div>
 
                         {/* Answer */}
-                        <div className="mt-5">
+                        <div className="mt-6">
                           {renderAnswerContent(
                             message.content,
                           )}
@@ -453,7 +528,7 @@ export default function ContractQaPanel({
                                 (citation) => (
                                   <div
                                     key={`${message.id}-${citation.citation_id}`}
-                                    className="group inline-flex items-center gap-2 rounded-xl border border-[#dfe5d9] bg-[#fffefa] px-3 py-2 shadow-[0_2px_8px_rgba(36,48,39,0.03)]"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-[#dfe5d9] bg-[#fffefa] px-3 py-2 shadow-[0_2px_8px_rgba(36,48,39,0.03)]"
                                   >
                                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#e5eadf] text-[9px] font-bold text-[#718060]">
                                       {citation.citation_id}
@@ -485,6 +560,7 @@ export default function ContractQaPanel({
               );
             })}
 
+            {/* Loading */}
             {askQuestion.isPending ? (
               <div className="px-6 py-6 sm:px-7">
                 <div className="relative overflow-hidden rounded-2xl border border-[#dfe5d9] bg-[#f7f9f4]">

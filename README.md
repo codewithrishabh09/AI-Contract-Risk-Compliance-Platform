@@ -840,7 +840,7 @@ Potential future improvements:
 
 # 👨‍💻 About the Developer
 
-## Rishabh 
+## Rishabh 🚀
 
 **Software Engineer | Backend & AI Engineer**
 
